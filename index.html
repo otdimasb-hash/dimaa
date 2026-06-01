@@ -1,317 +1,962 @@
+cat > /mnt/user-data/outputs/ruang-tenang-dimas-v2.html << 'HTMLEOF'
 <!DOCTYPE html>
 <html lang="id">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ruang Tenang Dimas</title>
-    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg-taman: #eef2eb; 
-            --warna-daun: #3e4e3e;
-            --warna-bunga: #dfc7be; 
-            --putih-hangat: #fdfdfb;
-            --teks-lembut: #5a6e5d;
-            --bayangan-halus: 0 12px 35px rgba(62, 78, 62, 0.04);
-            
-            --krl-soft: #fceecb;
-            --mrt-soft: #cfece4;
-            --lrt-soft: #def1f2;
-            --tj-soft: #ffdcd9;
+            --bg: #e8ede5;
+            --card: #fdfdfb;
+            --hijau: #2d3e2d;
+            --hijau-mid: #4a6150;
+            --hijau-soft: #8faa93;
+            --aksen: #c8a882;
+            --biru-krl: #1a4fa3;
+            --biru-krl-light: #3d7bd4;
+            --putih: #fdfdfb;
+            --shadow: 0 20px 60px rgba(30, 50, 30, 0.08);
+            --shadow-hover: 0 30px 80px rgba(30, 50, 30, 0.15);
         }
 
-        * {
-            box-sizing: border-box;
-            -webkit-tap-highlight-color: transparent;
-        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        html { scroll-behavior: smooth; }
 
         body {
             font-family: 'Nunito', sans-serif;
-            background-color: var(--bg-taman);
-            color: var(--warna-daun);
-            margin: 0;
-            padding: 24px;
+            background: var(--bg);
+            color: var(--hijau);
             overflow-x: hidden;
-            position: relative;
-            min-height: 100vh;
+            cursor: none;
         }
 
-        .area-emoji-pinggir {
+        /* CUSTOM CURSOR */
+        .cursor-dot {
+            width: 8px; height: 8px;
+            background: var(--biru-krl);
+            border-radius: 50%;
             position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 0;
+            top: 0; left: 0;
             pointer-events: none;
-            user-select: none;
+            z-index: 9999;
+            transition: transform 0.1s ease;
+        }
+        .cursor-ring {
+            width: 32px; height: 32px;
+            border: 2px solid var(--biru-krl);
+            border-radius: 50%;
+            position: fixed;
+            top: 0; left: 0;
+            pointer-events: none;
+            z-index: 9998;
+            transition: all 0.15s ease;
+            opacity: 0.5;
         }
 
-        .emoji-gerak {
-            position: absolute;
-            font-size: 32px;
-            opacity: 0.6;
+        /* NOISE TEXTURE OVERLAY */
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
+            opacity: 0.03;
+            pointer-events: none;
+            z-index: 1;
         }
 
-        @keyframes gerakAlami-1 {
-            0% { transform: translateY(0px) rotate(0deg) scale(1); }
-            50% { transform: translateY(-25px) rotate(15deg) scale(1.1); }
-            100% { transform: translateY(0px) rotate(0deg) scale(1); }
+        /* BACKGROUND GRADIENT ORBS */
+        .bg-orb {
+            position: fixed;
+            border-radius: 50%;
+            filter: blur(80px);
+            pointer-events: none;
+            z-index: 0;
+        }
+        .orb-1 {
+            width: 400px; height: 400px;
+            background: radial-gradient(circle, rgba(26,79,163,0.12) 0%, transparent 70%);
+            top: -100px; right: -100px;
+            animation: orbFloat1 8s ease-in-out infinite;
+        }
+        .orb-2 {
+            width: 350px; height: 350px;
+            background: radial-gradient(circle, rgba(200,168,130,0.15) 0%, transparent 70%);
+            bottom: 100px; left: -80px;
+            animation: orbFloat2 10s ease-in-out infinite;
+        }
+        .orb-3 {
+            width: 250px; height: 250px;
+            background: radial-gradient(circle, rgba(45,62,45,0.1) 0%, transparent 70%);
+            top: 40%; left: 30%;
+            animation: orbFloat3 12s ease-in-out infinite;
         }
 
-        @keyframes gerakAlami-2 {
-            0% { transform: translateY(0px) rotate(0deg) scale(1); }
-            50% { transform: translateY(-35px) rotate(-20deg) scale(1.05); }
-            100% { transform: translateY(0px) rotate(0deg) scale(1); }
+        @keyframes orbFloat1 {
+            0%, 100% { transform: translate(0,0) scale(1); }
+            50% { transform: translate(-30px, 30px) scale(1.1); }
+        }
+        @keyframes orbFloat2 {
+            0%, 100% { transform: translate(0,0) scale(1); }
+            50% { transform: translate(20px, -40px) scale(0.9); }
+        }
+        @keyframes orbFloat3 {
+            0%, 100% { transform: translate(0,0) scale(1); }
+            33% { transform: translate(30px, -20px) scale(1.05); }
+            66% { transform: translate(-20px, 30px) scale(0.95); }
         }
 
-        @keyframes gerakAlami-3 {
-            0% { transform: translateY(0px) rotate(0deg) scale(1); }
-            50% { transform: translateY(-20px) rotate(10deg) scale(1.15); }
-            100% { transform: translateY(0px) rotate(0deg) scale(1); }
-        }
-
-        .pos-kiri-1 { top: 12%; left: 4%; animation: gerakAlami-1 5s ease-in-out infinite; }
-        .pos-kiri-2 { top: 42%; left: 3%; animation: gerakAlami-2 7s ease-in-out infinite 0.5s; }
-        .pos-kiri-3 { top: 72%; left: 5%; animation: gerakAlami-3 6s ease-in-out infinite 1s; }
-        
-        .pos-kanan-1 { top: 18%; right: 4%; animation: gerakAlami-2 6.5s ease-in-out infinite 0.2s; }
-        .pos-kanan-2 { top: 48%; right: 3%; animation: gerakAlami-3 5.5s ease-in-out infinite 0.7s; }
-        .pos-kanan-3 { top: 78%; right: 5%; animation: gerakAlami-1 7.5s ease-in-out infinite 1.2s; }
-
-        @media (max-width: 768px) {
-            .emoji-gerak {
-                font-size: 24px;
-                opacity: 0.5;
-            }
-            .pos-kiri-1 { left: 2%; }
-            .pos-kiri-2 { left: 1%; }
-            .pos-kiri-3 { left: 2%; }
-            .pos-kanan-1 { right: 2%; }
-            .pos-kanan-2 { right: 1%; }
-            .pos-kanan-3 { right: 2%; }
-        }
-
-        .main-wrapper {
-            max-width: 620px;
-            margin: 40px auto;
-            position: relative;
+        /* FLOATING SIDE EMOJIS */
+        .side-emoji {
+            position: fixed;
+            font-size: 28px;
+            opacity: 0;
+            pointer-events: none;
             z-index: 2;
+            animation: sideFloat 1s ease forwards;
+        }
+        @keyframes sideFloat { to { opacity: 0.55; } }
+        @keyframes bobUp {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            50% { transform: translateY(-22px) rotate(12deg); }
+        }
+        @keyframes bobDown {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            50% { transform: translateY(-28px) rotate(-15deg); }
+        }
+        .s1 { top: 10%; left: 3%; animation: bobUp 5s ease-in-out infinite 0.5s; opacity: 0.55; }
+        .s2 { top: 35%; left: 2%; animation: bobDown 6.5s ease-in-out infinite 1s; opacity: 0.55; }
+        .s3 { top: 62%; left: 3.5%; animation: bobUp 7s ease-in-out infinite 0.2s; opacity: 0.55; }
+        .s4 { top: 15%; right: 3%; animation: bobDown 5.5s ease-in-out infinite 0.8s; opacity: 0.55; }
+        .s5 { top: 45%; right: 2%; animation: bobUp 6s ease-in-out infinite 1.5s; opacity: 0.55; }
+        .s6 { top: 72%; right: 3.5%; animation: bobDown 8s ease-in-out infinite 0.3s; opacity: 0.55; }
+
+        @media (max-width: 700px) {
+            .side-emoji { font-size: 20px; opacity: 0.4; }
         }
 
-        .header-teduh {
-            background-color: var(--putih-hangat);
-            padding: 45px 20px;
+        /* MAIN WRAPPER */
+        .wrap {
+            max-width: 640px;
+            margin: 0 auto;
+            padding: 40px 20px 60px;
+            position: relative;
+            z-index: 3;
+        }
+
+        /* PAGE-IN ANIMATION */
+        .reveal {
+            opacity: 0;
+            transform: translateY(40px);
+            animation: revealUp 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+        @keyframes revealUp {
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* ====== HEADER ====== */
+        .header {
+            background: var(--card);
             border-radius: 32px;
+            padding: 50px 28px 40px;
             text-align: center;
-            box-shadow: var(--bayangan-halus);
+            box-shadow: var(--shadow);
             margin-bottom: 24px;
-            border: 1px solid rgba(62, 78, 62, 0.06);
+            border: 1px solid rgba(45,62,45,0.06);
+            position: relative;
+            overflow: hidden;
+            animation-delay: 0.1s;
         }
 
-        .header-teduh h1 {
-            font-family: 'Poppins', sans-serif;
-            margin: 12px 0 0 0;
-            font-size: 24px;
-            color: var(--warna-daun);
-            font-weight: 600;
-            letter-spacing: -0.5px;
+        /* Garis rel dekoratif di header */
+        .header::before {
+            content: '';
+            position: absolute;
+            bottom: 0; left: 0; right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, transparent, var(--biru-krl), var(--biru-krl-light), var(--biru-krl), transparent);
+            animation: railShimmer 3s linear infinite;
+        }
+        @keyframes railShimmer {
+            0% { background-position: -200% 0; }
+            100% { background-position: 200% 0; }
         }
 
-        .icon-tanaman {
-            font-size: 40px;
+        .icon-wrap {
+            font-size: 44px;
             display: block;
-            animation: float-icon 4s ease-in-out infinite;
+            animation: iconFloat 4s ease-in-out infinite;
+            margin-bottom: 14px;
+        }
+        @keyframes iconFloat {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            50% { transform: translateY(-8px) rotate(4deg); }
         }
 
-        @keyframes float-icon {
-            0% { transform: translateY(0px) rotate(0deg); }
-            50% { transform: translateY(-6px) rotate(3deg); }
-            100% { transform: translateY(0px) rotate(0deg); }
+        .header h1 {
+            font-family: 'Syne', sans-serif;
+            font-size: 26px;
+            font-weight: 800;
+            color: var(--hijau);
+            letter-spacing: -1px;
+            margin-bottom: 8px;
         }
 
-        .sub-salam {
-            color: var(--teks-lembut);
+        .header .sub {
+            color: var(--hijau-soft);
             font-size: 13.5px;
-            margin-top: 10px;
             font-style: italic;
-            opacity: 0.9;
         }
 
-        .grid-lembut {
-            display: flex;
-            flex-direction: column;
-            gap: 18px;
+        /* ====== GRID KARTU ====== */
+        .grid { display: flex; flex-direction: column; gap: 20px; }
+
+        /* ====== 3D TILT CARD ====== */
+        .tilt-wrapper {
+            perspective: 1000px;
         }
 
-        .kartu-teduh {
-            background-color: var(--putih-hangat);
+        .kartu {
+            background: var(--card);
             border-radius: 28px;
             padding: 26px;
-            box-shadow: var(--bayangan-halus);
-            border: 1px solid rgba(62, 78, 62, 0.05);
+            box-shadow: var(--shadow);
+            border: 1px solid rgba(45,62,45,0.05);
+            transition: box-shadow 0.3s ease, transform 0.1s ease;
+            transform-style: preserve-3d;
+            position: relative;
+            overflow: hidden;
         }
+        .kartu::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: 28px;
+            background: linear-gradient(135deg, rgba(255,255,255,0.15) 0%, transparent 50%);
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        .kartu:hover::after { opacity: 1; }
+        .kartu:hover { box-shadow: var(--shadow-hover); }
 
-        h2.judul-kartu {
-            font-family: 'Poppins', sans-serif;
-            margin-top: 0;
-            font-size: 17px;
-            font-weight: 600;
-            color: var(--warna-daun);
+        h2.judul {
+            font-family: 'Syne', sans-serif;
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--hijau);
             display: flex;
             align-items: center;
             gap: 10px;
-            padding-bottom: 12px;
-            border-bottom: 1px solid #f2f5f2;
-            margin-bottom: 16px;
+            padding-bottom: 14px;
+            border-bottom: 1px solid #edf0ed;
+            margin-bottom: 18px;
+            letter-spacing: -0.3px;
         }
 
-        .info-list {
-            list-style: none;
-            padding: 0;
-            margin: 0;
-        }
-
+        .info-list { list-style: none; }
         .info-list li {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 7px 0;
-            font-size: 14.5px;
+            padding: 8px 0;
+            font-size: 14px;
+            border-bottom: 1px dashed rgba(45,62,45,0.06);
         }
-
-        .label {
-            color: #708473;
-        }
-
-        .isi {
-            font-weight: 600;
-            color: var(--warna-daun);
-            background-color: #f4f7f4;
+        .info-list li:last-child { border-bottom: none; }
+        .lbl { color: var(--hijau-mid); font-size: 13.5px; }
+        .val {
+            font-weight: 700;
+            font-family: 'Syne', sans-serif;
+            color: var(--hijau);
+            background: #f0f4f0;
             padding: 4px 14px;
             border-radius: 14px;
-            font-size: 14px;
+            font-size: 13px;
         }
 
-        .badge-container {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
-            margin-top: 8px;
-        }
-        
-        .badge-lembut {
-            background-color: #f4f7f4;
-            padding: 6px 14px;
-            border-radius: 16px;
-            font-size: 13.5px;
-            color: var(--teks-lembut);
-            font-weight: 600;
+        .badge-wrap { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+        .badge {
+            background: #f0f4f0;
+            padding: 7px 15px;
+            border-radius: 18px;
+            font-size: 13px;
+            color: var(--hijau-mid);
+            font-weight: 700;
             display: flex;
             align-items: center;
-            gap: 6px;
-            border: 1px solid rgba(62, 78, 62, 0.03);
+            gap: 5px;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            cursor: default;
         }
+        .badge:hover {
+            transform: translateY(-3px) scale(1.04);
+            box-shadow: 0 8px 20px rgba(45,62,45,0.12);
+        }
+        .badge.krl { background: #fceecb; color: #5a4b2c; }
+        .badge.mrt { background: #cfece4; color: #2e4d43; }
+        .badge.lrt { background: #def1f2; color: #2b4344; }
+        .badge.tj  { background: #ffdcd9; color: #5c3b38; }
 
-        .pesan-box {
-            background-color: var(--putih-hangat);
-            border-radius: 26px;
+        /* ====== KRL CLI-125 SECTION ====== */
+        .krl-section {
+            background: linear-gradient(145deg, #0d2b6b 0%, #1a4fa3 40%, #2563b8 100%);
+            border-radius: 28px;
             padding: 28px;
-            margin-top: 24px;
-            box-shadow: var(--bayangan-halus);
-            border: 1px solid rgba(62, 78, 62, 0.05);
-            border-left: 4px solid #bfaea7;
+            box-shadow: 0 25px 60px rgba(26,79,163,0.3);
+            border: 1px solid rgba(255,255,255,0.1);
+            position: relative;
+            overflow: hidden;
         }
 
-        .pesan-box p {
-            margin: 0;
-            line-height: 1.8;
-            font-size: 14.5px;
-            color: var(--teks-lembut);
-            text-align: justify;
+        /* Stars background */
+        .krl-section::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background-image:
+                radial-gradient(circle 1.5px at 20% 30%, rgba(255,255,255,0.6) 0%, transparent 100%),
+                radial-gradient(circle 1px at 75% 15%, rgba(255,255,255,0.4) 0%, transparent 100%),
+                radial-gradient(circle 1px at 50% 70%, rgba(255,255,255,0.3) 0%, transparent 100%),
+                radial-gradient(circle 2px at 85% 60%, rgba(255,255,255,0.5) 0%, transparent 100%),
+                radial-gradient(circle 1px at 10% 80%, rgba(255,255,255,0.4) 0%, transparent 100%),
+                radial-gradient(circle 1.5px at 60% 40%, rgba(255,255,255,0.3) 0%, transparent 100%);
+            pointer-events: none;
         }
 
-        .tanda-tangan {
-            margin-top: 18px;
-            font-size: 13.5px;
-            color: var(--warna-daun);
+        .krl-title {
+            font-family: 'Syne', sans-serif;
+            font-size: 16px;
+            font-weight: 800;
+            color: rgba(255,255,255,0.95);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 6px;
+            letter-spacing: -0.3px;
+        }
+        .krl-sub {
+            font-size: 12.5px;
+            color: rgba(255,255,255,0.55);
+            margin-bottom: 22px;
+        }
+
+        /* TRAIN SVG SCENE */
+        .train-scene {
+            position: relative;
+            width: 100%;
+            height: 160px;
+            overflow: hidden;
+            border-radius: 16px;
+            background: linear-gradient(180deg, #0a1628 0%, #0d2045 50%, #1a3060 100%);
+            margin-bottom: 18px;
+        }
+
+        /* Sky gradient & stars in scene */
+        .train-scene::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background:
+                radial-gradient(circle 1px at 15% 20%, white 0%, transparent 100%),
+                radial-gradient(circle 1.5px at 35% 10%, white 0%, transparent 100%),
+                radial-gradient(circle 1px at 55% 25%, rgba(255,255,255,0.7) 0%, transparent 100%),
+                radial-gradient(circle 1px at 75% 15%, white 0%, transparent 100%),
+                radial-gradient(circle 2px at 90% 30%, rgba(255,255,255,0.6) 0%, transparent 100%),
+                radial-gradient(circle 1px at 5% 35%, rgba(255,255,255,0.8) 0%, transparent 100%),
+                radial-gradient(circle 1px at 45% 40%, rgba(255,255,255,0.5) 0%, transparent 100%),
+                radial-gradient(circle 1.5px at 65% 8%, white 0%, transparent 100%),
+                radial-gradient(circle 1px at 80% 45%, rgba(255,255,255,0.6) 0%, transparent 100%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* Ground / Platform */
+        .ground {
+            position: absolute;
+            bottom: 0; left: 0; right: 0;
+            height: 38px;
+            background: linear-gradient(180deg, #1e3a5f 0%, #132840 100%);
+            z-index: 1;
+        }
+        .ground::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #c8a882, #e8c89a, #c8a882);
+        }
+
+        /* RAIL TRACKS */
+        .rails {
+            position: absolute;
+            bottom: 14px; left: 0; right: 0;
+            height: 8px;
+            z-index: 2;
+        }
+        .rail-top, .rail-bottom {
+            position: absolute;
+            left: 0; right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #4a6080, #8aabcc, #4a6080);
+            border-radius: 2px;
+        }
+        .rail-top { top: 0; }
+        .rail-bottom { bottom: 0; }
+
+        /* RAIL SLEEPERS (animated scroll) */
+        .sleepers {
+            position: absolute;
+            bottom: 16px;
+            left: 0; right: 0;
+            height: 10px;
+            overflow: hidden;
+            z-index: 1;
+        }
+        .sleeper-track {
+            display: flex;
+            gap: 24px;
+            animation: sleeperMove 1.2s linear infinite;
+            white-space: nowrap;
+        }
+        @keyframes sleeperMove {
+            from { transform: translateX(0); }
+            to { transform: translateX(-62px); }
+        }
+        .sleeper {
+            width: 14px;
+            height: 6px;
+            background: linear-gradient(180deg, #5a7a60, #3a5040);
+            border-radius: 2px;
+            flex-shrink: 0;
+        }
+
+        /* ELECTRIC WIRE */
+        .wire {
+            position: absolute;
+            top: 22px; left: -5%; right: -5%;
+            height: 2px;
+            background: linear-gradient(90deg, transparent 0%, rgba(200,220,255,0.5) 20%, rgba(180,210,255,0.8) 50%, rgba(200,220,255,0.5) 80%, transparent 100%);
+            z-index: 2;
+        }
+        .wire::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.9), transparent);
+            animation: wireGlow 2s ease-in-out infinite;
+        }
+        @keyframes wireGlow {
+            0%, 100% { transform: translateX(-100%); opacity: 0; }
+            50% { opacity: 1; }
+            to { transform: translateX(100%); opacity: 0; }
+        }
+
+        /* THE TRAIN SVG */
+        .train-svg-wrap {
+            position: absolute;
+            bottom: 22px;
+            left: -320px;
+            z-index: 5;
+            animation: trainEnter 2.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards 0.3s;
+        }
+        @keyframes trainEnter {
+            from { left: -320px; }
+            to { left: calc(50% - 160px); }
+        }
+
+        /* After stopping, gentle rock */
+        .train-body-group {
+            animation: trainIdle 3s ease-in-out infinite 3s;
+            transform-origin: center bottom;
+        }
+        @keyframes trainIdle {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            25% { transform: translateY(-1.5px) rotate(0.2deg); }
+            75% { transform: translateY(-0.5px) rotate(-0.15deg); }
+        }
+
+        /* PANTOGRAPH (catenary pickup) */
+        .pantograph {
+            position: absolute;
+            top: -26px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 40px;
+            height: 28px;
+        }
+
+        /* SPEED LINES (show during entry) */
+        .speed-lines {
+            position: absolute;
+            top: 25%; bottom: 25%;
+            right: 320px;
+            width: 200px;
+            z-index: 4;
+            animation: speedFade 2.5s ease forwards 0.3s;
+            opacity: 0;
+        }
+        @keyframes speedFade {
+            0% { opacity: 0.8; right: 320px; }
+            80% { opacity: 0.3; }
+            100% { opacity: 0; right: -200px; }
+        }
+        .speed-line {
+            position: absolute;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.6), transparent);
+            border-radius: 2px;
+        }
+
+        /* KRL INFO PILLS */
+        .krl-info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 2px;
+        }
+        .krl-pill {
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.15);
+            border-radius: 14px;
+            padding: 10px 14px;
+            backdrop-filter: blur(10px);
+            transition: background 0.2s ease, transform 0.2s ease;
+        }
+        .krl-pill:hover {
+            background: rgba(255,255,255,0.18);
+            transform: translateY(-2px);
+        }
+        .krl-pill-label {
+            font-size: 11px;
+            color: rgba(255,255,255,0.5);
+            margin-bottom: 3px;
+        }
+        .krl-pill-val {
+            font-family: 'Syne', sans-serif;
+            font-size: 13px;
+            font-weight: 700;
+            color: rgba(255,255,255,0.92);
+        }
+
+        /* ====== PROGRESS BARS ====== */
+        .progress-item { margin-bottom: 14px; }
+        .progress-label {
+            display: flex;
+            justify-content: space-between;
+            font-size: 13px;
+            color: var(--hijau-mid);
+            margin-bottom: 6px;
             font-weight: 600;
+        }
+        .progress-track {
+            height: 8px;
+            background: #e8ede5;
+            border-radius: 99px;
+            overflow: hidden;
+        }
+        .progress-fill {
+            height: 100%;
+            border-radius: 99px;
+            width: 0%;
+            transition: width 1.2s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .progress-fill.biru { background: linear-gradient(90deg, var(--biru-krl), var(--biru-krl-light)); }
+        .progress-fill.hijau { background: linear-gradient(90deg, #3a5a3a, #5e8a5e); }
+        .progress-fill.coklat { background: linear-gradient(90deg, #8a6040, #c8a882); }
+
+        /* ====== PESAN BOX ====== */
+        .pesan-box {
+            background: var(--card);
+            border-radius: 26px;
+            padding: 30px;
+            margin-top: 22px;
+            box-shadow: var(--shadow);
+            border: 1px solid rgba(45,62,45,0.05);
+            border-left: 5px solid var(--biru-krl);
+            position: relative;
+            overflow: hidden;
+        }
+        .pesan-box::before {
+            content: '"';
+            position: absolute;
+            top: -10px;
+            left: 20px;
+            font-family: 'Syne', sans-serif;
+            font-size: 120px;
+            color: rgba(26,79,163,0.06);
+            line-height: 1;
+            font-weight: 800;
+            pointer-events: none;
+        }
+        .pesan-box p {
+            line-height: 1.85;
+            font-size: 14.5px;
+            color: #5a6e5d;
+            text-align: justify;
+            position: relative;
+            z-index: 1;
+        }
+        .tanda-tangan {
+            margin-top: 20px;
+            font-family: 'Syne', sans-serif;
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--hijau);
             text-align: right;
         }
 
-        .footer-teduh {
+        /* ====== FOOTER ====== */
+        .footer {
             text-align: center;
-            margin-top: 45px;
-            font-size: 12.5px;
+            margin-top: 50px;
+            font-size: 12px;
             color: #92a495;
             padding-bottom: 30px;
-            letter-spacing: 0.3px;
+            letter-spacing: 0.5px;
+        }
+
+        /* SCROLL REVEAL UNTUK KARTU */
+        .scroll-reveal {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1), transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .scroll-reveal.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* PARTICLES (train smoke puffs) */
+        .particle {
+            position: fixed;
+            width: 8px; height: 8px;
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 9997;
+            animation: particleFade 1s ease-out forwards;
+        }
+        @keyframes particleFade {
+            0% { transform: scale(0) translateY(0); opacity: 1; }
+            100% { transform: scale(3) translateY(-40px); opacity: 0; }
         }
 
     </style>
 </head>
 <body>
 
-    <div class="area-emoji-pinggir">
-        <div class="emoji-gerak pos-kiri-1">🚅</div>
-        <div class="emoji-gerak pos-kiri-2">🥙</div>
-        <div class="emoji-gerak pos-kiri-3">🚌</div>
-        
-        <div class="emoji-gerak pos-kanan-1">🍜</div>
-        <div class="emoji-gerak pos-kanan-2">🚇</div>
-        <div class="emoji-gerak pos-kanan-3">🌿</div>
-    </div>
+    <div class="cursor-dot" id="dot"></div>
+    <div class="cursor-ring" id="ring"></div>
 
-    <div class="main-wrapper">
-        
-        <div class="header-teduh">
-            <span class="icon-tanaman">🌿</span>
+    <!-- BG ORBS -->
+    <div class="bg-orb orb-1"></div>
+    <div class="bg-orb orb-2"></div>
+    <div class="bg-orb orb-3"></div>
+
+    <!-- SIDE EMOJIS -->
+    <div class="side-emoji s1">🚅</div>
+    <div class="side-emoji s2">🥙</div>
+    <div class="side-emoji s3">🚌</div>
+    <div class="side-emoji s4">🍜</div>
+    <div class="side-emoji s5">🚇</div>
+    <div class="side-emoji s6">🌿</div>
+
+    <div class="wrap">
+
+        <!-- HEADER -->
+        <div class="header reveal" style="animation-delay:0.1s">
+            <span class="icon-wrap">🌿</span>
             <h1>Selamat Datang di Sudut Kecilku</h1>
-            <div class="sub-salam">Tempat teduh untuk berbagi cerita dan langkah baru</div>
+            <div class="sub">Tempat teduh untuk berbagi cerita dan langkah baru</div>
         </div>
 
-        <div class="grid-lembut">
-            
-            <!-- BIODATA -->
-            <div class="kartu-teduh">
-                <h2 class="judul-kartu">🪟 Tentang Aku</h2>
-                <ul class="info-list">
-                    <li><span class="label">Nama</span> <span class="isi">Dimas</span></li>
-                    <li><span class="label">Usia</span> <span class="isi">15 Tahun</span></li>
-                    <li><span class="label">Jenjang</span> <span class="isi">Mau masuk SMK</span></li>
-                    <li><span class="label">Tinggal di</span> <span class="isi">Bekasi</span></li>
-                </ul>
-            </div>
+        <div class="grid">
 
-            <!-- KESEHARIAN / KEGEMARAN -->
-            <div class="kartu-teduh">
-                <h2 class="judul-kartu">🧺 Yang Aku Suka</h2>
-                <p style="font-size: 13.5px; margin-bottom: 12px; color: #708473; margin-top: 0;">Hal-hal kecil yang bikin hariku lebih berwarna:</p>
-                <div class="badge-container">
-                    <span class="badge-lembut">🥙 Kebab</span>
-                    <span class="badge-lembut">🍜 Mie Ayam</span>
-                    <span class="badge-lembut">🍔 Burger</span>
-                    <span class="badge-lembut" style="background-color: var(--krl-soft); color: #5a4b2c;">🚅 Naik KRL</span>
-                    <span class="badge-lembut" style="background-color: var(--mrt-soft); color: #2e4d43;">🚈 MRT</span>
-                    <span class="badge-lembut" style="background-color: var(--lrt-soft); color: #2b4344;">🚆 LRT</span>
-                    <span class="badge-lembut" style="background-color: var(--tj-soft); color: #5c3b38;">🚌 TransJakarta</span>
+            <!-- BIODATA -->
+            <div class="tilt-wrapper scroll-reveal" data-delay="0">
+                <div class="kartu" data-tilt>
+                    <h2 class="judul">🪟 Tentang Aku</h2>
+                    <ul class="info-list">
+                        <li><span class="lbl">Nama</span><span class="val">Dimas</span></li>
+                        <li><span class="lbl">Usia</span><span class="val">15 Tahun</span></li>
+                        <li><span class="lbl">Jenjang</span><span class="val">Mau masuk SMK</span></li>
+                        <li><span class="lbl">Tinggal di</span><span class="val">Bekasi</span></li>
+                    </ul>
                 </div>
             </div>
 
-            <!-- HARAPAN -->
-            <div class="kartu-teduh">
-                <h2 class="judul-kartu">⚓ Impian & Rencana</h2>
-                <ul class="info-list">
-                    <li><span class="label">Yang lagi dikejar</span> <span class="isi">Belajar giat di SMK</span></li>
-                    <li><span class="label">Pengen banget punya</span> <span class="isi">📷 Canon R50</span></li>
-                    <li><span class="label">Destinasi impian</span> <span class="isi">🏝️ Banda Neira</span></li>
-                </ul>
+            <!-- YANG AKU SUKA -->
+            <div class="tilt-wrapper scroll-reveal" data-delay="100">
+                <div class="kartu" data-tilt>
+                    <h2 class="judul">🧺 Yang Aku Suka</h2>
+                    <p style="font-size:13px;color:#708473;margin-bottom:12px;">Hal-hal kecil yang bikin hariku lebih berwarna:</p>
+                    <div class="badge-wrap">
+                        <span class="badge">🥙 Kebab</span>
+                        <span class="badge">🍜 Mie Ayam</span>
+                        <span class="badge">🍔 Burger</span>
+                        <span class="badge krl">🚅 Naik KRL</span>
+                        <span class="badge mrt">🚈 MRT</span>
+                        <span class="badge lrt">🚆 LRT</span>
+                        <span class="badge tj">🚌 TransJakarta</span>
+                    </div>
+                </div>
             </div>
 
-        </div>
+            <!-- KRL CLI-125 SECTION -->
+            <div class="scroll-reveal" data-delay="200">
+                <div class="krl-section">
+                    <div class="krl-title">🚄 Kereta Favorit: KRL CLI-125</div>
+                    <div class="krl-sub">Commuter Line Indonesia · CRRC Sifang · Mulai Beroperasi 1 Juni 2025</div>
+
+                    <!-- TRAIN SCENE -->
+                    <div class="train-scene">
+                        <!-- Speed lines -->
+                        <div class="speed-lines">
+                            <div class="speed-line" style="top:20%;width:180px;opacity:0.8;"></div>
+                            <div class="speed-line" style="top:35%;width:130px;opacity:0.6;"></div>
+                            <div class="speed-line" style="top:50%;width:200px;opacity:0.9;"></div>
+                            <div class="speed-line" style="top:65%;width:110px;opacity:0.5;"></div>
+                            <div class="speed-line" style="top:78%;width:160px;opacity:0.7;"></div>
+                        </div>
+
+                        <!-- Wire -->
+                        <div class="wire"></div>
+
+                        <!-- Sleepers -->
+                        <div class="sleepers">
+                            <div class="sleeper-track">
+                                <!-- 20 sleepers looping -->
+                                <div class="sleeper"></div><div class="sleeper"></div><div class="sleeper"></div><div class="sleeper"></div><div class="sleeper"></div>
+                                <div class="sleeper"></div><div class="sleeper"></div><div class="sleeper"></div><div class="sleeper"></div><div class="sleeper"></div>
+                                <div class="sleeper"></div><div class="sleeper"></div><div class="sleeper"></div><div class="sleeper"></div><div class="sleeper"></div>
+                                <div class="sleeper"></div><div class="sleeper"></div><div class="sleeper"></div><div class="sleeper"></div><div class="sleeper"></div>
+                            </div>
+                        </div>
+
+                        <!-- Ground -->
+                        <div class="ground"></div>
+
+                        <!-- Rails -->
+                        <div class="rails">
+                            <div class="rail-top"></div>
+                            <div class="rail-bottom"></div>
+                        </div>
+
+                        <!-- THE TRAIN (SVG CSS art CLI-125 style) -->
+                        <div class="train-svg-wrap">
+                            <div class="train-body-group">
+                                <svg width="320" height="90" viewBox="0 0 320 90" fill="none" xmlns="http://www.w3.org/2000/svg">
+
+                                    <!-- PANTOGRAPH -->
+                                    <g transform="translate(145, 0)">
+                                        <!-- Main arm -->
+                                        <line x1="15" y1="28" x2="5" y2="8" stroke="#aac4e0" stroke-width="2" stroke-linecap="round"/>
+                                        <line x1="15" y1="28" x2="25" y2="8" stroke="#aac4e0" stroke-width="2" stroke-linecap="round"/>
+                                        <!-- Cross beam -->
+                                        <line x1="5" y1="8" x2="25" y2="8" stroke="#c8e0f4" stroke-width="2.5" stroke-linecap="round"/>
+                                        <!-- Contact wire spark -->
+                                        <circle cx="15" cy="7" r="2" fill="#ffe47a" opacity="0.9">
+                                            <animate attributeName="opacity" values="0.9;0.3;0.9" dur="0.4s" repeatCount="indefinite"/>
+                                        </circle>
+                                    </g>
+
+                                    <!-- ROOF EQUIPMENT -->
+                                    <rect x="80" y="28" width="20" height="5" rx="2" fill="#2a4a7a" opacity="0.7"/>
+                                    <rect x="210" y="28" width="20" height="5" rx="2" fill="#2a4a7a" opacity="0.7"/>
+
+                                    <!-- MAIN BODY - CLI-125 color: white + blue stripe -->
+                                    <!-- Body base white -->
+                                    <rect x="8" y="30" width="304" height="46" rx="6" fill="#f0f4fa"/>
+
+                                    <!-- Blue accent top stripe (CLI-125 signature blue stripe) -->
+                                    <rect x="8" y="30" width="304" height="12" rx="6" fill="#1a4fa3"/>
+                                    <!-- Bottom of stripe straight -->
+                                    <rect x="8" y="36" width="304" height="6" fill="#1a4fa3"/>
+
+                                    <!-- Thin silver/white separator -->
+                                    <rect x="8" y="42" width="304" height="2" fill="rgba(255,255,255,0.6)"/>
+
+                                    <!-- Bottom blue accent -->
+                                    <rect x="8" y="68" width="304" height="8" fill="#1a4fa3"/>
+                                    <rect x="8" y="68" width="304" height="4" rx="0" fill="#1a4fa3"/>
+
+                                    <!-- CLI-125 Logo area -->
+                                    <rect x="120" y="47" width="80" height="18" rx="4" fill="rgba(26,79,163,0.12)"/>
+                                    <text x="160" y="59" text-anchor="middle" font-family="Arial" font-size="8" font-weight="bold" fill="#1a4fa3" letter-spacing="0.5">CLI-125</text>
+
+                                    <!-- KAI Commuter wordmark area -->
+                                    <text x="160" y="47" text-anchor="middle" font-family="Arial" font-size="6" fill="rgba(26,79,163,0.6)" letter-spacing="1">KAI COMMUTER</text>
+
+                                    <!-- FRONT CABIN (aerodynamic nose) -->
+                                    <path d="M 8 30 Q 2 42 2 56 L 8 56 Z" fill="#1a4fa3"/>
+                                    <path d="M 8 76 L 2 56 L 8 56 Z" fill="#1240a0"/>
+
+                                    <!-- REAR -->
+                                    <path d="M 312 30 Q 318 42 318 56 L 312 56 Z" fill="#1a4fa3"/>
+                                    <path d="M 312 76 L 318 56 L 312 56 Z" fill="#1240a0"/>
+
+                                    <!-- WINDOWS (front cabin) -->
+                                    <rect x="4" y="34" width="18" height="10" rx="3" fill="#a8d4f0" opacity="0.85"/>
+                                    <!-- Window highlight -->
+                                    <rect x="5" y="35" width="6" height="3" rx="1" fill="rgba(255,255,255,0.6)"/>
+
+                                    <!-- WINDOWS (body - 4 windows per car, 2 cars visible) -->
+                                    <!-- Car 1 windows -->
+                                    <rect x="28" y="46" width="38" height="14" rx="3" fill="#b8ddf5" opacity="0.85"/>
+                                    <rect x="29" y="47" width="12" height="4" rx="1" fill="rgba(255,255,255,0.5)"/>
+                                    
+                                    <rect x="74" y="46" width="38" height="14" rx="3" fill="#b8ddf5" opacity="0.85"/>
+                                    <rect x="75" y="47" width="12" height="4" rx="1" fill="rgba(255,255,255,0.5)"/>
+
+                                    <!-- Divider between cars -->
+                                    <rect x="118" y="30" width="4" height="46" fill="rgba(26,79,163,0.3)"/>
+
+                                    <!-- Car 2 windows -->
+                                    <rect x="128" y="46" width="38" height="14" rx="3" fill="#b8ddf5" opacity="0.85"/>
+                                    <rect x="129" y="47" width="12" height="4" rx="1" fill="rgba(255,255,255,0.5)"/>
+
+                                    <rect x="174" y="46" width="38" height="14" rx="3" fill="#b8ddf5" opacity="0.85"/>
+                                    <rect x="175" y="47" width="12" height="4" rx="1" fill="rgba(255,255,255,0.5)"/>
+
+                                    <!-- Divider -->
+                                    <rect x="218" y="30" width="4" height="46" fill="rgba(26,79,163,0.3)"/>
+
+                                    <!-- Car 3 windows -->
+                                    <rect x="228" y="46" width="38" height="14" rx="3" fill="#b8ddf5" opacity="0.85"/>
+                                    <rect x="229" y="47" width="12" height="4" rx="1" fill="rgba(255,255,255,0.5)"/>
+
+                                    <rect x="272" y="46" width="30" height="14" rx="3" fill="#b8ddf5" opacity="0.85"/>
+                                    <rect x="273" y="47" width="10" height="4" rx="1" fill="rgba(255,255,255,0.5)"/>
+
+                                    <!-- DOORS (subtle) -->
+                                    <rect x="62" y="44" width="5" height="30" rx="1" fill="rgba(26,79,163,0.25)"/>
+                                    <rect x="162" y="44" width="5" height="30" rx="1" fill="rgba(26,79,163,0.25)"/>
+                                    <rect x="262" y="44" width="5" height="30" rx="1" fill="rgba(26,79,163,0.25)"/>
+
+                                    <!-- HEADLIGHTS -->
+                                    <ellipse cx="7" cy="62" rx="4" ry="3" fill="#ffe47a" opacity="0.9">
+                                        <animate attributeName="opacity" values="0.9;0.7;0.9" dur="2s" repeatCount="indefinite"/>
+                                    </ellipse>
+                                    <!-- Light beam -->
+                                    <path d="M 3 62 L -20 55 L -20 69 Z" fill="url(#lightBeam)" opacity="0.3"/>
+                                    <defs>
+                                        <linearGradient id="lightBeam" x1="0" y1="0" x2="1" y2="0">
+                                            <stop offset="0%" stop-color="#ffe47a" stop-opacity="0.8"/>
+                                            <stop offset="100%" stop-color="#ffe47a" stop-opacity="0"/>
+                                        </linearGradient>
+                                    </defs>
+
+                                    <!-- WHEELS (4 bogies) -->
+                                    <!-- Bogie 1 -->
+                                    <ellipse cx="40" cy="78" rx="9" ry="9" fill="#1a2a40"/>
+                                    <ellipse cx="40" cy="78" rx="6" ry="6" fill="#243550"/>
+                                    <ellipse cx="40" cy="78" rx="3" ry="3" fill="#8ab0d0"/>
+                                    <animateTransform attributeName="transform" type="rotate" from="0 40 78" to="360 40 78" dur="0.5s" repeatCount="indefinite" additive="sum" begin="0s" end="2.5s"/>
+                                    
+                                    <ellipse cx="70" cy="78" rx="9" ry="9" fill="#1a2a40"/>
+                                    <ellipse cx="70" cy="78" rx="6" ry="6" fill="#243550"/>
+                                    <ellipse cx="70" cy="78" rx="3" ry="3" fill="#8ab0d0"/>
+
+                                    <!-- Bogie 2 -->
+                                    <ellipse cx="140" cy="78" rx="9" ry="9" fill="#1a2a40"/>
+                                    <ellipse cx="140" cy="78" rx="6" ry="6" fill="#243550"/>
+                                    <ellipse cx="140" cy="78" rx="3" ry="3" fill="#8ab0d0"/>
+
+                                    <ellipse cx="170" cy="78" rx="9" ry="9" fill="#1a2a40"/>
+                                    <ellipse cx="170" cy="78" rx="6" ry="6" fill="#243550"/>
+                                    <ellipse cx="170" cy="78" rx="3" ry="3" fill="#8ab0d0"/>
+
+                                    <!-- Bogie 3 -->
+                                    <ellipse cx="240" cy="78" rx="9" ry="9" fill="#1a2a40"/>
+                                    <ellipse cx="240" cy="78" rx="6" ry="6" fill="#243550"/>
+                                    <ellipse cx="240" cy="78" rx="3" ry="3" fill="#8ab0d0"/>
+
+                                    <ellipse cx="270" cy="78" rx="9" ry="9" fill="#1a2a40"/>
+                                    <ellipse cx="270" cy="78" rx="6" ry="6" fill="#243550"/>
+                                    <ellipse cx="270" cy="78" rx="3" ry="3" fill="#8ab0d0"/>
+
+                                    <!-- UNDERCARRIAGE -->
+                                    <rect x="20" y="73" width="90" height="4" rx="2" fill="#1a3050"/>
+                                    <rect x="120" y="73" width="90" height="4" rx="2" fill="#1a3050"/>
+                                    <rect x="220" y="73" width="82" height="4" rx="2" fill="#1a3050"/>
+
+                                    <!-- REFLECTION (floor shine) -->
+                                    <rect x="8" y="72" width="304" height="2" fill="rgba(255,255,255,0.2)" rx="1"/>
+
+                                </svg>
+                            </div>
+                        </div>
+
+                        <!-- Platform numbers -->
+                        <div style="position:absolute;bottom:6px;right:12px;font-size:9px;color:rgba(255,255,255,0.3);font-family:'Syne',sans-serif;letter-spacing:1px;">MANGGARAI • BEKASI LINE</div>
+                    </div>
+
+                    <!-- KRL SPECS PILLS -->
+                    <div class="krl-info-grid">
+                        <div class="krl-pill">
+                            <div class="krl-pill-label">Seri</div>
+                            <div class="krl-pill-val">CLI-125 (CRRC)</div>
+                        </div>
+                        <div class="krl-pill">
+                            <div class="krl-pill-label">Kapasitas</div>
+                            <div class="krl-pill-val">3.400 penumpang</div>
+                        </div>
+                        <div class="krl-pill">
+                            <div class="krl-pill-label">Gerbong</div>
+                            <div class="krl-pill-val">12 per rangkaian</div>
+                        </div>
+                        <div class="krl-pill">
+                            <div class="krl-pill-label">Rute favorit</div>
+                            <div class="krl-pill-val">Bekasi ↔ Jakarta</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- PROGRESS BARS -->
+            <div class="tilt-wrapper scroll-reveal" data-delay="300">
+                <div class="kartu" data-tilt>
+                    <h2 class="judul">📊 Level Kegemaran</h2>
+                    <div id="progress-container">
+                        <div class="progress-item">
+                            <div class="progress-label"><span>🚅 Naik KRL</span><span>100%</span></div>
+                            <div class="progress-track"><div class="progress-fill biru" data-target="100"></div></div>
+                        </div>
+                        <div class="progress-item">
+                            <div class="progress-label"><span>🥙 Makan Enak</span><span>95%</span></div>
+                            <div class="progress-track"><div class="progress-fill hijau" data-target="95"></div></div>
+                        </div>
+                        <div class="progress-item">
+                            <div class="progress-label"><span>📷 Fotografi</span><span>80%</span></div>
+                            <div class="progress-track"><div class="progress-fill coklat" data-target="80"></div></div>
+                        </div>
+                        <div class="progress-item" style="margin-bottom:0">
+                            <div class="progress-label"><span>🌿 Jalan-jalan</span><span>88%</span></div>
+                            <div class="progress-track"><div class="progress-fill hijau" data-target="88"></div></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- IMPIAN & RENCANA -->
+            <div class="tilt-wrapper scroll-reveal" data-delay="100">
+                <div class="kartu" data-tilt>
+                    <h2 class="judul">⚓ Impian & Rencana</h2>
+                    <ul class="info-list">
+                        <li><span class="lbl">Yang lagi dikejar</span><span class="val">Belajar giat di SMK</span></li>
+                        <li><span class="lbl">Pengen banget punya</span><span class="val">📷 Canon R50</span></li>
+                        <li><span class="lbl">Destinasi impian</span><span class="val">🏝️ Banda Neira</span></li>
+                    </ul>
+                </div>
+            </div>
+
+        </div><!-- end grid -->
 
         <!-- PESAN -->
-        <div class="pesan-box">
+        <div class="pesan-box scroll-reveal" data-delay="0" style="margin-top:22px;">
             <p>
                 Halo! Makasih ya udah mau mampir ke sini. Halaman ini aku buat sesederhana mungkin—kayak kamar yang jendelanya menghadap taman, tenang dan nggak banyak ribet. Sekarang aku lagi fokus buat bersiap masuk SMK, sambil pelan-pelan nabung buat kamera impian dan suatu hari bisa duduk santai dengerin ombak langsung di Banda Neira. Semoga siapapun yang baca ini harinya selalu menyenangkan ya!
                 <br><br>
@@ -326,11 +971,116 @@
             <div class="tanda-tangan">— Dimas 🌿</div>
         </div>
 
-        <div class="footer-teduh">
+        <div class="footer">
             &copy; 2026 Ruang Tenang Dimas · Semoga harimu menyenangkan.
         </div>
 
-    </div>
+    </div><!-- end wrap -->
+
+    <script>
+        // ====== CUSTOM CURSOR ======
+        const dot = document.getElementById('dot');
+        const ring = document.getElementById('ring');
+        let mx = 0, my = 0, rx = 0, ry = 0;
+
+        document.addEventListener('mousemove', e => {
+            mx = e.clientX; my = e.clientY;
+            dot.style.left = mx - 4 + 'px';
+            dot.style.top = my - 4 + 'px';
+        });
+
+        (function animRing() {
+            rx += (mx - rx - 16) * 0.18;
+            ry += (my - ry - 16) * 0.18;
+            ring.style.left = rx + 'px';
+            ring.style.top = ry + 'px';
+            requestAnimationFrame(animRing);
+        })();
+
+        document.querySelectorAll('.kartu, .badge, .krl-pill').forEach(el => {
+            el.addEventListener('mouseenter', () => {
+                ring.style.transform = 'scale(1.8)';
+                ring.style.borderColor = 'var(--aksen)';
+                dot.style.transform = 'scale(1.5)';
+            });
+            el.addEventListener('mouseleave', () => {
+                ring.style.transform = 'scale(1)';
+                ring.style.borderColor = 'var(--biru-krl)';
+                dot.style.transform = 'scale(1)';
+            });
+        });
+
+        // ====== 3D TILT ON CARDS ======
+        document.querySelectorAll('[data-tilt]').forEach(card => {
+            const wrap = card.closest('.tilt-wrapper');
+            wrap.addEventListener('mousemove', e => {
+                const r = card.getBoundingClientRect();
+                const cx = r.left + r.width / 2;
+                const cy = r.top + r.height / 2;
+                const dx = (e.clientX - cx) / (r.width / 2);
+                const dy = (e.clientY - cy) / (r.height / 2);
+                card.style.transform = `rotateY(${dx * 8}deg) rotateX(${-dy * 8}deg) translateZ(8px)`;
+                card.style.boxShadow = `${-dx * 12}px ${dy * 12}px 40px rgba(30,50,30,0.15)`;
+            });
+            wrap.addEventListener('mouseleave', () => {
+                card.style.transform = 'rotateY(0) rotateX(0) translateZ(0)';
+                card.style.boxShadow = '';
+                card.style.transition = 'transform 0.5s ease, box-shadow 0.5s ease';
+                setTimeout(() => { card.style.transition = ''; }, 500);
+            });
+        });
+
+        // ====== SCROLL REVEAL ======
+        const reveals = document.querySelectorAll('.scroll-reveal');
+        const observer = new IntersectionObserver(entries => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const delay = entry.target.dataset.delay || 0;
+                    setTimeout(() => {
+                        entry.target.classList.add('visible');
+                        // Trigger progress bars when visible
+                        const fills = entry.target.querySelectorAll('.progress-fill');
+                        fills.forEach(f => {
+                            f.style.width = f.dataset.target + '%';
+                        });
+                    }, parseInt(delay));
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0.15 });
+
+        reveals.forEach(el => observer.observe(el));
+
+        // ====== CLICK PARTICLES ======
+        document.addEventListener('click', e => {
+            for (let i = 0; i < 6; i++) {
+                const p = document.createElement('div');
+                p.className = 'particle';
+                p.style.left = e.clientX + 'px';
+                p.style.top = e.clientY + 'px';
+                p.style.background = ['#1a4fa3','#c8a882','#5e8a5e','#ffe47a'][Math.floor(Math.random()*4)];
+                p.style.animationDelay = (i * 0.05) + 's';
+                const angle = (i / 6) * Math.PI * 2;
+                p.style.setProperty('--dx', Math.cos(angle) * 30 + 'px');
+                p.style.setProperty('--dy', Math.sin(angle) * 30 + 'px');
+                document.body.appendChild(p);
+                setTimeout(() => p.remove(), 1000);
+            }
+        });
+
+        // ====== BADGE HOVER SOUND (visual ripple) ======
+        document.querySelectorAll('.badge').forEach(b => {
+            b.addEventListener('click', () => {
+                b.style.animation = 'none';
+                b.offsetHeight;
+                b.style.animation = '';
+                b.style.transform = 'scale(0.9)';
+                setTimeout(() => b.style.transform = '', 150);
+            });
+        });
+    </script>
 
 </body>
-          </html>
+</html>
+HTMLEOF
+echo "Done"
