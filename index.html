@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ruang Tenang Dimas</title>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-taman: #eef2eb; 
+            --warna-daun: #3e4e3e;
+            --warna-bunga: #dfc7be; 
+            --putih-hangat: #fdfdfb;
+            --teks-lembut: #5a6e5d;
+            --bayangan-halus: 0 12px 35px rgba(62, 78, 62, 0.04);
+            
+            --krl-soft: #fceecb;
+            --mrt-soft: #cfece4;
+            --lrt-soft: #def1f2;
+            --tj-soft: #ffdcd9;
+        }
+
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: 'Nunito', sans-serif;
+            background-color: var(--bg-taman);
+            color: var(--warna-daun);
+            margin: 0;
+            padding: 24px;
+            overflow-x: hidden;
+            position: relative;
+            min-height: 100vh;
+        }
+
+        .area-emoji-pinggir {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            pointer-events: none;
+            user-select: none;
+        }
+
+        .emoji-gerak {
+            position: absolute;
+            font-size: 32px;
+            opacity: 0.6;
+        }
+
+        @keyframes gerakAlami-1 {
+            0% { transform: translateY(0px) rotate(0deg) scale(1); }
+            50% { transform: translateY(-25px) rotate(15deg) scale(1.1); }
+            100% { transform: translateY(0px) rotate(0deg) scale(1); }
+        }
+
+        @keyframes gerakAlami-2 {
+            0% { transform: translateY(0px) rotate(0deg) scale(1); }
+            50% { transform: translateY(-35px) rotate(-20deg) scale(1.05); }
+            100% { transform: translateY(0px) rotate(0deg) scale(1); }
+        }
+
+        @keyframes gerakAlami-3 {
+            0% { transform: translateY(0px) rotate(0deg) scale(1); }
+            50% { transform: translateY(-20px) rotate(10deg) scale(1.15); }
+            100% { transform: translateY(0px) rotate(0deg) scale(1); }
+        }
+
+        .pos-kiri-1 { top: 12%; left: 4%; animation: gerakAlami-1 5s ease-in-out infinite; }
+        .pos-kiri-2 { top: 42%; left: 3%; animation: gerakAlami-2 7s ease-in-out infinite 0.5s; }
+        .pos-kiri-3 { top: 72%; left: 5%; animation: gerakAlami-3 6s ease-in-out infinite 1s; }
+        
+        .pos-kanan-1 { top: 18%; right: 4%; animation: gerakAlami-2 6.5s ease-in-out infinite 0.2s; }
+        .pos-kanan-2 { top: 48%; right: 3%; animation: gerakAlami-3 5.5s ease-in-out infinite 0.7s; }
+        .pos-kanan-3 { top: 78%; right: 5%; animation: gerakAlami-1 7.5s ease-in-out infinite 1.2s; }
+
+        @media (max-width: 768px) {
+            .emoji-gerak {
+                font-size: 24px;
+                opacity: 0.5;
+            }
+            .pos-kiri-1 { left: 2%; }
+            .pos-kiri-2 { left: 1%; }
+            .pos-kiri-3 { left: 2%; }
+            .pos-kanan-1 { right: 2%; }
+            .pos-kanan-2 { right: 1%; }
+            .pos-kanan-3 { right: 2%; }
+        }
+
+        .main-wrapper {
+            max-width: 620px;
+            margin: 40px auto;
+            position: relative;
+            z-index: 2;
+        }
+
+        .header-teduh {
+            background-color: var(--putih-hangat);
+            padding: 45px 20px;
+            border-radius: 32px;
+            text-align: center;
+            box-shadow: var(--bayangan-halus);
+            margin-bottom: 24px;
+            border: 1px solid rgba(62, 78, 62, 0.06);
+        }
+
+        .header-teduh h1 {
+            font-family: 'Poppins', sans-serif;
+            margin: 12px 0 0 0;
+            font-size: 24px;
+            color: var(--warna-daun);
+            font-weight: 600;
+            letter-spacing: -0.5px;
+        }
+
+        .icon-tanaman {
+            font-size: 40px;
+            display: block;
+            animation: float-icon 4s ease-in-out infinite;
+        }
+
+        @keyframes float-icon {
+            0% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-6px) rotate(3deg); }
+            100% { transform: translateY(0px) rotate(0deg); }
+        }
+
+        .sub-salam {
+            color: var(--teks-lembut);
+            font-size: 13.5px;
+            margin-top: 10px;
+            font-style: italic;
+            opacity: 0.9;
+        }
+
+        .grid-lembut {
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+        }
+
+        .kartu-teduh {
+            background-color: var(--putih-hangat);
+            border-radius: 28px;
+            padding: 26px;
+            box-shadow: var(--bayangan-halus);
+            border: 1px solid rgba(62, 78, 62, 0.05);
+        }
+
+        h2.judul-kartu {
+            font-family: 'Poppins', sans-serif;
+            margin-top: 0;
+            font-size: 17px;
+            font-weight: 600;
+            color: var(--warna-daun);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid #f2f5f2;
+            margin-bottom: 16px;
+        }
+
+        .info-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .info-list li {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 7px 0;
+            font-size: 14.5px;
+        }
+
+        .label {
+            color: #708473;
+        }
+
+        .isi {
+            font-weight: 600;
+            color: var(--warna-daun);
+            background-color: #f4f7f4;
+            padding: 4px 14px;
+            border-radius: 14px;
+            font-size: 14px;
+        }
+
+        .badge-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 8px;
+        }
+        
+        .badge-lembut {
+            background-color: #f4f7f4;
+            padding: 6px 14px;
+            border-radius: 16px;
+            font-size: 13.5px;
+            color: var(--teks-lembut);
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            border: 1px solid rgba(62, 78, 62, 0.03);
+        }
+
+        .pesan-box {
+            background-color: var(--putih-hangat);
+            border-radius: 26px;
+            padding: 28px;
+            margin-top: 24px;
+            box-shadow: var(--bayangan-halus);
+            border: 1px solid rgba(62, 78, 62, 0.05);
+            border-left: 4px solid #bfaea7;
+        }
+
+        .pesan-box p {
+            margin: 0;
+            line-height: 1.8;
+            font-size: 14.5px;
+            color: var(--teks-lembut);
+            text-align: justify;
+        }
+
+        .tanda-tangan {
+            margin-top: 18px;
+            font-size: 13.5px;
+            color: var(--warna-daun);
+            font-weight: 600;
+            text-align: right;
+        }
+
+        .footer-teduh {
+            text-align: center;
+            margin-top: 45px;
+            font-size: 12.5px;
+            color: #92a495;
+            padding-bottom: 30px;
+            letter-spacing: 0.3px;
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="area-emoji-pinggir">
+        <div class="emoji-gerak pos-kiri-1">🚅</div>
+        <div class="emoji-gerak pos-kiri-2">🥙</div>
+        <div class="emoji-gerak pos-kiri-3">🚌</div>
+        
+        <div class="emoji-gerak pos-kanan-1">🍜</div>
+        <div class="emoji-gerak pos-kanan-2">🚇</div>
+        <div class="emoji-gerak pos-kanan-3">🌿</div>
+    </div>
+
+    <div class="main-wrapper">
+        
+        <div class="header-teduh">
+            <span class="icon-tanaman">🌿</span>
+            <h1>Selamat Datang di Sudut Kecilku</h1>
+            <div class="sub-salam">Tempat teduh untuk berbagi cerita dan langkah baru</div>
+        </div>
+
+        <div class="grid-lembut">
+            
+            <!-- BIODATA -->
+            <div class="kartu-teduh">
+                <h2 class="judul-kartu">🪟 Tentang Aku</h2>
+                <ul class="info-list">
+                    <li><span class="label">Nama</span> <span class="isi">Dimas</span></li>
+                    <li><span class="label">Usia</span> <span class="isi">15 Tahun</span></li>
+                    <li><span class="label">Jenjang</span> <span class="isi">Mau masuk SMK</span></li>
+                    <li><span class="label">Tinggal di</span> <span class="isi">Bekasi</span></li>
+                </ul>
+            </div>
+
+            <!-- KESEHARIAN / KEGEMARAN -->
+            <div class="kartu-teduh">
+                <h2 class="judul-kartu">🧺 Yang Aku Suka</h2>
+                <p style="font-size: 13.5px; margin-bottom: 12px; color: #708473; margin-top: 0;">Hal-hal kecil yang bikin hariku lebih berwarna:</p>
+                <div class="badge-container">
+                    <span class="badge-lembut">🥙 Kebab</span>
+                    <span class="badge-lembut">🍜 Mie Ayam</span>
+                    <span class="badge-lembut">🍔 Burger</span>
+                    <span class="badge-lembut" style="background-color: var(--krl-soft); color: #5a4b2c;">🚅 Naik KRL</span>
+                    <span class="badge-lembut" style="background-color: var(--mrt-soft); color: #2e4d43;">🚈 MRT</span>
+                    <span class="badge-lembut" style="background-color: var(--lrt-soft); color: #2b4344;">🚆 LRT</span>
+                    <span class="badge-lembut" style="background-color: var(--tj-soft); color: #5c3b38;">🚌 TransJakarta</span>
+                </div>
+            </div>
+
+            <!-- HARAPAN -->
+            <div class="kartu-teduh">
+                <h2 class="judul-kartu">⚓ Impian & Rencana</h2>
+                <ul class="info-list">
+                    <li><span class="label">Yang lagi dikejar</span> <span class="isi">Belajar giat di SMK</span></li>
+                    <li><span class="label">Pengen banget punya</span> <span class="isi">📷 Canon R50</span></li>
+                    <li><span class="label">Destinasi impian</span> <span class="isi">🏝️ Banda Neira</span></li>
+                </ul>
+            </div>
+
+        </div>
+
+        <!-- PESAN -->
+        <div class="pesan-box">
+            <p>
+                Halo! Makasih ya udah mau mampir ke sini. Halaman ini aku buat sesederhana mungkin—kayak kamar yang jendelanya menghadap taman, tenang dan nggak banyak ribet. Sekarang aku lagi fokus buat bersiap masuk SMK, sambil pelan-pelan nabung buat kamera impian dan suatu hari bisa duduk santai dengerin ombak langsung di Banda Neira. Semoga siapapun yang baca ini harinya selalu menyenangkan ya!
+                <br><br>
+                Nah, buat teman-teman SMP-ku... ini bagian yang paling penting buat aku tulis.
+                <br><br>
+                Pertama, aku minta maaf yang sebesar-besarnya. Kalau selama tiga tahun ini ada kata-kataku yang nyakitin, sikap yang bikin kalian nggak nyaman, atau hal-hal kecil yang tanpa sadar aku lakuin tapi ternyata mengganjal—aku beneran minta maaf. Nggak ada yang sempurna, dan aku tahu aku sering salah juga.
+                <br><br>
+                Tapi di balik itu semua, makasih banyak. Tiga tahun ini penuh banget warnanya—ada yang bikin ketawa, ada yang bikin capek, ada juga yang diem-diem ngajarin banyak hal. Kalian semua jadi bagian dari cerita yang nggak bakal aku lupain.
+                <br><br>
+                Sekarang kita masing-masing jalan ke arah yang berbeda. Tapi aku selalu doain yang terbaik buat kalian. Semoga apa yang kalian kejar bisa tercapai, dan semoga kita semua ketemu lagi suatu hari nanti dengan cerita yang lebih seru. Goodbye, teman-teman—makasih untuk semuanya.
+            </p>
+            <div class="tanda-tangan">— Dimas 🌿</div>
+        </div>
+
+        <div class="footer-teduh">
+            &copy; 2026 Ruang Tenang Dimas · Semoga harimu menyenangkan.
+        </div>
+
+    </div>
+
+</body>
+          </html>
