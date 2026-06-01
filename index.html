@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ruang Tenang Dimas</title>
+    <!-- Menggunakan font Nunito & Poppins agar tampilannya terasa bulat, lembut, dan ramah -->
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            /* Warna khas kamar Sho: Hijau sage teduh, kayu hangat, dan putih gading ghibli */
+            --bg-taman: #f2f5f1; 
+            --warna-daun: #3e4e3e; /* Hijau hutan tenang */
+            --warna-bunga: #dfc7be; 
+            --putih-hangat: #fdfdfb;
+            --teks-lembut: #5a6e5d;
+            --bayangan-halus: 0 12px 35px rgba(62, 78, 62, 0.04);
+            
+            /* Warna badge transportasi versi sangat pastel */
+            --krl-soft: #fceecb;
+            --mrt-soft: #cfece4;
+            --lrt-soft: #def1f2;
+            --tj-soft: #ffdcd9;
+        }
+
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: 'Nunito', sans-serif;
+            background-color: var(--bg-taman);
+            color: var(--warna-daun);
+            margin: 0;
+            padding: 24px;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* --- ELEMEN EM0JI MELAYANG (GHIBLI VIBES) --- */
+        /* Dibuat secukupnya & transparan agar tidak mengganggu keterbacaan */
+        .elemen-melayang {
+            position: fixed;
+            font-size: 28px;
+            opacity: 0.15; /* Sangat soft agar tidak menutupi teks */
+            z-index: -1;   /* Di belakang konten utama */
+            pointer-events: none;
+            user-select: none;
+        }
+
+        /* Variasi animasi melayang acak */
+        @keyframes float-slow-1 {
+            0% { transform: translateY(0) rotate(0deg); }
+            50% { transform: translateY(-15px) rotate(5deg); }
+            100% { transform: translateY(0) rotate(0deg); }
+        }
+
+        @keyframes float-slow-2 {
+            0% { transform: translateY(0) rotate(0deg); }
+            50% { transform: translateY(-25px) rotate(-8deg); }
+            100% { transform: translateY(0) rotate(0deg); }
+        }
+
+        /* Penempatan posisi emoji di area samping layar */
+        .el-1 { top: 15%; left: 8%; animation: float-slow-1 6s ease-in-out infinite; }
+        .el-2 { top: 45%; left: 5%; font-size: 34px; animation: float-slow-2 8s ease-in-out infinite 1s; }
+        .el-3 { top: 75%; left: 10%; animation: float-slow-1 7s ease-in-out infinite 0.5s; }
+        .el-4 { top: 20%; right: 7%; font-size: 32px; animation: float-slow-2 9s ease-in-out infinite; }
+        .el-5 { top: 50%; right: 9%; animation: float-slow-1 5s ease-in-out infinite 1.5s; }
+        .el-6 { top: 80%; right: 6%; animation: float-slow-2 7s ease-in-out infinite 0.2s; }
+
+        /* Sembunyikan beberapa emoji di layar HP biar gak sempit */
+        @media (max-width: 768px) {
+            .el-2, .el-5 { display: none; }
+            .elemen-melayang { font-size: 22px; opacity: 0.12; }
+        }
+
+        .main-wrapper {
+            max-width: 620px;
+            margin: 40px auto;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* --- HEADER SEPERTI JENDELA KAMAR SHO --- */
+        .header-teduh {
+            background-color: var(--putih-hangat);
+            padding: 45px 20px;
+            border-radius: 32px;
+            text-align: center;
+            box-shadow: var(--bayangan-halus);
+            margin-bottom: 24px;
+            border: 1px solid rgba(62, 78, 62, 0.06);
+        }
+
+        .header-teduh h1 {
+            font-family: 'Poppins', sans-serif;
+            margin: 12px 0 0 0;
+            font-size: 24px;
+            color: var(--warna-daun);
+            font-weight: 600;
+            letter-spacing: -0.5px;
+        }
+
+        .icon-tanaman {
+            font-size: 40px;
+            display: block;
+            animation: float-icon 4s ease-in-out infinite;
+        }
+
+        @keyframes float-icon {
+            0% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-6px) rotate(3deg); }
+            100% { transform: translateY(0px) rotate(0deg); }
+        }
+
+        .sub-salam {
+            color: var(--teks-lembut);
+            font-size: 13.5px;
+            margin-top: 10px;
+            font-style: italic;
+            opacity: 0.9;
+        }
+
+        /* --- GRID KARTU GHIBLI VIBES --- */
+        .grid-lembut {
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+        }
+
+        .kartu-teduh {
+            background-color: var(--putih-hangat);
+            border-radius: 28px;
+            padding: 26px;
+            box-shadow: var(--bayangan-halus);
+            border: 1px solid rgba(62, 78, 62, 0.05);
+        }
+
+        h2.judul-kartu {
+            font-family: 'Poppins', sans-serif;
+            margin-top: 0;
+            font-size: 17px;
+            font-weight: 600;
+            color: var(--warna-daun);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid #f2f5f2;
+            margin-bottom: 16px;
+        }
+
+        .info-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .info-list li {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 7px 0;
+            font-size: 14.5px;
+        }
+
+        .label {
+            color: #708473;
+        }
+
+        .isi {
+            font-weight: 600;
+            color: var(--warna-daun);
+            background-color: #f4f7f4;
+            padding: 4px 14px;
+            border-radius: 14px;
+            font-size: 14px;
+        }
+
+        /* --- BADGE UNTUK HAL FAVORIT --- */
+        .badge-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 8px;
+        }
+        
+        .badge-lembut {
+            background-color: #f4f7f4;
+            padding: 6px 14px;
+            border-radius: 16px;
+            font-size: 13.5px;
+            color: var(--teks-lembut);
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            border: 1px solid rgba(62, 78, 62, 0.03);
+        }
+
+        /* --- KOTAK PESAN SHO-STYLE --- */
+        .pesan-box {
+            background-color: var(--putih-hangat);
+            border-radius: 26px;
+            padding: 28px;
+            margin-top: 24px;
+            box-shadow: var(--bayangan-halus);
+            border: 1px solid rgba(62, 78, 62, 0.05);
+            border-left: 4px solid #bfaea7;
+        }
+
+        .pesan-box p {
+            margin: 0;
+            line-height: 1.8;
+            font-size: 14.5px;
+            color: var(--teks-lembut);
+            text-align: justify;
+        }
+
+        .tanda-tangan {
+            margin-top: 18px;
+            font-size: 13.5px;
+            color: var(--warna-daun);
+            font-weight: 600;
+            text-align: right;
+        }
+
+        /* --- FOOTER TENANG --- */
+        .footer-teduh {
+            text-align: center;
+            margin-top: 45px;
+            font-size: 12.5px;
+            color: #92a495;
+            padding-bottom: 30px;
+            letter-spacing: 0.3px;
+        }
+
+    </style>
+</head>
+<body>
+
+    <!-- ELEMEN EM0JI MELAYANG (Samping Kiri & Kanan Layar) -->
+    <div class="elemen-melayang el-1">🚊</div> <!-- KRL -->
+    <div class="elemen-melayang el-2">🥙</div> <!-- Kebab -->
+    <div class="elemen-melayang el-3">🚌</div> <!-- TransJakarta -->
+    <div class="elemen-melayang el-4">🍜</div> <!-- Mie Ayam -->
+    <div class="elemen-melayang el-5">🚇</div> <!-- MRT/LRT -->
+    <div class="elemen-melayang el-6">🌿</div> <!-- Daun Kamar Sho -->
+
+    <div class="main-wrapper">
+        
+        <!-- HEADER KECIL -->
+        <div class="header-teduh">
+            <span class="icon-tanaman">🌿</span>
+            <h1>Selamat Datang di Sudut Kecilku</h1>
+            <div class="sub-salam">Tempat teduh untuk melihat langkah baru</div>
+        </div>
+
+        <div class="grid-lembut">
+            
+            <!-- BIODATA -->
+            <div class="kartu-teduh">
+                <h2 class="judul-kartu">🪟 Tentang Aku</h2>
+                <ul class="info-list">
+                    <li><span class="label">Nama:</span> <span class="isi">Dimas</span></li>
+                    <li><span class="label">Usia:</span> <span class="isi">15 Tahun</span></li>
+                    <li><span class="label">Jenjang:</span> <span class="isi">Persiapan Menuju SMK</span></li>
+                    <li><span class="label">Tempat Tinggal:</span> <span class="isi">Bekasi</span></li>
+                </ul>
+            </div>
+
+            <!-- KESEHARIAN / KEGEMARAN -->
+            <div class="kartu-teduh">
+                <h2 class="judul-kartu">🧺 Hal-Hal yang Kusukai</h2>
+                <p style="font-size: 13.5px; margin-bottom: 12px; color: #708473; margin-top: 0;">Beberapa kegemaran kecil dan caraku menikmati hari:</p>
+                <div class="badge-container">
+                    <span class="badge-lembut">🥙 Kebab</span>
+                    <span class="badge-lembut">🍜 Mie Ayam</span>
+                    <span class="badge-lembut">🍔 Burger</span>
+                    <span class="badge-lembut" style="background-color: var(--krl-soft); color: #5a4b2c;">🚅 Perjalanan KRL</span>
+                    <span class="badge-lembut" style="background-color: var(--mrt-soft); color: #2e4d43;">2🚈 Kereta MRT</span>
+                    <span class="badge-lembut" style="background-color: var(--lrt-soft); color: #2b4344;">🚆 Jalur LRT</span>
+                    <span class="badge-lembut" style="background-color: var(--tj-soft); color: #5c3b38;">🚌 TransJakarta</span>
+                </div>
+            </div>
+
+            <!-- HARAPAN -->
+            <div class="kartu-teduh">
+                <h2 class="judul-kartu">⚓ Harapan Kecil</h2>
+                <ul class="info-list">
+                    <li><span class="label">Langkah Terdekat:</span> <span class="isi">Belajar dengan baik di SMK</span></li>
+                    <li><span class="label">Impian Sederhana:</span> <span class="isi">📷 Canon R50</span></li>
+                    <li><span class="label">Destinasi Tujuan:</span> <span class="isi">🏝️ Banda Neira</span></li>
+                </ul>
+            </div>
+
+        </div>
+
+        <!-- PESAN PENGUNJUNG (SHO FROM ARRIETTY STYLE) -->
+        <div class="pesan-box">
+            <p>
+                Halo semuanya, terima kasih banyak ya sudah meluangkan waktu untuk mampir dan melihat ruang kecil ini. Halaman ini sengaja aku buat sesederhana mungkin, seperti sebuah kamar tenang yang jendelanya menghadap langsung ke taman penuh dedaunan hijau. Saat ini, fokus utamaku adalah terus belajar, mempersiapkan diri sebaik mungkin, dan menabung perlahan untuk mengejar impian kecilku nanti di masa SMK—yaitu mengabadikan keindahan dunia lewat kamera Canon R50 dan mendengarkan suara ombak yang damai di Banda Neira secara langsung. Untuk siapa pun yang berkunjung, termasuk kamu yang mungkin sedang membaca tulisan ini... semoga harimu selalu terasa hangat, menyenangkan, dan dipenuhi oleh kedamaian, ya. Terima kasih sudah bersedia menjadi bagian dari cerita perjalananku. Mari kita melangkah maju di jalur kita masing-masing dengan hati yang tenang.
+            </p>
+            <div class="tanda-tangan">Salam hangat, Dimas</div>
+        </div>
+
+        <!-- FOOTER -->
+        <div class="footer-teduh">
+            &copy; 2026 Ruang Tenang Dimas. Semoga harimu menyenangkan.
+        </div>
+
+    </div>
+
+</body>
+</html>
