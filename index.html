@@ -1,1083 +1,1362 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ruang Tenang Dimas</title>
-    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
-    <style>
-        :root {
-            --bg: #e8ede5;
-            --card: #fdfdfb;
-            --hijau: #2d3e2d;
-            --hijau-mid: #4a6150;
-            --hijau-soft: #8faa93;
-            --aksen: #c8a882;
-            --biru-krl: #1a4fa3;
-            --biru-krl-light: #3d7bd4;
-            --putih: #fdfdfb;
-            --shadow: 0 20px 60px rgba(30, 50, 30, 0.08);
-            --shadow-hover: 0 30px 80px rgba(30, 50, 30, 0.15);
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CLI-125 — KAI Commuter Line Indonesia</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Rajdhani:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --red:#E8001E;--red2:#FF2233;--silver:#C4C8CC;--dark-silver:#888C90;
+  --bg:#060608;--bg2:#0A0A0E;
+  --white:#F0F2F5;--dim:rgba(240,242,245,0.5);--dimmer:rgba(240,242,245,0.25);
+}
+html{scroll-behavior:smooth;overflow-x:hidden}
+body{background:var(--bg);color:var(--white);font-family:'Rajdhani',sans-serif;overflow-x:hidden}
+::-webkit-scrollbar{width:2px}
+::-webkit-scrollbar-track{background:var(--bg)}
+::-webkit-scrollbar-thumb{background:var(--red)}
 
-        * { box-sizing: border-box; margin: 0; padding: 0; }
+/* ===== CUSTOM CURSOR ===== */
+#cur{position:fixed;width:6px;height:6px;background:var(--red);border-radius:50%;
+  pointer-events:none;z-index:9999;transform:translate(-50%,-50%);
+  transition:width .25s,height .25s,background .25s}
+#curR{position:fixed;width:28px;height:28px;border:1px solid rgba(232,0,30,.5);
+  border-radius:50%;pointer-events:none;z-index:9998;transform:translate(-50%,-50%);
+  transition:all .18s ease}
 
-        html { scroll-behavior: smooth; }
+/* ===== INTRO OVERLAY ===== */
+#intro{
+  position:fixed;inset:0;z-index:8000;background:#000;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:0;
+}
+#intro.out{animation:introOut 1.2s cubic-bezier(.76,0,.24,1) forwards}
+@keyframes introOut{
+  0%{opacity:1;transform:scale(1)}
+  60%{opacity:1;transform:scale(1.04)}
+  100%{opacity:0;transform:scale(1.08);pointer-events:none}
+}
+.il{font-family:'Space Mono',monospace;font-size:10px;letter-spacing:5px;
+  color:rgba(255,255,255,.15);text-transform:uppercase;overflow:hidden;height:14px;margin-bottom:5px}
+.il span{display:block;transform:translateY(110%);transition:transform .7s cubic-bezier(.16,1,.3,1)}
+.il.show span{transform:translateY(0)}
+#iLogo{font-family:'Bebas Neue',sans-serif;font-size:clamp(64px,11vw,130px);
+  letter-spacing:6px;color:#fff;opacity:0;transform:translateY(16px);
+  transition:opacity 1s ease .7s,transform 1s ease .7s;margin:8px 0 4px}
+#iLogo.show{opacity:1;transform:translateY(0)}
+#iLogo span{color:var(--red)}
+#iSub{font-family:'Space Mono',monospace;font-size:9px;letter-spacing:7px;
+  color:rgba(255,255,255,.12);text-transform:uppercase;
+  opacity:0;transition:opacity .8s ease 1.3s}
+#iSub.show{opacity:1}
+.iBar{position:absolute;bottom:48px;left:50%;transform:translateX(-50%);
+  width:180px;height:1px;background:rgba(255,255,255,.06)}
+.iBarF{height:100%;width:0;background:var(--red);
+  transition:width 2.6s cubic-bezier(.25,.46,.45,.94) .3s}
+.iBarF.go{width:100%}
 
-        body {
-            font-family: 'Nunito', sans-serif;
-            background: var(--bg);
-            color: var(--hijau);
-            overflow-x: hidden;
-            cursor: none;
-        }
+/* ===== NAV ===== */
+nav{position:fixed;top:0;left:0;right:0;z-index:700;
+  padding:22px 56px;display:flex;justify-content:space-between;align-items:center;
+  transition:background .4s,backdrop-filter .4s}
+nav.bg{background:rgba(6,6,8,.94);backdrop-filter:blur(18px)}
+.nLogo{font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:5px;color:var(--white)}
+.nLogo span{color:var(--red)}
+.nLinks{display:flex;gap:32px;list-style:none}
+.nLinks a{font-family:'Space Mono',monospace;font-size:8px;letter-spacing:3px;
+  color:var(--dimmer);text-decoration:none;text-transform:uppercase;transition:color .3s}
+.nLinks a:hover{color:var(--white)}
+.nTag{font-family:'Space Mono',monospace;font-size:8px;letter-spacing:2px;
+  border:1px solid rgba(232,0,30,.35);color:var(--red);padding:5px 14px}
 
-        /* CUSTOM CURSOR */
-        .cursor-dot {
-            width: 8px; height: 8px;
-            background: var(--biru-krl);
-            border-radius: 50%;
-            position: fixed;
-            top: 0; left: 0;
-            pointer-events: none;
-            z-index: 9999;
-            transition: transform 0.1s ease;
-        }
-        .cursor-ring {
-            width: 32px; height: 32px;
-            border: 2px solid var(--biru-krl);
-            border-radius: 50%;
-            position: fixed;
-            top: 0; left: 0;
-            pointer-events: none;
-            z-index: 9998;
-            transition: all 0.15s ease;
-            opacity: 0.5;
-        }
+/* ===== HERO ===== */
+#hero{position:relative;height:100vh;min-height:680px;overflow:hidden;
+  display:flex;align-items:center}
 
-        /* NOISE TEXTURE OVERLAY */
-        body::before {
-            content: '';
-            position: fixed;
-            inset: 0;
-            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
-            opacity: 0.03;
-            pointer-events: none;
-            z-index: 1;
-        }
+/* Cinematic fog/ambient */
+.fogWrap{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+.fogBlob{position:absolute;border-radius:50%;filter:blur(120px);animation:blobDrift ease-in-out infinite alternate}
+.fogBlob.b1{width:70vw;height:70vw;background:radial-gradient(ellipse,rgba(232,0,30,.055) 0%,transparent 70%);
+  top:-20%;right:-20%;animation-duration:22s}
+.fogBlob.b2{width:60vw;height:50vw;background:radial-gradient(ellipse,rgba(30,30,50,.18) 0%,transparent 70%);
+  bottom:-10%;left:-10%;animation-duration:30s;animation-delay:-12s}
+.fogBlob.b3{width:40vw;height:40vw;background:radial-gradient(ellipse,rgba(232,0,30,.025) 0%,transparent 70%);
+  top:30%;left:30%;animation-duration:18s;animation-delay:-6s}
+@keyframes blobDrift{0%{transform:translate(0,0) scale(1)}100%{transform:translate(4%,3%) scale(1.08)}}
 
-        /* BACKGROUND GRADIENT ORBS */
-        .bg-orb {
-            position: fixed;
-            border-radius: 50%;
-            filter: blur(80px);
-            pointer-events: none;
-            z-index: 0;
-        }
-        .orb-1 {
-            width: 400px; height: 400px;
-            background: radial-gradient(circle, rgba(26,79,163,0.12) 0%, transparent 70%);
-            top: -100px; right: -100px;
-            animation: orbFloat1 8s ease-in-out infinite;
-        }
-        .orb-2 {
-            width: 350px; height: 350px;
-            background: radial-gradient(circle, rgba(200,168,130,0.15) 0%, transparent 70%);
-            bottom: 100px; left: -80px;
-            animation: orbFloat2 10s ease-in-out infinite;
-        }
-        .orb-3 {
-            width: 250px; height: 250px;
-            background: radial-gradient(circle, rgba(45,62,45,0.1) 0%, transparent 70%);
-            top: 40%; left: 30%;
-            animation: orbFloat3 12s ease-in-out infinite;
-        }
+/* Particles */
+#ptcl{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+.pt{position:absolute;width:1.5px;height:1.5px;background:rgba(232,0,30,.7);
+  border-radius:50%;animation:ptFloat linear infinite}
+@keyframes ptFloat{
+  0%{transform:translateY(110vh) translateX(0) scale(0);opacity:0}
+  5%{opacity:1;transform:translateY(100vh) translateX(0) scale(1)}
+  95%{opacity:.2}
+  100%{transform:translateY(-5vh) translateX(var(--dx)) scale(.5);opacity:0}
+}
 
-        @keyframes orbFloat1 {
-            0%, 100% { transform: translate(0,0) scale(1); }
-            50% { transform: translate(-30px, 30px) scale(1.1); }
-        }
-        @keyframes orbFloat2 {
-            0%, 100% { transform: translate(0,0) scale(1); }
-            50% { transform: translate(20px, -40px) scale(0.9); }
-        }
-        @keyframes orbFloat3 {
-            0%, 100% { transform: translate(0,0) scale(1); }
-            33% { transform: translate(30px, -20px) scale(1.05); }
-            66% { transform: translate(-20px, 30px) scale(0.95); }
-        }
+/* Scanline */
+.scanline{position:absolute;inset:0;pointer-events:none;
+  background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,.04) 2px,rgba(0,0,0,.04) 4px)}
 
-        /* FLOATING SIDE EMOJIS */
-        .side-emoji {
-            position: fixed;
-            font-size: 28px;
-            opacity: 0;
-            pointer-events: none;
-            z-index: 2;
-            animation: sideFloat 1s ease forwards;
-        }
-        @keyframes sideFloat { to { opacity: 0.55; } }
-        @keyframes bobUp {
-            0%, 100% { transform: translateY(0) rotate(0deg); }
-            50% { transform: translateY(-22px) rotate(12deg); }
-        }
-        @keyframes bobDown {
-            0%, 100% { transform: translateY(0) rotate(0deg); }
-            50% { transform: translateY(-28px) rotate(-15deg); }
-        }
-        .s1 { top: 10%; left: 3%; animation: bobUp 5s ease-in-out infinite 0.5s; opacity: 0.55; }
-        .s2 { top: 35%; left: 2%; animation: bobDown 6.5s ease-in-out infinite 1s; opacity: 0.55; }
-        .s3 { top: 62%; left: 3.5%; animation: bobUp 7s ease-in-out infinite 0.2s; opacity: 0.55; }
-        .s4 { top: 15%; right: 3%; animation: bobDown 5.5s ease-in-out infinite 0.8s; opacity: 0.55; }
-        .s5 { top: 45%; right: 2%; animation: bobUp 6s ease-in-out infinite 1.5s; opacity: 0.55; }
-        .s6 { top: 72%; right: 3.5%; animation: bobDown 8s ease-in-out infinite 0.3s; opacity: 0.55; }
+/* Hero layout */
+.heroInner{position:relative;z-index:10;width:100%;padding:0 56px;
+  display:grid;grid-template-columns:1fr 1fr;gap:40px;align-items:center}
 
-        @media (max-width: 700px) {
-            .side-emoji { font-size: 20px; opacity: 0.4; }
-        }
+/* Hero Left */
+.hL{}
+.hTag{font-family:'Space Mono',monospace;font-size:9px;letter-spacing:5px;color:var(--red);
+  text-transform:uppercase;display:flex;align-items:center;gap:12px;margin-bottom:22px;
+  opacity:0;animation:suA .8s ease forwards .2s}
+.hTag::before{content:'';width:28px;height:1px;background:var(--red)}
+.hH1{font-family:'Bebas Neue',sans-serif;font-size:clamp(76px,11vw,152px);
+  line-height:.88;letter-spacing:2px;
+  opacity:0;animation:suA .9s cubic-bezier(.16,1,.3,1) forwards .4s}
+.hH1 .outline{-webkit-text-stroke:1px rgba(240,242,245,.18);color:transparent}
+.hH1 .red{color:var(--red)}
+.hDesc{font-size:14px;font-weight:400;line-height:1.85;color:var(--dim);
+  max-width:360px;margin-top:24px;
+  opacity:0;animation:suA .9s ease forwards .6s}
+.hBtns{display:flex;gap:14px;margin-top:36px;
+  opacity:0;animation:suA .9s ease forwards .8s}
+.bRed{background:var(--red);color:#fff;font-family:'Space Mono',monospace;font-size:8px;
+  letter-spacing:3px;text-transform:uppercase;padding:13px 28px;border:none;
+  cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:8px;
+  transition:all .3s;position:relative;overflow:hidden}
+.bRed::after{content:'';position:absolute;left:-100%;top:0;bottom:0;width:100%;
+  background:rgba(255,255,255,.15);transition:left .3s}
+.bRed:hover::after{left:0}
+.bRed:hover{transform:translateY(-2px)}
+.bGhost{background:transparent;color:var(--white);font-family:'Space Mono',monospace;font-size:8px;
+  letter-spacing:3px;text-transform:uppercase;padding:13px 28px;
+  border:1px solid rgba(240,242,245,.12);cursor:pointer;text-decoration:none;
+  display:inline-flex;align-items:center;transition:all .3s}
+.bGhost:hover{border-color:var(--red);background:rgba(232,0,30,.05)}
 
-        /* MAIN WRAPPER */
-        .wrap {
-            max-width: 640px;
-            margin: 0 auto;
-            padding: 40px 20px 60px;
-            position: relative;
-            z-index: 3;
-        }
+/* Hero Right — HUD panel */
+.hR{opacity:0;animation:slL 1s ease forwards 1s}
+@keyframes slL{from{opacity:0;transform:translateX(30px)}to{opacity:1;transform:translateX(0)}}
+.hudPanel{border:1px solid rgba(240,242,245,.06);padding:36px;
+  background:rgba(255,255,255,.018);backdrop-filter:blur(8px);position:relative}
+.hudCorner{position:absolute;width:10px;height:10px}
+.hudCorner.tl{top:-1px;left:-1px;border-top:1.5px solid var(--red);border-left:1.5px solid var(--red)}
+.hudCorner.tr{top:-1px;right:-1px;border-top:1.5px solid var(--red);border-right:1.5px solid var(--red)}
+.hudCorner.bl{bottom:-1px;left:-1px;border-bottom:1.5px solid var(--red);border-left:1.5px solid var(--red)}
+.hudCorner.br{bottom:-1px;right:-1px;border-bottom:1.5px solid var(--red);border-right:1.5px solid var(--red)}
+.hudLbl{font-family:'Space Mono',monospace;font-size:8px;letter-spacing:3px;color:var(--red);
+  text-transform:uppercase;padding-bottom:16px;border-bottom:1px solid rgba(240,242,245,.05);margin-bottom:20px}
+.hudRow{display:flex;justify-content:space-between;align-items:baseline;
+  padding:10px 0;border-bottom:1px solid rgba(240,242,245,.04)}
+.hudRow:last-child{border-bottom:none}
+.hK{font-size:10px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:rgba(240,242,245,.28)}
+.hV{font-family:'Bebas Neue',sans-serif;font-size:24px;color:var(--white)}
+.hV em{font-style:normal;font-size:12px;color:var(--red);margin-left:2px}
 
-        /* PAGE-IN ANIMATION */
-        .reveal {
-            opacity: 0;
-            transform: translateY(40px);
-            animation: revealUp 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-        }
-        @keyframes revealUp {
-            to { opacity: 1; transform: translateY(0); }
-        }
+/* Scroll hint */
+.scrollHint{position:absolute;bottom:28px;left:50%;transform:translateX(-50%);
+  display:flex;flex-direction:column;align-items:center;gap:8px;
+  opacity:0;animation:fadeIn .8s ease forwards 2.2s}
+.shLine{width:1px;height:44px;background:linear-gradient(to bottom,var(--red),transparent);
+  animation:shPulse 2s ease-in-out infinite}
+.shTxt{font-family:'Space Mono',monospace;font-size:7px;letter-spacing:3px;
+  color:rgba(240,242,245,.2);text-transform:uppercase}
+@keyframes shPulse{0%,100%{opacity:.4;height:44px}50%{opacity:1;height:54px}}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes suA{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:translateY(0)}}
 
-        /* ====== HEADER ====== */
-        .header {
-            background: var(--card);
-            border-radius: 32px;
-            padding: 50px 28px 40px;
-            text-align: center;
-            box-shadow: var(--shadow);
-            margin-bottom: 24px;
-            border: 1px solid rgba(45,62,45,0.06);
-            position: relative;
-            overflow: hidden;
-            animation-delay: 0.1s;
-        }
+/* ===== SECTION BASE ===== */
+.sec{position:relative;padding:110px 56px;overflow:hidden}
+.secDark{background:var(--bg)}
+.secMid{background:var(--bg2)}
+.sep{height:1px;margin:0 56px;background:linear-gradient(90deg,transparent,rgba(232,0,30,.18),transparent)}
 
-        /* Garis rel dekoratif di header */
-        .header::before {
-            content: '';
-            position: absolute;
-            bottom: 0; left: 0; right: 0;
-            height: 4px;
-            background: linear-gradient(90deg, transparent, var(--biru-krl), var(--biru-krl-light), var(--biru-krl), transparent);
-            animation: railShimmer 3s linear infinite;
-        }
-        @keyframes railShimmer {
-            0% { background-position: -200% 0; }
-            100% { background-position: 200% 0; }
-        }
+/* Section header */
+.secHead{margin-bottom:70px}
+.secEye{font-family:'Space Mono',monospace;font-size:8px;letter-spacing:5px;
+  color:var(--red);text-transform:uppercase;margin-bottom:14px;
+  display:flex;align-items:center;gap:10px}
+.secEye::before{content:'';width:22px;height:1px;background:var(--red)}
+.secTitle{font-family:'Bebas Neue',sans-serif;font-size:clamp(44px,6vw,78px);
+  line-height:1;letter-spacing:2px}
 
-        .icon-wrap {
-            font-size: 44px;
-            display: block;
-            animation: iconFloat 4s ease-in-out infinite;
-            margin-bottom: 14px;
-        }
-        @keyframes iconFloat {
-            0%, 100% { transform: translateY(0) rotate(0deg); }
-            50% { transform: translateY(-8px) rotate(4deg); }
-        }
+/* Reveal util */
+.rv{opacity:0;transform:translateY(28px);transition:opacity .7s ease,transform .7s ease}
+.rv.vis{opacity:1;transform:translateY(0)}
+.rv.d1{transition-delay:.1s}.rv.d2{transition-delay:.2s}.rv.d3{transition-delay:.3s}
+.rv.d4{transition-delay:.4s}.rv.d5{transition-delay:.5s}
 
-        .header h1 {
-            font-family: 'Syne', sans-serif;
-            font-size: 26px;
-            font-weight: 800;
-            color: var(--hijau);
-            letter-spacing: -1px;
-            margin-bottom: 8px;
-        }
+/* ===== FRONT-FACE SVG STYLES ===== */
+.frontWrap{display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:center}
+.frontSvgBox{position:relative}
+.frontSvgBox svg{width:100%;filter:drop-shadow(0 0 60px rgba(232,0,30,.18)) drop-shadow(0 30px 80px rgba(0,0,0,.8))}
+.featureList{display:flex;flex-direction:column;gap:0}
+.fItem{padding:22px 0;border-bottom:1px solid rgba(240,242,245,.05);
+  display:grid;grid-template-columns:44px 1fr;gap:14px;align-items:start}
+.fItem:last-child{border-bottom:none}
+.fN{font-family:'Bebas Neue',sans-serif;font-size:38px;color:rgba(232,0,30,.22);line-height:1}
+.fBody h4{font-weight:700;font-size:14px;letter-spacing:2px;margin-bottom:4px;text-transform:uppercase}
+.fBody p{font-size:12px;color:var(--dim);line-height:1.65}
 
-        .header .sub {
-            color: var(--hijau-soft);
-            font-size: 13.5px;
-            font-style: italic;
-        }
+/* ===== SIDE VIEW ===== */
+.sideWrap{width:calc(100% + 112px);margin-left:-56px;position:relative;
+  padding:20px 56px 50px;overflow:hidden}
+.sideWrap svg{width:100%;height:auto;display:block}
+.sideLabel{display:flex;justify-content:space-between;padding:0 0;margin-top:12px}
+.sideLabel span{font-family:'Space Mono',monospace;font-size:8px;letter-spacing:2px;
+  color:rgba(240,242,245,.25);text-transform:uppercase}
 
-        /* ====== GRID KARTU ====== */
-        .grid { display: flex; flex-direction: column; gap: 20px; }
+/* ===== LIVERY COMPARE ===== */
+.livGrid{display:grid;grid-template-columns:1fr 1fr;gap:4px;margin-top:60px}
+.livCard{background:rgba(255,255,255,.022);border:1px solid rgba(240,242,245,.05);
+  padding:36px;position:relative;overflow:hidden}
+.livCard::before{content:attr(data-lbl);position:absolute;top:0;left:36px;
+  font-family:'Space Mono',monospace;font-size:8px;letter-spacing:3px;
+  background:var(--red);color:#fff;padding:5px 12px}
+.livCard svg{width:100%;margin-top:28px}
+.livDesc{font-size:12px;color:var(--dim);line-height:1.7;margin-top:18px}
 
-        /* ====== 3D TILT CARD ====== */
-        .tilt-wrapper {
-            perspective: 1000px;
-        }
+/* ===== SPECS GRID ===== */
+.specsGrid{display:grid;grid-template-columns:repeat(3,1fr);gap:2px}
+.spBlk{background:rgba(255,255,255,.02);border:1px solid rgba(240,242,245,.05);
+  padding:34px;position:relative;overflow:hidden;
+  transition:background .4s,border-color .4s}
+.spBlk:hover{background:rgba(232,0,30,.035);border-color:rgba(232,0,30,.2)}
+.spBlk::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;
+  background:linear-gradient(90deg,transparent,var(--red),transparent);
+  transform:scaleX(0);transition:transform .5s}
+.spBlk:hover::after{transform:scaleX(1)}
+.spBlk.span2{grid-column:span 2}
+.spBlk.span3{grid-column:span 3;display:grid;grid-template-columns:repeat(4,1fr);gap:36px}
+.spIco{font-size:26px;margin-bottom:14px;display:block}
+.spBig{font-family:'Bebas Neue',sans-serif;font-size:52px;line-height:1;margin-bottom:6px}
+.spBig em{font-style:normal;font-size:22px;color:var(--red);margin-left:2px}
+.spK{font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:rgba(240,242,245,.3)}
+.spV{font-size:12px;color:rgba(240,242,245,.22);margin-top:6px;line-height:1.55}
 
-        .kartu {
-            background: var(--card);
-            border-radius: 28px;
-            padding: 26px;
-            box-shadow: var(--shadow);
-            border: 1px solid rgba(45,62,45,0.05);
-            transition: box-shadow 0.3s ease, transform 0.1s ease;
-            transform-style: preserve-3d;
-            position: relative;
-            overflow: hidden;
-        }
-        .kartu::after {
-            content: '';
-            position: absolute;
-            inset: 0;
-            border-radius: 28px;
-            background: linear-gradient(135deg, rgba(255,255,255,0.15) 0%, transparent 50%);
-            pointer-events: none;
-            opacity: 0;
-            transition: opacity 0.3s ease;
-        }
-        .kartu:hover::after { opacity: 1; }
-        .kartu:hover { box-shadow: var(--shadow-hover); }
+/* ===== TECH SECTION ===== */
+.techGrid{display:grid;grid-template-columns:repeat(3,1fr);gap:2px}
+.tCard{background:rgba(255,255,255,.02);border:1px solid rgba(240,242,245,.05);
+  padding:40px;position:relative;overflow:hidden;transition:transform .4s}
+.tCard:hover{transform:translateY(-5px)}
+.tCard::before{content:'';position:absolute;inset:0;
+  background:radial-gradient(ellipse at 50% 110%,rgba(232,0,30,.07),transparent 65%);
+  opacity:0;transition:opacity .4s}
+.tCard:hover::before{opacity:1}
+.tIco{width:48px;height:48px;border:1px solid rgba(232,0,30,.2);border-radius:6px;
+  display:flex;align-items:center;justify-content:center;font-size:24px;
+  margin-bottom:22px;background:rgba(232,0,30,.06)}
+.tCard h4{font-family:'Bebas Neue',sans-serif;font-size:28px;letter-spacing:2px;margin-bottom:10px}
+.tCard p{font-size:12px;color:var(--dim);line-height:1.7}
+.tBadge{display:inline-flex;font-family:'Space Mono',monospace;font-size:8px;letter-spacing:2px;
+  border:1px solid rgba(232,0,30,.3);color:var(--red);padding:4px 10px;margin-top:14px}
 
-        h2.judul {
-            font-family: 'Syne', sans-serif;
-            font-size: 16px;
-            font-weight: 700;
-            color: var(--hijau);
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            padding-bottom: 14px;
-            border-bottom: 1px solid #edf0ed;
-            margin-bottom: 18px;
-            letter-spacing: -0.3px;
-        }
+/* ===== HISTORY ===== */
+.histLayout{display:grid;grid-template-columns:1fr 380px;gap:70px;align-items:start}
+.histTL{position:relative;padding-top:10px}
+.histTL::before{content:'';position:absolute;left:0;top:0;bottom:0;width:1px;
+  background:linear-gradient(to bottom,var(--red),rgba(232,0,30,.04))}
+.hItem{padding:0 0 52px 34px;position:relative;
+  opacity:0;transform:translateX(-14px);transition:opacity .6s ease,transform .6s ease}
+.hItem.vis{opacity:1;transform:translateX(0)}
+.hDot{position:absolute;left:-5px;top:10px;width:10px;height:10px;
+  background:var(--red);border-radius:50%;box-shadow:0 0 14px rgba(232,0,30,.55)}
+.hYr{font-family:'Bebas Neue',sans-serif;font-size:48px;color:rgba(232,0,30,.22);
+  line-height:1;margin-bottom:6px}
+.hTi{font-weight:700;font-size:15px;letter-spacing:1px;margin-bottom:6px;text-transform:uppercase}
+.hTx{font-size:12px;color:var(--dim);line-height:1.7}
+.histVis{position:sticky;top:110px;
+  background:rgba(255,255,255,.02);border:1px solid rgba(240,242,245,.05);padding:44px}
+.hvStat{text-align:center;padding:24px 0;border-bottom:1px solid rgba(240,242,245,.04)}
+.hvStat:last-child{border-bottom:none}
+.hvN{font-family:'Bebas Neue',sans-serif;font-size:72px;line-height:1;color:var(--red)}
+.hvL{font-family:'Space Mono',monospace;font-size:8px;letter-spacing:3px;
+  color:var(--dimmer);text-transform:uppercase;margin-top:4px}
 
-        .info-list { list-style: none; }
-        .info-list li {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 8px 0;
-            font-size: 14px;
-            border-bottom: 1px dashed rgba(45,62,45,0.06);
-        }
-        .info-list li:last-child { border-bottom: none; }
-        .lbl { color: var(--hijau-mid); font-size: 13.5px; }
-        .val {
-            font-weight: 700;
-            font-family: 'Syne', sans-serif;
-            color: var(--hijau);
-            background: #f0f4f0;
-            padding: 4px 14px;
-            border-radius: 14px;
-            font-size: 13px;
-        }
+/* ===== FLEET ===== */
+.fleetRow{display:grid;grid-template-columns:repeat(4,1fr);gap:2px;margin-bottom:50px}
+.fCard{background:rgba(255,255,255,.02);border:1px solid rgba(240,242,245,.05);
+  padding:32px 24px;text-align:center}
+.fcN{font-family:'Bebas Neue',sans-serif;font-size:62px;line-height:1}
+.fcU{font-family:'Bebas Neue',sans-serif;font-size:26px;color:var(--red);margin-left:3px}
+.fcL{font-family:'Space Mono',monospace;font-size:7px;letter-spacing:2px;
+  color:var(--dimmer);text-transform:uppercase;margin-top:5px}
+.routeList{display:flex;gap:10px;flex-wrap:wrap}
+.rPill{display:flex;align-items:center;gap:9px;
+  border:1px solid rgba(240,242,245,.07);padding:10px 18px;
+  font-weight:600;font-size:13px;letter-spacing:1px}
+.rDot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
 
-        .badge-wrap { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
-        .badge {
-            background: #f0f4f0;
-            padding: 7px 15px;
-            border-radius: 18px;
-            font-size: 13px;
-            color: var(--hijau-mid);
-            font-weight: 700;
-            display: flex;
-            align-items: center;
-            gap: 5px;
-            transition: transform 0.2s ease, box-shadow 0.2s ease;
-            cursor: default;
-        }
-        .badge:hover {
-            transform: translateY(-3px) scale(1.04);
-            box-shadow: 0 8px 20px rgba(45,62,45,0.12);
-        }
-        .badge.krl { background: #fceecb; color: #5a4b2c; }
-        .badge.mrt { background: #cfece4; color: #2e4d43; }
-        .badge.lrt { background: #def1f2; color: #2b4344; }
-        .badge.tj  { background: #ffdcd9; color: #5c3b38; }
+/* ===== INTERIOR ===== */
+.intLayout{display:grid;grid-template-columns:1fr 340px;gap:4px}
+.intMain{background:rgba(255,255,255,.02);border:1px solid rgba(240,242,245,.05);
+  padding:50px;position:relative;overflow:hidden}
+.intMain::after{content:'INTERIOR';position:absolute;bottom:-28px;right:-16px;
+  font-family:'Bebas Neue',sans-serif;font-size:160px;letter-spacing:-6px;
+  color:rgba(255,255,255,.013);pointer-events:none;line-height:1}
+.intFeat{padding:18px 0;border-bottom:1px solid rgba(240,242,245,.04)}
+.intFeat:last-child{border-bottom:none}
+.ifH{display:flex;align-items:center;gap:12px;margin-bottom:6px}
+.ifBar{width:18px;height:1.5px;background:var(--red);flex-shrink:0}
+.ifTitle{font-weight:700;font-size:13px;letter-spacing:2px;text-transform:uppercase}
+.ifDesc{font-size:12px;color:var(--dim);line-height:1.65;padding-left:30px}
+.intSide{display:flex;flex-direction:column;gap:4px}
+.isCrd{background:rgba(255,255,255,.02);border:1px solid rgba(240,242,245,.05);
+  padding:28px;flex:1;display:flex;flex-direction:column;justify-content:flex-end}
+.isN{font-family:'Bebas Neue',sans-serif;font-size:60px;line-height:1;color:var(--red)}
+.isL{font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;
+  color:rgba(240,242,245,.28);margin-top:4px}
 
-        /* ====== KRL CLI-125 SECTION ====== */
-        .krl-section {
-            background: linear-gradient(145deg, #0d2b6b 0%, #1a4fa3 40%, #2563b8 100%);
-            border-radius: 28px;
-            padding: 28px;
-            box-shadow: 0 25px 60px rgba(26,79,163,0.3);
-            border: 1px solid rgba(255,255,255,0.1);
-            position: relative;
-            overflow: hidden;
-        }
+/* ===== FOOTER ===== */
+footer{padding:70px 56px;border-top:1px solid rgba(240,242,245,.04);
+  display:grid;grid-template-columns:1fr 1fr 1fr;gap:50px;background:var(--bg)}
+.fBrand .fbL{font-family:'Bebas Neue',sans-serif;font-size:28px;letter-spacing:5px}
+.fBrand .fbL span{color:var(--red)}
+.fBrand p{font-size:12px;color:var(--dim);line-height:1.7;margin-top:10px;max-width:210px}
+.fCol h5{font-family:'Space Mono',monospace;font-size:7px;letter-spacing:3px;
+  color:var(--red);text-transform:uppercase;margin-bottom:14px}
+.fCol ul{list-style:none;display:flex;flex-direction:column;gap:9px}
+.fCol ul li{font-size:12px;color:var(--dim)}
+.fBot{padding:20px 56px;border-top:1px solid rgba(240,242,245,.03);
+  display:flex;justify-content:space-between;align-items:center}
+.fBot p{font-family:'Space Mono',monospace;font-size:8px;letter-spacing:2px;
+  color:rgba(240,242,245,.18)}
 
-        /* Stars background */
-        .krl-section::before {
-            content: '';
-            position: absolute;
-            inset: 0;
-            background-image:
-                radial-gradient(circle 1.5px at 20% 30%, rgba(255,255,255,0.6) 0%, transparent 100%),
-                radial-gradient(circle 1px at 75% 15%, rgba(255,255,255,0.4) 0%, transparent 100%),
-                radial-gradient(circle 1px at 50% 70%, rgba(255,255,255,0.3) 0%, transparent 100%),
-                radial-gradient(circle 2px at 85% 60%, rgba(255,255,255,0.5) 0%, transparent 100%),
-                radial-gradient(circle 1px at 10% 80%, rgba(255,255,255,0.4) 0%, transparent 100%),
-                radial-gradient(circle 1.5px at 60% 40%, rgba(255,255,255,0.3) 0%, transparent 100%);
-            pointer-events: none;
-        }
+/* ===== TRAINSET DIAGRAM ===== */
+.tsWrap{overflow-x:auto;padding-bottom:16px}
+.tsWrap::-webkit-scrollbar{height:2px}
+.tsRow{display:flex;gap:4px;min-width:max-content;padding:50px 0 16px}
+.car{width:86px;cursor:pointer;position:relative;flex-shrink:0}
+.car:hover .carBody{transform:translateY(-8px)}
+.carBody{height:48px;border-radius:5px;position:relative;overflow:hidden;
+  transition:transform .35s cubic-bezier(.16,1,.3,1)}
+/* up wave cars 1-6 */
+.car.up .carBody{background:linear-gradient(145deg,#BFC3C7,#CDD1D5)}
+.car.up .carBody::before{content:'';position:absolute;bottom:0;left:-8%;right:-8%;height:58%;
+  background:var(--red);
+  clip-path:polygon(0% 55%,18% 5%,36% 42%,54% 0%,72% 32%,88% 8%,100% 38%,100% 100%,0% 100%)}
+/* down wave cars 7-12 */
+.car.dn .carBody{background:linear-gradient(145deg,#BFC3C7,#CDD1D5)}
+.car.dn .carBody::before{content:'';position:absolute;top:0;left:-8%;right:-8%;height:58%;
+  background:var(--red);
+  clip-path:polygon(0% 0%,100% 0%,100% 38%,88% 90%,72% 62%,54% 95%,36% 58%,18% 90%,0% 55%)}
+/* head front (facing forward = car 1 in forward direction, car 12 tail) */
+.car.hf .carBody{border-radius:18px 5px 5px 5px}
+.car.hr .carBody{border-radius:5px 18px 5px 5px}
+.carWin{position:absolute;top:6px;left:6px;right:6px;height:13px;
+  background:rgba(90,130,170,.5);border-radius:2px;z-index:2}
+.carDoor{position:absolute;top:5px;height:28px;width:7px;
+  background:rgba(20,20,30,.35);border-radius:1px;z-index:3}
+.carDoor.d1{left:16px}.carDoor.d2{left:32px}.carDoor.d3{right:32px}.carDoor.d4{right:16px}
+.carNum{font-family:'Space Mono',monospace;font-size:9px;font-weight:700;
+  color:rgba(0,0,0,.5);position:relative;z-index:4;
+  display:flex;align-items:center;justify-content:center;height:100%;padding-top:10px}
+.carLbl{text-align:center;font-size:9px;font-weight:700;letter-spacing:1px;
+  color:rgba(240,242,245,.28);margin-top:7px;text-transform:uppercase}
+.carType{text-align:center;font-family:'Space Mono',monospace;font-size:7px;
+  color:var(--red);margin-top:3px;letter-spacing:.5px}
+/* Tooltip */
+.carTip{position:absolute;bottom:calc(100% + 10px);left:50%;transform:translateX(-50%);
+  background:var(--bg2);border:1px solid rgba(240,242,245,.07);
+  padding:8px 12px;font-size:10px;white-space:nowrap;
+  pointer-events:none;opacity:0;transition:opacity .2s;z-index:20;color:var(--white)}
+.car:hover .carTip{opacity:1}
+</style></head><body>
+<!-- CURSOR --><div id="cur"></div><div id="curR"></div>
 
-        .krl-title {
-            font-family: 'Syne', sans-serif;
-            font-size: 16px;
-            font-weight: 800;
-            color: rgba(255,255,255,0.95);
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            margin-bottom: 6px;
-            letter-spacing: -0.3px;
-        }
-        .krl-sub {
-            font-size: 12.5px;
-            color: rgba(255,255,255,0.55);
-            margin-bottom: 22px;
-        }
+<!-- INTRO -->
+<div id="intro">
+  <div class="il" id="il1"><span>COMMUTER LINE INDONESIA</span></div>
+  <div class="il" id="il2"><span>GENERASI PERTAMA · BUATAN CRRC QINGDAO</span></div>
+  <div id="iLogo">KAI <span>CLI</span>–125</div>
+  <div id="iSub">BEROPERASI SEJAK 1 JUNI 2025</div>
+  <div class="iBar"><div class="iBarF" id="iBarF"></div></div>
+</div>
 
-        /* TRAIN SVG SCENE */
-        .train-scene {
-            position: relative;
-            width: 100%;
-            height: 160px;
-            overflow: hidden;
-            border-radius: 16px;
-            background: linear-gradient(180deg, #0a1628 0%, #0d2045 50%, #1a3060 100%);
-            margin-bottom: 18px;
-        }
+<!-- MAIN -->
+<div id="main" style="opacity:0;transition:opacity .8s ease">
 
-        /* Sky gradient & stars in scene */
-        .train-scene::before {
-            content: '';
-            position: absolute;
-            inset: 0;
-            background:
-                radial-gradient(circle 1px at 15% 20%, white 0%, transparent 100%),
-                radial-gradient(circle 1.5px at 35% 10%, white 0%, transparent 100%),
-                radial-gradient(circle 1px at 55% 25%, rgba(255,255,255,0.7) 0%, transparent 100%),
-                radial-gradient(circle 1px at 75% 15%, white 0%, transparent 100%),
-                radial-gradient(circle 2px at 90% 30%, rgba(255,255,255,0.6) 0%, transparent 100%),
-                radial-gradient(circle 1px at 5% 35%, rgba(255,255,255,0.8) 0%, transparent 100%),
-                radial-gradient(circle 1px at 45% 40%, rgba(255,255,255,0.5) 0%, transparent 100%),
-                radial-gradient(circle 1.5px at 65% 8%, white 0%, transparent 100%),
-                radial-gradient(circle 1px at 80% 45%, rgba(255,255,255,0.6) 0%, transparent 100%);
-            pointer-events: none;
-            z-index: 0;
-        }
+<!-- NAV -->
+<nav id="nav">
+  <div class="nLogo">KAI <span>COMMUTER</span></div>
+  <ul class="nLinks">
+    <li><a href="#eksterior">Eksterior</a></li>
+    <li><a href="#livery">Livery</a></li>
+    <li><a href="#spesifikasi">Spesifikasi</a></li>
+    <li><a href="#teknologi">Teknologi</a></li>
+    <li><a href="#sejarah">Sejarah</a></li>
+    <li><a href="#armada">Armada</a></li>
+  </ul>
+  <div class="nTag">● AKTIF 2025</div>
+</nav>
 
-        /* Ground / Platform */
-        .ground {
-            position: absolute;
-            bottom: 0; left: 0; right: 0;
-            height: 38px;
-            background: linear-gradient(180deg, #1e3a5f 0%, #132840 100%);
-            z-index: 1;
-        }
-        .ground::before {
-            content: '';
-            position: absolute;
-            top: 0; left: 0; right: 0;
-            height: 3px;
-            background: linear-gradient(90deg, #c8a882, #e8c89a, #c8a882);
-        }
+<!-- HERO -->
+<section id="hero">
+  <div class="fogWrap">
+    <div class="fogBlob b1"></div>
+    <div class="fogBlob b2"></div>
+    <div class="fogBlob b3"></div>
+  </div>
+  <div id="ptcl"></div>
+  <div class="scanline"></div>
 
-        /* RAIL TRACKS */
-        .rails {
-            position: absolute;
-            bottom: 14px; left: 0; right: 0;
-            height: 8px;
-            z-index: 2;
-        }
-        .rail-top, .rail-bottom {
-            position: absolute;
-            left: 0; right: 0;
-            height: 3px;
-            background: linear-gradient(90deg, #4a6080, #8aabcc, #4a6080);
-            border-radius: 2px;
-        }
-        .rail-top { top: 0; }
-        .rail-bottom { bottom: 0; }
+  <div class="heroInner">
+    <div class="hL">
+      <div class="hTag">Commuter Line Indonesia · Generasi Pertama</div>
+      <h1 class="hH1">
+        <span class="red">CLI</span><br>
+        <span class="outline">–125</span>
+      </h1>
+      <p class="hDesc">Kereta rel listrik pertama yang diproduksi khusus untuk KAI Commuter. Beroperasi di lintas Jabodetabek sejak 1 Juni 2025 — membawa era baru transportasi urban Indonesia.</p>
+      <div class="hBtns">
+        <a class="bRed" href="#eksterior">Jelajahi Kereta</a>
+        <a class="bGhost" href="#sejarah">Sejarah</a>
+      </div>
+    </div>
+    <div class="hR">
+      <div class="hudPanel">
+        <div class="hudCorner tl"></div><div class="hudCorner tr"></div>
+        <div class="hudCorner bl"></div><div class="hudCorner br"></div>
+        <div class="hudLbl">SISTEM DATA · CLI-125-1012</div>
+        <div class="hudRow"><span class="hK">Produsen</span><span class="hV">CRRC <em>QS</em></span></div>
+        <div class="hudRow"><span class="hK">Model</span><span class="hV">SFC120<em>-V</em></span></div>
+        <div class="hudRow"><span class="hK">Formasi</span><span class="hV">SF<em>12</em></span></div>
+        <div class="hudRow"><span class="hK">Kec. Maks</span><span class="hV">120<em>km/h</em></span></div>
+        <div class="hudRow"><span class="hK">Propulsi</span><span class="hV">1500<em>V DC</em></span></div>
+        <div class="hudRow"><span class="hK">Inverter</span><span class="hV">VVVF<em>IGBT</em></span></div>
+        <div class="hudRow"><span class="hK">Operasi</span><span class="hV" style="color:var(--red)">2025<em>●</em></span></div>
+      </div>
+    </div>
+  </div>
 
-        /* RAIL SLEEPERS (animated scroll) */
-        .sleepers {
-            position: absolute;
-            bottom: 16px;
-            left: 0; right: 0;
-            height: 10px;
-            overflow: hidden;
-            z-index: 1;
-        }
-        .sleeper-track {
-            display: flex;
-            gap: 24px;
-            animation: sleeperMove 1.2s linear infinite;
-            white-space: nowrap;
-        }
-        @keyframes sleeperMove {
-            from { transform: translateX(0); }
-            to { transform: translateX(-62px); }
-        }
-        .sleeper {
-            width: 14px;
-            height: 6px;
-            background: linear-gradient(180deg, #5a7a60, #3a5040);
-            border-radius: 2px;
-            flex-shrink: 0;
-        }
+  <div class="scrollHint">
+    <div class="shLine"></div>
+    <div class="shTxt">Scroll</div>
+  </div>
+</section>
 
-        /* ELECTRIC WIRE */
-        .wire {
-            position: absolute;
-            top: 22px; left: -5%; right: -5%;
-            height: 2px;
-            background: linear-gradient(90deg, transparent 0%, rgba(200,220,255,0.5) 20%, rgba(180,210,255,0.8) 50%, rgba(200,220,255,0.5) 80%, transparent 100%);
-            z-index: 2;
-        }
-        .wire::before {
-            content: '';
-            position: absolute;
-            top: 0; left: 0; right: 0;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.9), transparent);
-            animation: wireGlow 2s ease-in-out infinite;
-        }
-        @keyframes wireGlow {
-            0%, 100% { transform: translateX(-100%); opacity: 0; }
-            50% { opacity: 1; }
-            to { transform: translateX(100%); opacity: 0; }
-        }
+<div class="sep"></div>
 
-        /* THE TRAIN SVG */
-        .train-svg-wrap {
-            position: absolute;
-            bottom: 22px;
-            left: -320px;
-            z-index: 5;
-            animation: trainEnter 2.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards 0.3s;
-        }
-        @keyframes trainEnter {
-            from { left: -320px; }
-            to { left: calc(50% - 160px); }
-        }
+<!-- SCENE 1: EKSTERIOR — KEPALA -->
+<section class="sec secDark" id="eksterior">
+  <div class="secHead rv">
+    <div class="secEye">01 · Eksterior</div>
+    <div class="secTitle">KEPALA<br>CLI–125</div>
+  </div>
 
-        /* After stopping, gentle rock */
-        .train-body-group {
-            animation: trainIdle 3s ease-in-out infinite 3s;
-            transform-origin: center bottom;
-        }
-        @keyframes trainIdle {
-            0%, 100% { transform: translateY(0) rotate(0deg); }
-            25% { transform: translateY(-1.5px) rotate(0.2deg); }
-            75% { transform: translateY(-0.5px) rotate(-0.15deg); }
-        }
+  <div class="frontWrap rv d1">
+    <div class="frontSvgBox">
+      <svg id="frontSvg" viewBox="0 0 480 500" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <radialGradient id="bodyGrad" cx="50%" cy="35%" r="65%">
+            <stop offset="0%" stop-color="#D8DCDF"/>
+            <stop offset="100%" stop-color="#B0B5B9"/>
+          </radialGradient>
+          <radialGradient id="blackFaceGrad" cx="50%" cy="40%" r="60%">
+            <stop offset="0%" stop-color="#1A1A22"/>
+            <stop offset="100%" stop-color="#0A0A0E"/>
+          </radialGradient>
+          <radialGradient id="windshieldGrad" cx="45%" cy="35%" r="65%">
+            <stop offset="0%" stop-color="rgba(100,150,200,.55)"/>
+            <stop offset="60%" stop-color="rgba(60,100,160,.4)"/>
+            <stop offset="100%" stop-color="rgba(20,40,80,.6)"/>
+          </radialGradient>
+          <linearGradient id="ledGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stop-color="rgba(232,0,30,0)"/>
+            <stop offset="15%" stop-color="#FF1830"/>
+            <stop offset="50%" stop-color="#FF2233"/>
+            <stop offset="85%" stop-color="#FF1830"/>
+            <stop offset="100%" stop-color="rgba(232,0,30,0)"/>
+          </linearGradient>
+          <filter id="ledGlow">
+            <feGaussianBlur stdDeviation="5" result="b"/>
+            <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+          </filter>
+          <filter id="redGlow">
+            <feGaussianBlur stdDeviation="8" result="b"/>
+            <feFlood flood-color="#E8001E" flood-opacity=".35" result="c"/>
+            <feComposite in="c" in2="b" operator="in" result="s"/>
+            <feMerge><feMergeNode in="s"/><feMergeNode in="SourceGraphic"/></feMerge>
+          </filter>
+          <filter id="softShadow">
+            <feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="rgba(0,0,0,.5)"/>
+          </filter>
+          <linearGradient id="redStripeGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stop-color="#C8001A"/>
+            <stop offset="50%" stop-color="#E8001E"/>
+            <stop offset="100%" stop-color="#C8001A"/>
+          </linearGradient>
+          <clipPath id="bodyClip">
+            <rect x="18" y="20" width="444" height="400" rx="28"/>
+          </clipPath>
+        </defs>
 
-        /* PANTOGRAPH (catenary pickup) */
-        .pantograph {
-            position: absolute;
-            top: -26px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 40px;
-            height: 28px;
-        }
+        <!-- BODY SHELL -->
+        <rect x="18" y="20" width="444" height="400" rx="28" fill="url(#bodyGrad)" filter="url(#softShadow)"/>
+        <rect x="18" y="20" width="444" height="7" rx="4" fill="url(#redStripeGrad)"/>
+        <rect x="18" y="20" width="22" height="400" rx="4" fill="#C8001A"/>
+        <rect x="18" y="20" width="22" height="400" rx="4" fill="url(#redStripeGrad)" opacity=".9"/>
+        <rect x="440" y="20" width="22" height="400" rx="4" fill="#C8001A"/>
+        <rect x="440" y="20" width="22" height="400" rx="4" fill="url(#redStripeGrad)" opacity=".9"/>
 
-        /* SPEED LINES (show during entry) */
-        .speed-lines {
-            position: absolute;
-            top: 25%; bottom: 25%;
-            right: 320px;
-            width: 200px;
-            z-index: 4;
-            animation: speedFade 2.5s ease forwards 0.3s;
-            opacity: 0;
-        }
-        @keyframes speedFade {
-            0% { opacity: 0.8; right: 320px; }
-            80% { opacity: 0.3; }
-            100% { opacity: 0; right: -200px; }
-        }
-        .speed-line {
-            position: absolute;
-            height: 2px;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.6), transparent);
-            border-radius: 2px;
-        }
+        <!-- BLACK FRONT FACE -->
+        <path d="M 80 27 L 400 27 Q 430 27 445 55 L 445 240 Q 445 265 420 275 L 240 290 L 60 275 Q 35 265 35 240 L 35 55 Q 35 27 80 27 Z"
+          fill="url(#blackFaceGrad)" clip-path="url(#bodyClip)"/>
 
-        /* KRL INFO PILLS */
-        .krl-info-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
-            margin-top: 2px;
-        }
-        .krl-pill {
-            background: rgba(255,255,255,0.1);
-            border: 1px solid rgba(255,255,255,0.15);
-            border-radius: 14px;
-            padding: 10px 14px;
-            backdrop-filter: blur(10px);
-            transition: background 0.2s ease, transform 0.2s ease;
-        }
-        .krl-pill:hover {
-            background: rgba(255,255,255,0.18);
-            transform: translateY(-2px);
-        }
-        .krl-pill-label {
-            font-size: 11px;
-            color: rgba(255,255,255,0.5);
-            margin-bottom: 3px;
-        }
-        .krl-pill-val {
-            font-family: 'Syne', sans-serif;
-            font-size: 13px;
-            font-weight: 700;
-            color: rgba(255,255,255,0.92);
-        }
+        <!-- WINDSHIELD -->
+        <path d="M 68 42 L 412 42 Q 424 42 428 52 L 430 175 Q 430 188 416 192 L 240 200 L 64 192 Q 50 188 50 175 L 52 52 Q 52 42 68 42 Z"
+          fill="rgba(15,20,30,.9)" rx="4"/>
+        <path d="M 72 48 L 408 48 Q 418 48 420 57 L 422 172 Q 422 183 410 186 L 240 193 L 70 186 Q 58 183 58 172 L 60 57 Q 60 48 72 48 Z"
+          fill="url(#windshieldGrad)"/>
+        <line x1="240" y1="48" x2="240" y2="193" stroke="rgba(30,40,60,.8)" stroke-width="5"/>
+        <path d="M 72 48 L 408 48 Q 418 48 420 57 L 72 57 Q 60 57 60 57 L 60 57 Q 60 48 72 48Z" fill="rgba(150,160,170,.3)"/>
+        <line x1="140" y1="190" x2="90" y2="120" stroke="rgba(60,70,80,.8)" stroke-width="3" stroke-linecap="round"/>
+        <line x1="340" y1="190" x2="390" y2="120" stroke="rgba(60,70,80,.8)" stroke-width="3" stroke-linecap="round"/>
+        <line x1="155" y1="192" x2="108" y2="128" stroke="rgba(60,70,80,.5)" stroke-width="1.5" stroke-linecap="round"/>
+        <line x1="325" y1="192" x2="372" y2="128" stroke="rgba(60,70,80,.5)" stroke-width="1.5" stroke-linecap="round"/>
+        <path d="M 80 60 L 160 60 L 140 100 L 70 100 Z" fill="rgba(255,255,255,.04)"/>
+        <path d="M 300 60 L 380 60 L 400 100 L 310 100 Z" fill="rgba(255,255,255,.03)"/>
 
-        /* ====== PROGRESS BARS ====== */
-        .progress-item { margin-bottom: 14px; }
-        .progress-label {
-            display: flex;
-            justify-content: space-between;
-            font-size: 13px;
-            color: var(--hijau-mid);
-            margin-bottom: 6px;
-            font-weight: 600;
-        }
-        .progress-track {
-            height: 8px;
-            background: #e8ede5;
-            border-radius: 99px;
-            overflow: hidden;
-        }
-        .progress-fill {
-            height: 100%;
-            border-radius: 99px;
-            width: 0%;
-            transition: width 1.2s cubic-bezier(0.16, 1, 0.3, 1);
-        }
-        .progress-fill.biru { background: linear-gradient(90deg, var(--biru-krl), var(--biru-krl-light)); }
-        .progress-fill.hijau { background: linear-gradient(90deg, #3a5a3a, #5e8a5e); }
-        .progress-fill.coklat { background: linear-gradient(90deg, #8a6040, #c8a882); }
+        <!-- PANTOGRAPH MOUNT -->
+        <rect x="190" y="18" width="100" height="10" rx="3" fill="rgba(80,85,90,.8)"/>
+        <rect x="215" y="10" width="50" height="10" rx="2" fill="rgba(90,95,100,.7)"/>
+        <line x1="240" y1="10" x2="220" y2="-5" stroke="rgba(100,105,110,.6)" stroke-width="2"/>
+        <line x1="240" y1="10" x2="260" y2="-5" stroke="rgba(100,105,110,.6)" stroke-width="2"/>
 
-        /* ====== PESAN BOX ====== */
-        .pesan-box {
-            background: var(--card);
-            border-radius: 26px;
-            padding: 30px;
-            margin-top: 22px;
-            box-shadow: var(--shadow);
-            border: 1px solid rgba(45,62,45,0.05);
-            border-left: 5px solid var(--biru-krl);
-            position: relative;
-            overflow: hidden;
-        }
-        .pesan-box::before {
-            content: '"';
-            position: absolute;
-            top: -10px;
-            left: 20px;
-            font-family: 'Syne', sans-serif;
-            font-size: 120px;
-            color: rgba(26,79,163,0.06);
-            line-height: 1;
-            font-weight: 800;
-            pointer-events: none;
-        }
-        .pesan-box p {
-            line-height: 1.85;
-            font-size: 14.5px;
-            color: #5a6e5d;
-            text-align: justify;
-            position: relative;
-            z-index: 1;
-        }
-        .tanda-tangan {
-            margin-top: 20px;
-            font-family: 'Syne', sans-serif;
-            font-size: 14px;
-            font-weight: 700;
-            color: var(--hijau);
-            text-align: right;
-        }
+        <!-- NOSE LOWER -->
+        <path d="M 50 210 L 430 210 L 426 280 Q 424 294 410 296 L 240 304 L 70 296 Q 56 294 54 280 Z" fill="#0E0E18"/>
+        <rect x="175" y="240" width="130" height="28" rx="3" fill="rgba(255,255,255,.04)"/>
+        <text x="240" y="259" text-anchor="middle" font-family="'Rajdhani',sans-serif" font-weight="700" font-size="11" fill="rgba(255,255,255,.75)" letter-spacing="2">KAI</text>
+        <text x="240" y="272" text-anchor="middle" font-family="'Rajdhani',sans-serif" font-weight="400" font-size="8" fill="rgba(255,255,255,.45)" letter-spacing="3">Commuter</text>
 
-        /* ====== FOOTER ====== */
-        .footer {
-            text-align: center;
-            margin-top: 50px;
-            font-size: 12px;
-            color: #92a495;
-            padding-bottom: 30px;
-            letter-spacing: 0.5px;
-        }
+        <!-- S21 MARKER BOARD -->
+        <g id="s21Board">
+          <rect x="24" y="200" width="16" height="50" rx="2" fill="#1A1A22"/>
+          <rect x="20" y="204" width="22" height="42" rx="2" fill="var(--red)"/>
+          <rect x="22" y="206" width="18" height="38" rx="1.5" fill="#C80018"/>
+          <text x="31" y="230" text-anchor="middle" font-family="'Space Mono',monospace" font-weight="700" font-size="7" fill="rgba(255,255,255,.85)" letter-spacing=".5">S</text>
+          <text x="31" y="240" text-anchor="middle" font-family="'Space Mono',monospace" font-weight="700" font-size="7" fill="rgba(255,255,255,.85)" letter-spacing=".5">21</text>
+        </g>
 
-        /* SCROLL REVEAL UNTUK KARTU */
-        .scroll-reveal {
-            opacity: 0;
-            transform: translateY(30px);
-            transition: opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1), transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
-        }
-        .scroll-reveal.visible {
-            opacity: 1;
-            transform: translateY(0);
-        }
+        <!-- LED HEADLIGHT BAR -->
+        <rect x="42" y="215" width="88" height="8" rx="4" fill="rgba(10,10,20,.9)"/>
+        <rect x="44" y="216" width="84" height="6" rx="3" fill="url(#ledGrad)" filter="url(#ledGlow)" opacity=".95"/>
+        <ellipse cx="86" cy="219" rx="46" ry="8" fill="rgba(232,0,30,.18)" filter="url(#ledGlow)"/>
 
-        /* PARTICLES (train smoke puffs) */
-        .particle {
-            position: fixed;
-            width: 8px; height: 8px;
-            border-radius: 50%;
-            pointer-events: none;
-            z-index: 9997;
-            animation: particleFade 1s ease-out forwards;
-        }
-        @keyframes particleFade {
-            0% { transform: scale(0) translateY(0); opacity: 1; }
-            100% { transform: scale(3) translateY(-40px); opacity: 0; }
-        }
+        <rect x="350" y="215" width="88" height="8" rx="4" fill="rgba(10,10,20,.9)"/>
+        <rect x="352" y="216" width="84" height="6" rx="3" fill="url(#ledGrad)" filter="url(#ledGlow)" opacity=".95"/>
+        <ellipse cx="394" cy="219" rx="46" ry="8" fill="rgba(232,0,30,.18)" filter="url(#ledGlow)"/>
 
-    </style>
-</head>
-<body>
+        <circle cx="42" cy="209" r="4" fill="rgba(232,0,30,.7)"/>
+        <circle cx="42" cy="209" r="4" fill="rgba(232,0,30,.5)" filter="url(#ledGlow)"/>
+        <circle cx="438" cy="209" r="4" fill="rgba(232,0,30,.7)"/>
+        <circle cx="438" cy="209" r="4" fill="rgba(232,0,30,.5)" filter="url(#ledGlow)"/>
 
-    <div class="cursor-dot" id="dot"></div>
-    <div class="cursor-ring" id="ring"></div>
+        <!-- NUMBER PLATE -->
+        <rect x="168" y="308" width="144" height="20" rx="3" fill="rgba(255,255,255,.035)"/>
+        <text x="240" y="322" text-anchor="middle" font-family="'Space Mono',monospace" font-size="9" fill="rgba(240,242,245,.45)" letter-spacing="2">CLI-125.1012</text>
 
-    <!-- BG ORBS -->
-    <div class="bg-orb orb-1"></div>
-    <div class="bg-orb orb-2"></div>
-    <div class="bg-orb orb-3"></div>
+        <!-- LOWER BODY / SKIRT -->
+        <path d="M 54 300 L 426 300 L 440 340 L 440 400 Q 440 420 420 420 L 60 420 Q 40 420 40 400 L 40 340 Z" fill="#B8BCC0"/>
+        <rect x="40" y="380" width="400" height="12" rx="2" fill="url(#redStripeGrad)"/>
+        <rect x="192" y="400" width="96" height="30" rx="6" fill="#888C90"/>
+        <rect x="208" y="410" width="64" height="14" rx="3" fill="#666A6E"/>
+        <rect x="224" y="422" width="32" height="12" rx="4" fill="#555"/>
 
-    <!-- SIDE EMOJIS -->
-    <div class="side-emoji s1">🚅</div>
-    <div class="side-emoji s2">🥙</div>
-    <div class="side-emoji s3">🚌</div>
-    <div class="side-emoji s4">🍜</div>
-    <div class="side-emoji s5">🚇</div>
-    <div class="side-emoji s6">🌿</div>
+        <!-- BOGIES/WHEELS -->
+        <ellipse cx="110" cy="440" rx="44" ry="24" fill="#1A1A22" stroke="#2A2A32" stroke-width="2"/>
+        <ellipse cx="110" cy="440" rx="26" ry="14" fill="#252530"/>
+        <ellipse cx="110" cy="440" rx="12" ry="7" fill="#1A1A22"/>
+        <ellipse cx="158" cy="445" rx="36" ry="20" fill="#1A1A22" stroke="#2A2A32" stroke-width="2"/>
+        <ellipse cx="158" cy="445" rx="20" ry="11" fill="#252530"/>
+        <ellipse cx="370" cy="440" rx="44" ry="24" fill="#1A1A22" stroke="#2A2A32" stroke-width="2"/>
+        <ellipse cx="370" cy="440" rx="26" ry="14" fill="#252530"/>
+        <ellipse cx="370" cy="440" rx="12" ry="7" fill="#1A1A22"/>
+        <ellipse cx="322" cy="445" rx="36" ry="20" fill="#1A1A22" stroke="#2A2A32" stroke-width="2"/>
+        <ellipse cx="322" cy="445" rx="20" ry="11" fill="#252530"/>
 
-    <div class="wrap">
+        <rect x="0" y="462" width="480" height="3" rx="1.5" fill="rgba(200,205,210,.08)"/>
+        <rect x="0" y="468" width="480" height="2" rx="1" fill="rgba(200,205,210,.04)"/>
 
-        <!-- HEADER -->
-        <div class="header reveal" style="animation-delay:0.1s">
-            <span class="icon-wrap">🌿</span>
-            <h1>Selamat Datang di Sudut Kecilku</h1>
-            <div class="sub">Tempat teduh untuk berbagi cerita dan langkah baru</div>
+        <path d="M 40 20 L 40 420" stroke="rgba(255,255,255,.06)" stroke-width="1"/>
+        <path d="M 440 20 L 440 420" stroke="rgba(0,0,0,.2)" stroke-width="1"/>
+        <path d="M 40 20 L 440 20" stroke="rgba(255,255,255,.04)" stroke-width="1"/>
+      </svg>
+
+      <div style="margin-top:20px;display:flex;gap:10px">
+        <button id="btnMundur" onclick="setMode('mundur')"
+          style="font-family:'Space Mono',monospace;font-size:8px;letter-spacing:2px;text-transform:uppercase;
+          padding:8px 16px;background:var(--red);color:#fff;border:none;cursor:pointer">
+          ← MUNDUR (FOTO 1)
+        </button>
+        <button id="btnMaju" onclick="setMode('maju')"
+          style="font-family:'Space Mono',monospace;font-size:8px;letter-spacing:2px;text-transform:uppercase;
+          padding:8px 16px;background:rgba(255,255,255,.06);color:var(--white);border:1px solid rgba(255,255,255,.12);cursor:pointer">
+          → MAJU (FOTO 2)
+        </button>
+      </div>
+    </div>
+
+    <div class="featureList">
+      <div class="fItem rv d1">
+        <span class="fN">01</span>
+        <div class="fBody">
+          <h4>Lampu LED S21-Style</h4>
+          <p>Dua strip LED merah panjang yang khas — mirip desain lampu Samsung Galaxy S21. Terdapat juga DRL posisi di sudut kanan-kiri. Saat kereta mundur (arah berlawanan tujuan), strip menyala penuh.</p>
         </div>
-
-        <div class="grid">
-
-            <!-- BIODATA -->
-            <div class="tilt-wrapper scroll-reveal" data-delay="0">
-                <div class="kartu" data-tilt>
-                    <h2 class="judul">🪟 Tentang Aku</h2>
-                    <ul class="info-list">
-                        <li><span class="lbl">Nama</span><span class="val">Dimas</span></li>
-                        <li><span class="lbl">Usia</span><span class="val">15 Tahun</span></li>
-                        <li><span class="lbl">Jenjang</span><span class="val">Mau masuk SMK</span></li>
-                        <li><span class="lbl">Tinggal di</span><span class="val">Bekasi</span></li>
-                    </ul>
-                </div>
-            </div>
-
-            <!-- YANG AKU SUKA -->
-            <div class="tilt-wrapper scroll-reveal" data-delay="100">
-                <div class="kartu" data-tilt>
-                    <h2 class="judul">🧺 Yang Aku Suka</h2>
-                    <p style="font-size:13px;color:#708473;margin-bottom:12px;">Hal-hal kecil yang bikin hariku lebih berwarna:</p>
-                    <div class="badge-wrap">
-                        <span class="badge">🥙 Kebab</span>
-                        <span class="badge">🍜 Mie Ayam</span>
-                        <span class="badge">🍔 Burger</span>
-                        <span class="badge krl">🚅 Naik KRL</span>
-                        <span class="badge mrt">🚈 MRT</span>
-                        <span class="badge lrt">🚆 LRT</span>
-                        <span class="badge tj">🚌 TransJakarta</span>
-                    </div>
-                </div>
-            </div>
-
-            <!-- KRL CLI-125 SECTION -->
-            <div class="scroll-reveal" data-delay="200">
-                <div class="krl-section">
-                    <div class="krl-title">🚄 Kereta Favorit: KRL CLI-125</div>
-                    <div class="krl-sub">Commuter Line Indonesia · CRRC Sifang · Mulai Beroperasi 1 Juni 2025</div>
-
-                    <!-- TRAIN SCENE -->
-                    <div class="train-scene">
-                        <!-- Speed lines -->
-                        <div class="speed-lines">
-                            <div class="speed-line" style="top:20%;width:180px;opacity:0.8;"></div>
-                            <div class="speed-line" style="top:35%;width:130px;opacity:0.6;"></div>
-                            <div class="speed-line" style="top:50%;width:200px;opacity:0.9;"></div>
-                            <div class="speed-line" style="top:65%;width:110px;opacity:0.5;"></div>
-                            <div class="speed-line" style="top:78%;width:160px;opacity:0.7;"></div>
-                        </div>
-
-                        <!-- Wire -->
-                        <div class="wire"></div>
-
-                        <!-- Sleepers -->
-                        <div class="sleepers">
-                            <div class="sleeper-track">
-                                <!-- 20 sleepers looping -->
-                                <div class="sleeper"></div><div class="sleeper"></div><div class="sleeper"></div><div class="sleeper"></div><div class="sleeper"></div>
-                                <div class="sleeper"></div><div class="sleeper"></div><div class="sleeper"></div><div class="sleeper"></div><div class="sleeper"></div>
-                                <div class="sleeper"></div><div class="sleeper"></div><div class="sleeper"></div><div class="sleeper"></div><div class="sleeper"></div>
-                                <div class="sleeper"></div><div class="sleeper"></div><div class="sleeper"></div><div class="sleeper"></div><div class="sleeper"></div>
-                            </div>
-                        </div>
-
-                        <!-- Ground -->
-                        <div class="ground"></div>
-
-                        <!-- Rails -->
-                        <div class="rails">
-                            <div class="rail-top"></div>
-                            <div class="rail-bottom"></div>
-                        </div>
-
-                        <!-- THE TRAIN (SVG CSS art CLI-125 style) -->
-                        <div class="train-svg-wrap">
-                            <div class="train-body-group">
-                                <svg width="320" height="90" viewBox="0 0 320 90" fill="none" xmlns="http://www.w3.org/2000/svg">
-
-                                    <!-- PANTOGRAPH -->
-                                    <g transform="translate(145, 0)">
-                                        <!-- Main arm -->
-                                        <line x1="15" y1="28" x2="5" y2="8" stroke="#aac4e0" stroke-width="2" stroke-linecap="round"/>
-                                        <line x1="15" y1="28" x2="25" y2="8" stroke="#aac4e0" stroke-width="2" stroke-linecap="round"/>
-                                        <!-- Cross beam -->
-                                        <line x1="5" y1="8" x2="25" y2="8" stroke="#c8e0f4" stroke-width="2.5" stroke-linecap="round"/>
-                                        <!-- Contact wire spark -->
-                                        <circle cx="15" cy="7" r="2" fill="#ffe47a" opacity="0.9">
-                                            <animate attributeName="opacity" values="0.9;0.3;0.9" dur="0.4s" repeatCount="indefinite"/>
-                                        </circle>
-                                    </g>
-
-                                    <!-- ROOF EQUIPMENT -->
-                                    <rect x="80" y="28" width="20" height="5" rx="2" fill="#2a4a7a" opacity="0.7"/>
-                                    <rect x="210" y="28" width="20" height="5" rx="2" fill="#2a4a7a" opacity="0.7"/>
-
-                                    <!-- MAIN BODY - CLI-125 color: white + blue stripe -->
-                                    <!-- Body base white -->
-                                    <rect x="8" y="30" width="304" height="46" rx="6" fill="#f0f4fa"/>
-
-                                    <!-- Blue accent top stripe (CLI-125 signature blue stripe) -->
-                                    <rect x="8" y="30" width="304" height="12" rx="6" fill="#1a4fa3"/>
-                                    <!-- Bottom of stripe straight -->
-                                    <rect x="8" y="36" width="304" height="6" fill="#1a4fa3"/>
-
-                                    <!-- Thin silver/white separator -->
-                                    <rect x="8" y="42" width="304" height="2" fill="rgba(255,255,255,0.6)"/>
-
-                                    <!-- Bottom blue accent -->
-                                    <rect x="8" y="68" width="304" height="8" fill="#1a4fa3"/>
-                                    <rect x="8" y="68" width="304" height="4" rx="0" fill="#1a4fa3"/>
-
-                                    <!-- CLI-125 Logo area -->
-                                    <rect x="120" y="47" width="80" height="18" rx="4" fill="rgba(26,79,163,0.12)"/>
-                                    <text x="160" y="59" text-anchor="middle" font-family="Arial" font-size="8" font-weight="bold" fill="#1a4fa3" letter-spacing="0.5">CLI-125</text>
-
-                                    <!-- KAI Commuter wordmark area -->
-                                    <text x="160" y="47" text-anchor="middle" font-family="Arial" font-size="6" fill="rgba(26,79,163,0.6)" letter-spacing="1">KAI COMMUTER</text>
-
-                                    <!-- FRONT CABIN (aerodynamic nose) -->
-                                    <path d="M 8 30 Q 2 42 2 56 L 8 56 Z" fill="#1a4fa3"/>
-                                    <path d="M 8 76 L 2 56 L 8 56 Z" fill="#1240a0"/>
-
-                                    <!-- REAR -->
-                                    <path d="M 312 30 Q 318 42 318 56 L 312 56 Z" fill="#1a4fa3"/>
-                                    <path d="M 312 76 L 318 56 L 312 56 Z" fill="#1240a0"/>
-
-                                    <!-- WINDOWS (front cabin) -->
-                                    <rect x="4" y="34" width="18" height="10" rx="3" fill="#a8d4f0" opacity="0.85"/>
-                                    <!-- Window highlight -->
-                                    <rect x="5" y="35" width="6" height="3" rx="1" fill="rgba(255,255,255,0.6)"/>
-
-                                    <!-- WINDOWS (body - 4 windows per car, 2 cars visible) -->
-                                    <!-- Car 1 windows -->
-                                    <rect x="28" y="46" width="38" height="14" rx="3" fill="#b8ddf5" opacity="0.85"/>
-                                    <rect x="29" y="47" width="12" height="4" rx="1" fill="rgba(255,255,255,0.5)"/>
-                                    
-                                    <rect x="74" y="46" width="38" height="14" rx="3" fill="#b8ddf5" opacity="0.85"/>
-                                    <rect x="75" y="47" width="12" height="4" rx="1" fill="rgba(255,255,255,0.5)"/>
-
-                                    <!-- Divider between cars -->
-                                    <rect x="118" y="30" width="4" height="46" fill="rgba(26,79,163,0.3)"/>
-
-                                    <!-- Car 2 windows -->
-                                    <rect x="128" y="46" width="38" height="14" rx="3" fill="#b8ddf5" opacity="0.85"/>
-                                    <rect x="129" y="47" width="12" height="4" rx="1" fill="rgba(255,255,255,0.5)"/>
-
-                                    <rect x="174" y="46" width="38" height="14" rx="3" fill="#b8ddf5" opacity="0.85"/>
-                                    <rect x="175" y="47" width="12" height="4" rx="1" fill="rgba(255,255,255,0.5)"/>
-
-                                    <!-- Divider -->
-                                    <rect x="218" y="30" width="4" height="46" fill="rgba(26,79,163,0.3)"/>
-
-                                    <!-- Car 3 windows -->
-                                    <rect x="228" y="46" width="38" height="14" rx="3" fill="#b8ddf5" opacity="0.85"/>
-                                    <rect x="229" y="47" width="12" height="4" rx="1" fill="rgba(255,255,255,0.5)"/>
-
-                                    <rect x="272" y="46" width="30" height="14" rx="3" fill="#b8ddf5" opacity="0.85"/>
-                                    <rect x="273" y="47" width="10" height="4" rx="1" fill="rgba(255,255,255,0.5)"/>
-
-                                    <!-- DOORS (subtle) -->
-                                    <rect x="62" y="44" width="5" height="30" rx="1" fill="rgba(26,79,163,0.25)"/>
-                                    <rect x="162" y="44" width="5" height="30" rx="1" fill="rgba(26,79,163,0.25)"/>
-                                    <rect x="262" y="44" width="5" height="30" rx="1" fill="rgba(26,79,163,0.25)"/>
-
-                                    <!-- HEADLIGHTS -->
-                                    <ellipse cx="7" cy="62" rx="4" ry="3" fill="#ffe47a" opacity="0.9">
-                                        <animate attributeName="opacity" values="0.9;0.7;0.9" dur="2s" repeatCount="indefinite"/>
-                                    </ellipse>
-                                    <!-- Light beam -->
-                                    <path d="M 3 62 L -20 55 L -20 69 Z" fill="url(#lightBeam)" opacity="0.3"/>
-                                    <defs>
-                                        <linearGradient id="lightBeam" x1="0" y1="0" x2="1" y2="0">
-                                            <stop offset="0%" stop-color="#ffe47a" stop-opacity="0.8"/>
-                                            <stop offset="100%" stop-color="#ffe47a" stop-opacity="0"/>
-                                        </linearGradient>
-                                    </defs>
-
-                                    <!-- WHEELS (4 bogies) -->
-                                    <!-- Bogie 1 -->
-                                    <ellipse cx="40" cy="78" rx="9" ry="9" fill="#1a2a40"/>
-                                    <ellipse cx="40" cy="78" rx="6" ry="6" fill="#243550"/>
-                                    <ellipse cx="40" cy="78" rx="3" ry="3" fill="#8ab0d0"/>
-                                    <animateTransform attributeName="transform" type="rotate" from="0 40 78" to="360 40 78" dur="0.5s" repeatCount="indefinite" additive="sum" begin="0s" end="2.5s"/>
-                                    
-                                    <ellipse cx="70" cy="78" rx="9" ry="9" fill="#1a2a40"/>
-                                    <ellipse cx="70" cy="78" rx="6" ry="6" fill="#243550"/>
-                                    <ellipse cx="70" cy="78" rx="3" ry="3" fill="#8ab0d0"/>
-
-                                    <!-- Bogie 2 -->
-                                    <ellipse cx="140" cy="78" rx="9" ry="9" fill="#1a2a40"/>
-                                    <ellipse cx="140" cy="78" rx="6" ry="6" fill="#243550"/>
-                                    <ellipse cx="140" cy="78" rx="3" ry="3" fill="#8ab0d0"/>
-
-                                    <ellipse cx="170" cy="78" rx="9" ry="9" fill="#1a2a40"/>
-                                    <ellipse cx="170" cy="78" rx="6" ry="6" fill="#243550"/>
-                                    <ellipse cx="170" cy="78" rx="3" ry="3" fill="#8ab0d0"/>
-
-                                    <!-- Bogie 3 -->
-                                    <ellipse cx="240" cy="78" rx="9" ry="9" fill="#1a2a40"/>
-                                    <ellipse cx="240" cy="78" rx="6" ry="6" fill="#243550"/>
-                                    <ellipse cx="240" cy="78" rx="3" ry="3" fill="#8ab0d0"/>
-
-                                    <ellipse cx="270" cy="78" rx="9" ry="9" fill="#1a2a40"/>
-                                    <ellipse cx="270" cy="78" rx="6" ry="6" fill="#243550"/>
-                                    <ellipse cx="270" cy="78" rx="3" ry="3" fill="#8ab0d0"/>
-
-                                    <!-- UNDERCARRIAGE -->
-                                    <rect x="20" y="73" width="90" height="4" rx="2" fill="#1a3050"/>
-                                    <rect x="120" y="73" width="90" height="4" rx="2" fill="#1a3050"/>
-                                    <rect x="220" y="73" width="82" height="4" rx="2" fill="#1a3050"/>
-
-                                    <!-- REFLECTION (floor shine) -->
-                                    <rect x="8" y="72" width="304" height="2" fill="rgba(255,255,255,0.2)" rx="1"/>
-
-                                </svg>
-                            </div>
-                        </div>
-
-                        <!-- Platform numbers -->
-                        <div style="position:absolute;bottom:6px;right:12px;font-size:9px;color:rgba(255,255,255,0.3);font-family:'Syne',sans-serif;letter-spacing:1px;">MANGGARAI • BEKASI LINE</div>
-                    </div>
-
-                    <!-- KRL SPECS PILLS -->
-                    <div class="krl-info-grid">
-                        <div class="krl-pill">
-                            <div class="krl-pill-label">Seri</div>
-                            <div class="krl-pill-val">CLI-125 (CRRC)</div>
-                        </div>
-                        <div class="krl-pill">
-                            <div class="krl-pill-label">Kapasitas</div>
-                            <div class="krl-pill-val">3.400 penumpang</div>
-                        </div>
-                        <div class="krl-pill">
-                            <div class="krl-pill-label">Gerbong</div>
-                            <div class="krl-pill-val">12 per rangkaian</div>
-                        </div>
-                        <div class="krl-pill">
-                            <div class="krl-pill-label">Rute favorit</div>
-                            <div class="krl-pill-val">Bekasi ↔ Jakarta</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- PROGRESS BARS -->
-            <div class="tilt-wrapper scroll-reveal" data-delay="300">
-                <div class="kartu" data-tilt>
-                    <h2 class="judul">📊 Level Kegemaran</h2>
-                    <div id="progress-container">
-                        <div class="progress-item">
-                            <div class="progress-label"><span>🚅 Naik KRL</span><span>100%</span></div>
-                            <div class="progress-track"><div class="progress-fill biru" data-target="100"></div></div>
-                        </div>
-                        <div class="progress-item">
-                            <div class="progress-label"><span>🥙 Makan Enak</span><span>95%</span></div>
-                            <div class="progress-track"><div class="progress-fill hijau" data-target="95"></div></div>
-                        </div>
-                        <div class="progress-item">
-                            <div class="progress-label"><span>📷 Fotografi</span><span>80%</span></div>
-                            <div class="progress-track"><div class="progress-fill coklat" data-target="80"></div></div>
-                        </div>
-                        <div class="progress-item" style="margin-bottom:0">
-                            <div class="progress-label"><span>🌿 Jalan-jalan</span><span>88%</span></div>
-                            <div class="progress-track"><div class="progress-fill hijau" data-target="88"></div></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- IMPIAN & RENCANA -->
-            <div class="tilt-wrapper scroll-reveal" data-delay="100">
-                <div class="kartu" data-tilt>
-                    <h2 class="judul">⚓ Impian & Rencana</h2>
-                    <ul class="info-list">
-                        <li><span class="lbl">Yang lagi dikejar</span><span class="val">Belajar giat di SMK</span></li>
-                        <li><span class="lbl">Pengen banget punya</span><span class="val">📷 Canon R50</span></li>
-                        <li><span class="lbl">Destinasi impian</span><span class="val">🏝️ Banda Neira</span></li>
-                    </ul>
-                </div>
-            </div>
-
-        </div><!-- end grid -->
-
-        <!-- PESAN -->
-        <div class="pesan-box scroll-reveal" data-delay="0" style="margin-top:22px;">
-            <p>
-                Halo! Makasih ya udah mau mampir ke sini. Halaman ini aku buat sesederhana mungkin—kayak kamar yang jendelanya menghadap taman, tenang dan nggak banyak ribet. Sekarang aku lagi fokus buat bersiap masuk SMK, sambil pelan-pelan nabung buat kamera impian dan suatu hari bisa duduk santai dengerin ombak langsung di Banda Neira. Semoga siapapun yang baca ini harinya selalu menyenangkan ya!
-                <br><br>
-                Nah, buat teman-teman SMP-ku... ini bagian yang paling penting buat aku tulis.
-                <br><br>
-                Pertama, aku minta maaf yang sebesar-besarnya. Kalau selama tiga tahun ini ada kata-kataku yang nyakitin, sikap yang bikin kalian nggak nyaman, atau hal-hal kecil yang tanpa sadar aku lakuin tapi ternyata mengganjal—aku beneran minta maaf. Nggak ada yang sempurna, dan aku tahu aku sering salah juga.
-                <br><br>
-                Tapi di balik itu semua, makasih banyak. Tiga tahun ini penuh banget warnanya—ada yang bikin ketawa, ada yang bikin capek, ada juga yang diem-diem ngajarin banyak hal. Kalian semua jadi bagian dari cerita yang nggak bakal aku lupain.
-                <br><br>
-                Sekarang kita masing-masing jalan ke arah yang berbeda. Tapi aku selalu doain yang terbaik buat kalian. Semoga apa yang kalian kejar bisa tercapai, dan semoga kita semua ketemu lagi suatu hari nanti dengan cerita yang lebih seru. Goodbye, teman-teman—makasih untuk semuanya.
-            </p>
-            <div class="tanda-tangan">— Dimas 🌿</div>
+      </div>
+      <div class="fItem rv d2">
+        <span class="fN">02</span>
+        <div class="fBody">
+          <h4>Papan S21 (Marker Board)</h4>
+          <p>Tanda destinasi merah di sisi kiri kepala. Terbuka (terlihat merah) saat kereta berjalan mundur dari tujuan, tertutup saat kereta maju sesuai arah tujuan.</p>
         </div>
-
-        <div class="footer">
-            &copy; 2026 Ruang Tenang Dimas · Semoga harimu menyenangkan.
+      </div>
+      <div class="fItem rv d3">
+        <span class="fN">03</span>
+        <div class="fBody">
+          <h4>Kaca Depan Lebar</h4>
+          <p>Windshield dua panel besar dengan frame hitam elegan. Berbeda dari KRL generasi lama — desain lebih aerodinamis dan modern. Tiap unit berdiri sendiri, bukan terhubung seperti lokomotif.</p>
         </div>
+      </div>
+      <div class="fItem rv d4">
+        <span class="fN">04</span>
+        <div class="fBody">
+          <h4>Hidung Hitam (Black Nose)</h4>
+          <p>Bagian muka dicat hitam kontras dengan bodi silver dan aksen merah di sisi samping. Memberikan tampilan sporty dan modern khas CRRC Qingdao Sifang SFC120-V.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+<div class="sep"></div>
 
-    </div><!-- end wrap -->
+<!-- ============================================================ -->
+<!-- SCENE 2: LIVERY SAMPING — KOREKSI MODEL MAJU/MUNDUR           -->
+<!-- ============================================================ -->
+<section class="sec secMid" id="livery">
+  <div class="secHead rv">
+    <div class="secEye">02 · Desain Livery</div>
+    <div class="secTitle">LIVERY<br>GROWING</div>
+  </div>
 
-    <script>
-        // ====== CUSTOM CURSOR ======
-        const dot = document.getElementById('dot');
-        const ring = document.getElementById('ring');
-        let mx = 0, my = 0, rx = 0, ry = 0;
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:40px;align-items:start" class="rv d1">
+    <div>
+      <p style="font-size:14px;line-height:1.8;color:var(--dim);margin-bottom:24px">
+        Desain eksterior "Growing" — ombak merah-putih yang asimetris. Gerbong <strong style="color:var(--white)">1–6</strong> merupakan formasi <strong style="color:var(--red)">Kepala Mundur (Foto 1)</strong> dengan pola ombak yang <strong style="color:var(--red)">naik ke atas ↗</strong>, sedangkan gerbong <strong style="color:var(--white)">7–12</strong> merupakan formasi <strong style="color:var(--white)">Kepala Maju (Foto 2)</strong> dengan pola ombak <strong style="color:var(--red)">turun ke bawah ↘</strong>.
+      </p>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <span style="font-family:'Space Mono',monospace;font-size:8px;letter-spacing:2px;
+          background:rgba(232,0,30,.1);border:1px solid rgba(232,0,30,.25);color:var(--red);padding:5px 12px">
+          GROWING THEME
+        </span>
+        <span style="font-family:'Space Mono',monospace;font-size:8px;letter-spacing:2px;
+          background:rgba(232,0,30,.1);border:1px solid rgba(232,0,30,.25);color:var(--red);padding:5px 12px">
+          MERAH–PUTIH
+        </span>
+        <span style="font-family:'Space Mono',monospace;font-size:8px;letter-spacing:2px;
+          background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);color:var(--dim);padding:5px 12px">
+          STAINLESS STEEL
+        </span>
+        <span style="font-family:'Space Mono',monospace;font-size:8px;letter-spacing:2px;
+          background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);color:var(--dim);padding:5px 12px">
+          CRRC SFM138
+        </span>
+      </div>
+    </div>
+    <div style="background:rgba(255,255,255,.02);border:1px solid rgba(240,242,245,.05);padding:28px">
+      <div style="font-family:'Space Mono',monospace;font-size:8px;letter-spacing:3px;color:var(--red);text-transform:uppercase;margin-bottom:16px">Pola Livery SF12</div>
+      <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--dimmer);margin-bottom:8px">
+        <span>← GBG 1–6 · MUNDUR (↗)</span>
+        <span>GBG 7–12 · MAJU (↘) →</span>
+      </div>
+      <svg viewBox="0 0 400 40" style="width:100%">
+        <!-- cars 1-6 up wave -->
+        <g opacity=".9">
+          <rect x="0" y="8" width="30" height="28" rx="3" fill="#C4C8CC"/>
+          <path d="M0 30 Q8 14 16 24 Q22 32 30 18 L30 36 L0 36Z" fill="#E8001E"/>
+          <rect x="32" y="8" width="30" height="28" rx="3" fill="#C4C8CC"/>
+          <path d="M32 30 Q40 14 48 24 Q54 32 62 18 L62 36 L32 36Z" fill="#E8001E"/>
+          <rect x="64" y="8" width="30" height="28" rx="3" fill="#C4C8CC"/>
+          <path d="M64 30 Q72 14 80 24 Q86 32 94 18 L94 36 L64 36Z" fill="#E8001E"/>
+          <rect x="96" y="8" width="30" height="28" rx="3" fill="#C4C8CC"/>
+          <path d="M96 30 Q104 14 112 24 Q118 32 126 18 L126 36 L96 36Z" fill="#E8001E"/>
+          <rect x="128" y="8" width="30" height="28" rx="3" fill="#C4C8CC"/>
+          <path d="M128 30 Q136 14 144 24 Q150 32 158 18 L158 36 L128 36Z" fill="#E8001E"/>
+          <rect x="160" y="8" width="30" height="28" rx="3" fill="#C4C8CC"/>
+          <path d="M160 30 Q168 14 176 24 Q182 32 190 18 L190 36 L160 36Z" fill="#E8001E"/>
+        </g>
+        <!-- divider -->
+        <line x1="196" y1="4" x2="196" y2="40" stroke="rgba(232,0,30,.4)" stroke-width="1" stroke-dasharray="3 3"/>
+        <!-- cars 7-12 down wave -->
+        <g opacity=".9">
+          <rect x="200" y="8" width="30" height="28" rx="3" fill="#C4C8CC"/>
+          <path d="M200 8 L230 8 L230 22 Q222 36 214 26 Q208 18 200 30 Z" fill="#E8001E"/>
+          <rect x="232" y="8" width="30" height="28" rx="3" fill="#C4C8CC"/>
+          <path d="M232 8 L262 8 L262 22 Q254 36 246 26 Q240 18 232 30 Z" fill="#E8001E"/>
+          <rect x="264" y="8" width="30" height="28" rx="3" fill="#C4C8CC"/>
+          <path d="M264 8 L294 8 L294 22 Q286 36 278 26 Q272 18 264 30 Z" fill="#E8001E"/>
+          <rect x="296" y="8" width="30" height="28" rx="3" fill="#C4C8CC"/>
+          <path d="M296 8 L326 8 L326 22 Q318 36 310 26 Q304 18 296 30 Z" fill="#E8001E"/>
+          <rect x="328" y="8" width="30" height="28" rx="3" fill="#C4C8CC"/>
+          <path d="M328 8 L358 8 L358 22 Q350 36 342 26 Q336 18 328 30 Z" fill="#E8001E"/>
+          <rect x="360" y="8" width="30" height="28" rx="3" fill="#C4C8CC"/>
+          <path d="M360 8 L390 8 L390 22 Q382 36 374 26 Q368 18 360 30 Z" fill="#E8001E"/>
+        </g>
+        <text x="95" y="6" text-anchor="middle" font-family="monospace" font-size="5" fill="rgba(232,0,30,.5)">↗ MUNDUR</text>
+        <text x="305" y="6" text-anchor="middle" font-family="monospace" font-size="5" fill="rgba(232,0,30,.5)">↘ MAJU</text>
+      </svg>
+    </div>
+  </div>
 
-        document.addEventListener('mousemove', e => {
-            mx = e.clientX; my = e.clientY;
-            dot.style.left = mx - 4 + 'px';
-            dot.style.top = my - 4 + 'px';
-        });
+  <!-- FULL SIDE VIEW SVG — REVISED MODEL -->
+  <div class="sideWrap rv d2" style="margin-top:60px">
+    <svg viewBox="0 0 1200 180" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="sBodyG" x1="0%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" stop-color="#D0D4D8"/>
+          <stop offset="50%" stop-color="#C4C8CC"/>
+          <stop offset="100%" stop-color="#B4B8BC"/>
+        </linearGradient>
+        <clipPath id="sClip1"><rect x="4" y="8" width="155" height="130" rx="16"/></clipPath>
+        <clipPath id="sClip2"><rect x="165" y="16" width="132" height="122" rx="4"/></clipPath>
+        <clipPath id="sClip3"><rect x="303" y="16" width="132" height="122" rx="4"/></clipPath>
+        <clipPath id="sClip4"><rect x="441" y="16" width="132" height="122" rx="4"/></clipPath>
+        <clipPath id="sClip5"><rect x="579" y="16" width="132" height="122" rx="4"/></clipPath>
+        <clipPath id="sClip6"><rect x="717" y="16" width="132" height="122" rx="4"/></clipPath>
+        <clipPath id="sClip7"><rect x="855" y="16" width="132" height="122" rx="4"/></clipPath>
+        <clipPath id="sClipEnd"><rect x="1041" y="8" width="155" height="130" rx="16"/></clipPath>
+      </defs>
 
-        (function animRing() {
-            rx += (mx - rx - 16) * 0.18;
-            ry += (my - ry - 16) * 0.18;
-            ring.style.left = rx + 'px';
-            ring.style.top = ry + 'px';
-            requestAnimationFrame(animRing);
-        })();
+      <!-- ============ KEPALA MUNDUR (GERBONG 1) — FOTO 1 STYLE ============ -->
+      <rect x="4" y="8" width="155" height="130" rx="16" fill="url(#sBodyG)"/>
+      <path d="M4 8 Q4 8 40 8 L40 140 L4 140 Q4 140 4 8Z" fill="#1A1A22" clip-path="url(#sClip1)"/>
+      <rect x="4" y="8" width="155" height="6" rx="3" fill="var(--red)"/>
+      <rect x="4" y="132" width="155" height="6" rx="3" fill="#C8001A"/>
+      <rect x="48" y="24" width="106" height="42" rx="3" fill="rgba(70,110,150,.6)"/>
+      <rect x="50" y="26" width="22" height="38" rx="2" fill="rgba(255,255,255,.08)"/>
+      <!-- UP WAVE (Gerbong 1-6) -->
+      <path d="M48 100 Q75 62 102 88 Q122 106 159 72 L159 138 L48 138Z" fill="var(--red)" opacity=".92" clip-path="url(#sClip1)"/>
+      <rect x="56" y="88" width="10" height="44" rx="2" fill="rgba(20,20,30,.3)"/>
+      <rect x="120" y="88" width="10" height="44" rx="2" fill="rgba(20,20,30,.3)"/>
+      <!-- LED Tail Light (Mundur = Red) -->
+      <rect x="4" y="75" width="30" height="6" rx="3" fill="#FF2233"/>
+      <rect x="4" y="75" width="30" height="6" rx="3" fill="rgba(232,0,30,.4)" filter="url(#ledGlow)"/>
+      <text x="85" y="120" text-anchor="middle" font-family="'Rajdhani',sans-serif" font-weight="700" font-size="8" fill="rgba(255,255,255,.5)" letter-spacing="1">CLI-125.1001</text>
+      <text x="10" y="20" font-family="monospace" font-size="7" fill="rgba(255,255,255,.3)">1 (Mundur)</text>
 
-        document.querySelectorAll('.kartu, .badge, .krl-pill').forEach(el => {
-            el.addEventListener('mouseenter', () => {
-                ring.style.transform = 'scale(1.8)';
-                ring.style.borderColor = 'var(--aksen)';
-                dot.style.transform = 'scale(1.5)';
-            });
-            el.addEventListener('mouseleave', () => {
-                ring.style.transform = 'scale(1)';
-                ring.style.borderColor = 'var(--biru-krl)';
-                dot.style.transform = 'scale(1)';
-            });
-        });
+      <!-- ============ GERBONG 2–6 (UP WAVE / MUNDUR POLA) ============ -->
+      <!-- CAR 2 -->
+      <rect x="165" y="16" width="132" height="122" rx="4" fill="url(#sBodyG)"/>
+      <rect x="165" y="16" width="132" height="5" fill="var(--red)"/>
+      <rect x="165" y="133" width="132" height="5" fill="#C8001A"/>
+      <rect x="176" y="30" width="110" height="36" rx="3" fill="rgba(70,110,150,.55)"/>
+      <rect x="178" y="32" width="18" height="32" rx="2" fill="rgba(255,255,255,.07)"/>
+      <path d="M165 98 Q192 60 219 84 Q239 102 297 68 L297 138 L165 138Z" fill="var(--red)" opacity=".92" clip-path="url(#sClip2)"/>
+      <rect x="176" y="86" width="9" height="46" rx="2" fill="rgba(20,20,30,.28)"/>
+      <rect x="210" y="86" width="9" height="46" rx="2" fill="rgba(20,20,30,.28)"/>
+      <rect x="252" y="86" width="9" height="46" rx="2" fill="rgba(20,20,30,.28)"/>
+      <rect x="278" y="86" width="9" height="46" rx="2" fill="rgba(20,20,30,.28)"/>
+      <text x="231" y="128" text-anchor="middle" font-family="monospace" font-size="6" fill="rgba(255,255,255,.25)">CLI-125.1002</text>
+      <text x="170" y="24" font-family="monospace" font-size="7" fill="rgba(0,0,0,.3)">2</text>
 
-        // ====== 3D TILT ON CARDS ======
-        document.querySelectorAll('[data-tilt]').forEach(card => {
-            const wrap = card.closest('.tilt-wrapper');
-            wrap.addEventListener('mousemove', e => {
-                const r = card.getBoundingClientRect();
-                const cx = r.left + r.width / 2;
-                const cy = r.top + r.height / 2;
-                const dx = (e.clientX - cx) / (r.width / 2);
-                const dy = (e.clientY - cy) / (r.height / 2);
-                card.style.transform = `rotateY(${dx * 8}deg) rotateX(${-dy * 8}deg) translateZ(8px)`;
-                card.style.boxShadow = `${-dx * 12}px ${dy * 12}px 40px rgba(30,50,30,0.15)`;
-            });
-            wrap.addEventListener('mouseleave', () => {
-                card.style.transform = 'rotateY(0) rotateX(0) translateZ(0)';
-                card.style.boxShadow = '';
-                card.style.transition = 'transform 0.5s ease, box-shadow 0.5s ease';
-                setTimeout(() => { card.style.transition = ''; }, 500);
-            });
-        });
+      <!-- CAR 3 -->
+      <rect x="303" y="16" width="132" height="122" rx="4" fill="url(#sBodyG)"/>
+      <rect x="303" y="16" width="132" height="5" fill="var(--red)"/>
+      <rect x="303" y="133" width="132" height="5" fill="#C8001A"/>
+      <rect x="314" y="30" width="110" height="36" rx="3" fill="rgba(70,110,150,.55)"/>
+      <path d="M303 96 Q330 58 357 82 Q377 100 435 66 L435 138 L303 138Z" fill="var(--red)" opacity=".92" clip-path="url(#sClip3)"/>
+      <rect x="314" y="86" width="9" height="46" rx="2" fill="rgba(20,20,30,.28)"/>
+      <rect x="348" y="86" width="9" height="46" rx="2" fill="rgba(20,20,30,.28)"/>
+      <rect x="390" y="86" width="9" height="46" rx="2" fill="rgba(20,20,30,.28)"/>
+      <rect x="416" y="86" width="9" height="46" rx="2" fill="rgba(20,20,30,.28)"/>
+      <text x="369" y="128" text-anchor="middle" font-family="monospace" font-size="6" fill="rgba(255,255,255,.25)">CLI-125.1003</text>
+      <text x="308" y="24" font-family="monospace" font-size="7" fill="rgba(0,0,0,.3)">3</text>
 
-        // ====== SCROLL REVEAL ======
-        const reveals = document.querySelectorAll('.scroll-reveal');
-        const observer = new IntersectionObserver(entries => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    const delay = entry.target.dataset.delay || 0;
-                    setTimeout(() => {
-                        entry.target.classList.add('visible');
-                        // Trigger progress bars when visible
-                        const fills = entry.target.querySelectorAll('.progress-fill');
-                        fills.forEach(f => {
-                            f.style.width = f.dataset.target + '%';
-                        });
-                    }, parseInt(delay));
-                    observer.unobserve(entry.target);
-                }
-            });
-        }, { threshold: 0.15 });
+      <!-- CAR 4 -->
+      <rect x="441" y="16" width="132" height="122" rx="4" fill="url(#sBodyG)"/>
+      <rect x="441" y="16" width="132" height="5" fill="var(--red)"/>
+      <rect x="441" y="133" width="132" height="5" fill="#C8001A"/>
+      <rect x="452" y="30" width="110" height="36" rx="3" fill="rgba(70,110,150,.55)"/>
+      <path d="M441 100 Q468 62 495 86 Q515 104 573 70 L573 138 L441 138Z" fill="var(--red)" opacity=".92" clip-path="url(#sClip4)"/>
+      <rect x="452" y="86" width="9" height="46" rx="2" fill="rgba(20,20,30,.28)"/>
+      <rect x="486" y="86" width="9" height="46" rx="2" fill="rgba(20,20,30,.28)"/>
+      <text x="507" y="128" text-anchor="middle" font-family="monospace" font-size="6" fill="rgba(255,255,255,.25)">CLI-125.1004</text>
+      <text x="446" y="24" font-family="monospace" font-size="7" fill="rgba(0,0,0,.3)">4</text>
 
-        reveals.forEach(el => observer.observe(el));
+      <!-- CAR 5 -->
+      <rect x="579" y="16" width="132" height="122" rx="4" fill="url(#sBodyG)"/>
+      <rect x="579" y="16" width="132" height="5" fill="var(--red)"/>
+      <rect x="579" y="133" width="132" height="5" fill="#C8001A"/>
+      <rect x="590" y="30" width="110" height="36" rx="3" fill="rgba(70,110,150,.55)"/>
+      <path d="M579 98 Q606 60 633 84 Q653 102 711 68 L711 138 L579 138Z" fill="var(--red)" opacity=".92" clip-path="url(#sClip5)"/>
+      <rect x="590" y="86" width="9" height="46" rx="2" fill="rgba(20,20,30,.28)"/>
+      <rect x="624" y="86" width="9" height="46" rx="2" fill="rgba(20,20,30,.28)"/>
+      <text x="645" y="128" text-anchor="middle" font-family="monospace" font-size="6" fill="rgba(255,255,255,.25)">CLI-125.1005</text>
+      <text x="584" y="24" font-family="monospace" font-size="7" fill="rgba(0,0,0,.3)">5</text>
 
-        // ====== CLICK PARTICLES ======
-        document.addEventListener('click', e => {
-            for (let i = 0; i < 6; i++) {
-                const p = document.createElement('div');
-                p.className = 'particle';
-                p.style.left = e.clientX + 'px';
-                p.style.top = e.clientY + 'px';
-                p.style.background = ['#1a4fa3','#c8a882','#5e8a5e','#ffe47a'][Math.floor(Math.random()*4)];
-                p.style.animationDelay = (i * 0.05) + 's';
-                const angle = (i / 6) * Math.PI * 2;
-                p.style.setProperty('--dx', Math.cos(angle) * 30 + 'px');
-                p.style.setProperty('--dy', Math.sin(angle) * 30 + 'px');
-                document.body.appendChild(p);
-                setTimeout(() => p.remove(), 1000);
-            }
-        });
+      <!-- CAR 6 -->
+      <rect x="717" y="16" width="132" height="122" rx="4" fill="url(#sBodyG)"/>
+      <rect x="717" y="16" width="132" height="5" fill="var(--red)"/>
+      <rect x="717" y="133" width="132" height="5" fill="#C8001A"/>
+      <rect x="728" y="30" width="110" height="36" rx="3" fill="rgba(70,110,150,.55)"/>
+      <path d="M717 102 Q744 64 771 88 Q791 106 849 72 L849 138 L717 138Z" fill="var(--red)" opacity=".92" clip-path="url(#sClip6)"/>
+      <rect x="728" y="86" width="9" height="46" rx="2" fill="rgba(20,20,30,.28)"/>
+      <rect x="762" y="86" width="9" height="46" rx="2" fill="rgba(20,20,30,.28)"/>
+      <text x="783" y="128" text-anchor="middle" font-family="monospace" font-size="6" fill="rgba(255,255,255,.25)">CLI-125.1006</text>
+      <text x="722" y="24" font-family="monospace" font-size="7" fill="rgba(0,0,0,.3)">6</text>
 
-        // ====== BADGE HOVER SOUND (visual ripple) ======
-        document.querySelectorAll('.badge').forEach(b => {
-            b.addEventListener('click', () => {
-                b.style.animation = 'none';
-                b.offsetHeight;
-                b.style.animation = '';
-                b.style.transform = 'scale(0.9)';
-                setTimeout(() => b.style.transform = '', 150);
-            });
-        });
-    </script>
+      <!-- WAVE TRANSITION -->
+      <line x1="851" y1="8" x2="851" y2="148" stroke="rgba(232,0,30,.35)" stroke-width="1" stroke-dasharray="5 4"/>
 
+      <!-- ============ GERBONG 7–11 (DOWN WAVE / MAJU POLA) ============ -->
+      <!-- CAR 7 -->
+      <rect x="855" y="16" width="132" height="122" rx="4" fill="url(#sBodyG)"/>
+      <rect x="855" y="16" width="132" height="5" fill="var(--red)"/>
+      <rect x="855" y="133" width="132" height="5" fill="#C8001A"/>
+      <rect x="866" y="30" width="110" height="36" rx="3" fill="rgba(70,110,150,.55)"/>
+      <!-- DOWN WAVE (Gerbong 7-12) -->
+      <path d="M855 16 L987 16 L987 52 Q960 90 933 66 Q913 48 855 80 Z" fill="var(--red)" opacity=".92" clip-path="url(#sClip7)"/>
+      <rect x="866" y="70" width="9" height="62" rx="2" fill="rgba(20,20,30,.28)"/>
+      <rect x="900" y="70" width="9" height="62" rx="2" fill="rgba(20,20,30,.28)"/>
+      <text x="921" y="128" text-anchor="middle" font-family="monospace" font-size="6" fill="rgba(255,255,255,.25)">CLI-125.1007</text>
+      <text x="860" y="24" font-family="monospace" font-size="7" fill="rgba(0,0,0,.3)">7</text>
+
+      <!-- ============ KEPALA MAJU (GERBONG 12) — FOTO 2 STYLE ============ -->
+      <rect x="1041" y="8" width="155" height="130" rx="16" fill="url(#sBodyG)"/>
+      <path d="M1160 8 Q1196 8 1196 8 L1196 140 L1160 140 Z" fill="#1A1A22" clip-path="url(#sClipEnd)"/>
+      <rect x="1041" y="8" width="155" height="6" rx="3" fill="var(--red)"/>
+      <rect x="1041" y="132" width="155" height="6" rx="3" fill="#C8001A"/>
+      <rect x="1046" y="24" width="106" height="42" rx="3" fill="rgba(70,110,150,.6)"/>
+      <!-- DOWN WAVE -->
+      <path d="M1041 16 L1196 16 L1196 60 Q1168 96 1140 70 Q1120 52 1041 88 Z" fill="var(--red)" opacity=".92" clip-path="url(#sClipEnd)"/>
+      <rect x="1060" y="88" width="10" height="44" rx="2" fill="rgba(20,20,30,.3)"/>
+      <rect x="1124" y="88" width="10" height="44" rx="2" fill="rgba(20,20,30,.3)"/>
+      <!-- Headlight LED (Maju = Yellow/White Light) -->
+      <rect x="1166" y="75" width="26" height="6" rx="3" fill="#FFFFCC"/>
+      <text x="1100" y="120" text-anchor="middle" font-family="monospace" font-size="6" fill="rgba(255,255,255,.25)">CLI-125.1012</text>
+      <text x="1150" y="20" font-family="monospace" font-size="7" fill="rgba(255,255,255,.3)">12 (Maju)</text>
+
+      <!-- intermediate indicator for 8-11 -->
+      <rect x="993" y="16" width="42" height="122" rx="3" fill="rgba(196,200,204,.5)"/>
+      <text x="1014" y="82" text-anchor="middle" font-family="monospace" font-size="8" fill="rgba(0,0,0,.3)" transform="rotate(-90,1014,82)">8–11</text>
+
+      <!-- Rails -->
+      <rect x="0" y="150" width="1200" height="2" rx="1" fill="rgba(200,205,210,.1)"/>
+      <rect x="0" y="156" width="1200" height="2" rx="1" fill="rgba(200,205,210,.05)"/>
+
+      <!-- Labels -->
+      <text x="851" y="164" text-anchor="middle" font-family="monospace" font-size="7" fill="rgba(232,0,30,.5)">TRANSISI TRANSISI LIVERY</text>
+      <text x="420" y="164" text-anchor="middle" font-family="monospace" font-size="7" fill="rgba(232,0,30,.35)">GBG 1–6 · KEPALA MUNDUR (↗ NAIK)</text>
+      <text x="1100" y="164" text-anchor="middle" font-family="monospace" font-size="7" fill="rgba(232,0,30,.35)">GBG 7–12 · KEPALA MAJU (↘ TURUN)</text>
+    </svg>
+
+    <div class="sideLabel">
+      <span>← KEPALA MUNDUR (MC1) · GERBONG 1</span>
+      <span>GERBONG 12 · KEPALA MAJU (MC2) →</span>
+    </div>
+  </div>
+</section>
+<div class="sep"></div>
+
+<!-- TRAINSET DIAGRAM -->
+<section class="sec secDark">
+  <div class="secHead rv">
+    <div class="secEye">03 · Rangkaian</div>
+    <div class="secTitle">SF12<br>TRAINSET</div>
+  </div>
+  <div class="tsWrap rv d1">
+    <div class="tsRow" id="tsRow"></div>
+  </div>
+</section>
+
+<div class="sep"></div>
+
+<!-- SPECS -->
+<section class="sec secMid" id="spesifikasi">
+  <div class="secHead rv">
+    <div class="secEye">04 · Spesifikasi Teknis</div>
+    <div class="secTitle">DATA<br>TEKNIS</div>
+  </div>
+  <div class="specsGrid">
+    <div class="spBlk rv d1">
+      <span class="spIco">⚡</span>
+      <div class="spBig">1500<em>V DC</em></div>
+      <div class="spK">Sistem Kelistrikan</div>
+      <div class="spV">Overhead Catenary Wire · Pantograf tunggal per gerbong bermotor</div>
+    </div>
+    <div class="spBlk rv d2">
+      <span class="spIco">🏎</span>
+      <div class="spBig">120<em>km/h</em></div>
+      <div class="spK">Kecepatan Maksimum</div>
+      <div class="spV">Operasional 75–95 km/h di lintas Jabodetabek</div>
+    </div>
+    <div class="spBlk rv d3">
+      <span class="spIco">📐</span>
+      <div class="spBig">20<em>m</em></div>
+      <div class="spK">Panjang Per Gerbong</div>
+      <div class="spV">Lebar 3000mm · Tinggi 3985mm · Bodi Stainless Steel SUS301L</div>
+    </div>
+    <div class="spBlk span2 rv d1" style="display:flex;gap:50px;align-items:center">
+      <div>
+        <span class="spIco">🚃</span>
+        <div class="spBig">12<em>gbg</em></div>
+        <div class="spK">Formasi SF12</div>
+        <div class="spV">6M+6T (Motor + Trailer) per rangkaian penuh</div>
+      </div>
+      <div>
+        <span class="spIco">🚪</span>
+        <div class="spBig">4<em>×2</em></div>
+        <div class="spK">Pintu Per Gerbong</div>
+        <div class="spV">4 pasang pintu geser otomatis · Anti Trap Door System</div>
+      </div>
+    </div>
+    <div class="spBlk rv d2">
+      <span class="spIco">❄️</span>
+      <div class="spBig">2<em>unit</em></div>
+      <div class="spK">AC Per Gerbong</div>
+      <div class="spV">INKA I-Cond ACI 3501 · Dirancang untuk iklim tropis</div>
+    </div>
+    <div class="spBlk span3 rv">
+      <div>
+        <div class="spBig">42<em>krs</em></div>
+        <div class="spK">Kursi Kabin</div>
+        <div class="spV">Per gerbong kabin</div>
+      </div>
+      <div>
+        <div class="spBig">54<em>krs</em></div>
+        <div class="spK">Kursi Non-Kabin</div>
+        <div class="spV">Per gerbong non-kabin</div>
+      </div>
+      <div>
+        <div class="spBig">300<em>+</em></div>
+        <div class="spK">Kapasitas/Gerbong</div>
+        <div class="spV">Duduk + berdiri penuh</div>
+      </div>
+      <div>
+        <div class="spBig">2025<em></em></div>
+        <div class="spK">Mulai Operasi</div>
+        <div class="spV">1 Juni 2025</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="sep"></div>
+
+<!-- TEKNOLOGI -->
+<section class="sec secDark" id="teknologi">
+  <div class="secHead rv">
+    <div class="secEye">05 · Teknologi</div>
+    <div class="secTitle">SISTEM<br>PROPULSI</div>
+  </div>
+  <div class="techGrid">
+    <div class="tCard rv d1">
+      <div class="tIco">⚙️</div>
+      <h4>VVVF–IGBT</h4>
+      <p>Variable Voltage Variable Frequency dengan Insulated Gate Bipolar Transistor. Sistem ini memungkinkan kontrol kecepatan halus dan efisiensi energi tinggi — termasuk pengereman regeneratif yang mengembalikan listrik ke jaringan.</p>
+      <span class="tBadge">TOYO DENKI RG6061-A-M</span>
+    </div>
+    <div class="tCard rv d2">
+      <div class="tIco">🖥️</div>
+      <h4>TCMS</h4>
+      <p>Train Control and Monitoring System — sistem terpusat yang memantau seluruh parameter kereta secara real-time: traksi, rem, pintu, AC, dan diagnostik. Data terpantau dari kabin masinis hingga pusat kendali.</p>
+      <span class="tBadge">INTEGRATED CONTROL</span>
+    </div>
+    <div class="tCard rv d3">
+      <div class="tIco">🚪</div>
+      <h4>Anti Trap Door</h4>
+      <p>Sistem sensor canggih pada pintu otomatis yang mendeteksi hambatan sebelum pintu menutup penuh. Meningkatkan keselamatan penumpang signifikan dibanding generasi KRL lama yang tidak memiliki fitur ini.</p>
+      <span class="tBadge">SAFETY CERTIFIED</span>
+    </div>
+  </div>
+</section>
+
+<div class="sep"></div>
+
+<!-- SEJARAH -->
+<section class="sec secMid" id="sejarah">
+  <div class="secHead rv">
+    <div class="secEye">06 · Sejarah</div>
+    <div class="secTitle">KRONOLOGI<br>CLI–125</div>
+  </div>
+  <div class="histLayout">
+    <div class="histTL">
+      <div class="hItem" data-delay="0">
+        <div class="hDot"></div>
+        <div class="hYr">2023</div>
+        <div class="hTi">Polemik Impor KRL Bekas</div>
+        <div class="hTx">Kontroversi rencana impor KRL bekas dari Jepang berujung pembatalan. Pemerintah memutuskan mencari pengadaan KRL baru untuk meremajakan armada Jabodetabek yang terus bertumbuh.</div>
+      </div>
+      <div class="hItem" data-delay="100">
+        <div class="hDot"></div>
+        <div class="hYr">2024</div>
+        <div class="hTi">Kontrak CRRC Qingdao Sifang</div>
+        <div class="hTx">KAI Commuter menandatangani kontrak pengadaan dengan CRRC Qingdao Sifang Co., Ltd. — produsen kereta terbesar di Tiongkok. Model yang dipilih: SFC120-V (kode internal SFM138), dengan pembiayaan melalui PMN.</div>
+      </div>
+      <div class="hItem" data-delay="200">
+        <div class="hDot"></div>
+        <div class="hYr">2024</div>
+        <div class="hTi">Produksi & Pengiriman</div>
+        <div class="hTx">Produksi dimulai di fasilitas CRRC di Qingdao, Shandong. Rangkaian pertama dikirim ke Indonesia dan menjalani serangkaian uji kelayakan serta sertifikasi keselamatan oleh DJKA Kemenhub sesuai Permenhub No. PM 49 Tahun 2023.</div>
+      </div>
+      <div class="hItem" data-delay="300">
+        <div class="hDot"></div>
+        <div class="hYr">2025</div>
+        <div class="hTi">Operasi Perdana — 1 Juni 2025</div>
+        <div class="hTx">KAI Commuter resmi mengoperasikan tiga rangkaian CLI-125 perdana. Dua rangkaian untuk Lin Bogor (KA 11 dan KA 12), satu untuk Lin Cikarang. Diresmikan oleh Direktur Utama Asdo Artriviyanto di Stasiun Manggarai.</div>
+      </div>
+      <div class="hItem" data-delay="400">
+        <div class="hDot"></div>
+        <div class="hYr">2025+</div>
+        <div class="hTi">Ekspansi Armada Berlanjut</div>
+        <div class="hTx">Total 84 gerbong (7 trainset) telah terkirim, 108 gerbong (9 trainset) dalam produksi. Rencana perluasan ke lintas lain menyusul. Ridership Commuter Line terus tumbuh: 334,36 juta penumpang sepanjang 2024.</div>
+      </div>
+    </div>
+    <div class="histVis rv">
+      <div class="hvStat">
+        <div class="hvN" id="ctr1">0</div>
+        <div class="hvL">Gerbong Dibangun</div>
+      </div>
+      <div class="hvStat">
+        <div class="hvN" id="ctr2">0</div>
+        <div class="hvL">Trainset Aktif</div>
+      </div>
+      <div class="hvStat">
+        <div class="hvN" id="ctr3">0</div>
+        <div class="hvL">Juta Penumpang/Tahun</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="sep"></div>
+
+<!-- ARMADA -->
+<section class="sec secDark" id="armada">
+  <div class="secHead rv">
+    <div class="secEye">07 · Status Armada</div>
+    <div class="secTitle">ARMADA<br>CLI–125</div>
+  </div>
+  <div class="fleetRow">
+    <div class="fCard rv d1">
+      <div><span class="fcN" data-to="84">0</span><span class="fcU">unit</span></div>
+      <div class="fcL">Gerbong Terkirim</div>
+    </div>
+    <div class="fCard rv d2">
+      <div><span class="fcN" data-to="7">0</span><span class="fcU">set</span></div>
+      <div class="fcL">Trainset Aktif</div>
+    </div>
+    <div class="fCard rv d3">
+      <div><span class="fcN" data-to="108">0</span><span class="fcU">unit</span></div>
+      <div class="fcL">Dalam Konstruksi</div>
+    </div>
+    <div class="fCard rv d4">
+      <div><span class="fcN" data-to="12">0</span><span class="fcU">gbg</span></div>
+      <div class="fcL">Per Trainset (SF12)</div>
+    </div>
+  </div>
+  <div class="secEye rv" style="margin-bottom:16px">Jalur Operasi</div>
+  <div class="routeList rv d1">
+    <div class="rPill"><div class="rDot" style="background:#E8001E"></div>Lin Bogor (Bogor–Jakarta Kota)</div>
+    <div class="rPill"><div class="rDot" style="background:#F7A800"></div>Lin Cikarang (Cikarang–Angke)</div>
+    <div class="rPill" style="opacity:.35"><div class="rDot" style="background:#666"></div>Lintas lain (segera)</div>
+  </div>
+</section>
+
+<div class="sep"></div>
+
+<!-- INTERIOR -->
+<section class="sec secMid" id="interior">
+  <div class="secHead rv">
+    <div class="secEye">08 · Interior</div>
+    <div class="secTitle">KABIN<br>PENUMPANG</div>
+  </div>
+  <div class="intLayout">
+    <div class="intMain rv">
+      <div class="intFeat">
+        <div class="ifH"><div class="ifBar"></div><div class="ifTitle">Kursi Sideway Merah</div></div>
+        <p class="ifDesc">Kursi memanjang (sideway) berbalut material merah yang ikonik — sama dengan foto interior. 42 kursi di gerbong kabin, 54 di gerbong non-kabin. Desain kokoh dan mudah dibersihkan.</p>
+      </div>
+      <div class="intFeat">
+        <div class="ifH"><div class="ifBar"></div><div class="ifTitle">Strap Pegangan Hijau</div></div>
+        <p class="ifDesc">Pegangan gantung berwarna hijau cerah yang terdistribusi merata di sepanjang interior. Mudah dijangkau penumpang berdiri berbagai ketinggian, dengan tiang vertikal stainless yang kokoh.</p>
+      </div>
+      <div class="intFeat">
+        <div class="ifH"><div class="ifBar"></div><div class="ifTitle">Pencahayaan LED Penuh</div></div>
+        <p class="ifDesc">Strip LED putih di sepanjang langit-langit memberikan pencahayaan merata dan terang. Panel overhead juga mencakup kisi-kisi AC dan kamera CCTV terintegrasi di setiap gerbong.</p>
+      </div>
+      <div class="intFeat">
+        <div class="ifH"><div class="ifBar"></div><div class="ifTitle">HVAC Tropis INKA I-Cond</div></div>
+        <p class="ifDesc">Sistem pendingin AC model ACI 3501 buatan INKA — 2 unit per gerbong — khusus dirancang untuk suhu dan kelembaban ekstrem Indonesia. Distribusi udara dingin merata ke seluruh kabin.</p>
+      </div>
+      
+      <div style="margin-top:32px;background:rgba(0,0,0,.4);border:1px solid rgba(240,242,245,.04);overflow:hidden">
+        <svg viewBox="0 0 600 280" fill="none" style="width:100%;display:block">
+          <path d="M0 280 L600 280 L380 140 L220 140Z" fill="#484848"/>
+          <path d="M0 280 L600 280 L380 140 L220 140Z" fill="url(#floorGrad)"/>
+          <defs>
+            <linearGradient id="floorGrad" x1="50%" y1="100%" x2="50%" y2="0%">
+              <stop offset="0%" stop-color="#3C3C3C"/>
+              <stop offset="100%" stop-color="#585858"/>
+            </linearGradient>
+          </defs>
+          <path d="M0 0 L600 0 L380 140 L220 140Z" fill="#D0D2D4"/>
+          <path d="M0 0 L0 280 L220 140Z" fill="#B8BCBE"/>
+          <path d="M600 0 L600 280 L380 140Z" fill="#B0B4B6"/>
+          <path d="M0 180 L0 280 L200 210 L220 140Z" fill="#C8001E"/>
+          <path d="M0 180 L0 280 L200 210 L220 140Z" fill="rgba(0,0,0,.15)"/>
+          <line x1="0" y1="200" x2="215" y2="148" stroke="rgba(0,0,0,.2)" stroke-width="1.5"/>
+          <line x1="0" y1="220" x2="215" y2="158" stroke="rgba(0,0,0,.2)" stroke-width="1.5"/>
+          <line x1="0" y1="240" x2="215" y2="168" stroke="rgba(0,0,0,.2)" stroke-width="1.5"/>
+          <line x1="0" y1="260" x2="215" y2="178" stroke="rgba(0,0,0,.2)" stroke-width="1.5"/>
+          <path d="M600 180 L600 280 L400 210 L380 140Z" fill="#C8001E"/>
+          <path d="M600 180 L600 280 L400 210 L380 140Z" fill="rgba(0,0,0,.1)"/>
+          <line x1="600" y1="200" x2="385" y2="148" stroke="rgba(0,0,0,.15)" stroke-width="1.5"/>
+          <line x1="600" y1="220" x2="385" y2="158" stroke="rgba(0,0,0,.15)" stroke-width="1.5"/>
+          <line x1="600" y1="240" x2="385" y2="168" stroke="rgba(0,0,0,.15)" stroke-width="1.5"/>
+          <rect x="0" y="30" width="80" height="90" rx="3" fill="rgba(140,180,220,.55)"/>
+          <rect x="90" y="30" width="80" height="90" rx="3" fill="rgba(140,180,220,.55)"/>
+          <rect x="180" y="30" width="40" height="70" rx="3" fill="rgba(140,180,220,.4)"/>
+          <rect x="520" y="30" width="80" height="90" rx="3" fill="rgba(180,210,240,.5)"/>
+          <rect x="430" y="30" width="80" height="90" rx="3" fill="rgba(180,210,240,.5)"/>
+          <rect x="380" y="30" width="40" height="70" rx="3" fill="rgba(180,210,240,.4)"/>
+          <rect x="0" y="0" width="220" height="8" fill="rgba(255,255,240,.9)"/>
+          <rect x="0" y="0" width="220" height="8" fill="rgba(255,255,255,.3)"/>
+          <rect x="380" y="0" width="220" height="8" fill="rgba(255,255,240,.9)"/>
+          <line x1="50" y1="0" x2="50" y2="110" stroke="rgba(80,80,90,.5)" stroke-width="1.5"/>
+          <ellipse cx="50" cy="114" rx="6" ry="7" fill="none" stroke="#28A040" stroke-width="2.5"/>
+          <line x1="110" y1="0" x2="110" y2="110" stroke="rgba(80,80,90,.5)" stroke-width="1.5"/>
+          <ellipse cx="110" cy="114" rx="6" ry="7" fill="none" stroke="#28A040" stroke-width="2.5"/>
+          <line x1="170" y1="0" x2="170" y2="110" stroke="rgba(80,80,90,.4)" stroke-width="1.5"/>
+          <ellipse cx="170" cy="114" rx="6" ry="7" fill="none" stroke="#28A040" stroke-width="2.5"/>
+          <line x1="550" y1="0" x2="550" y2="110" stroke="rgba(80,80,90,.5)" stroke-width="1.5"/>
+          <ellipse cx="550" cy="114" rx="6" ry="7" fill="none" stroke="#28A040" stroke-width="2.5"/>
+          <line x1="490" y1="0" x2="490" y2="110" stroke="rgba(80,80,90,.5)" stroke-width="1.5"/>
+          <ellipse cx="490" cy="114" rx="6" ry="7" fill="none" stroke="#28A040" stroke-width="2.5"/>
+          <line x1="430" y1="0" x2="430" y2="110" stroke="rgba(80,80,90,.4)" stroke-width="1.5"/>
+          <ellipse cx="430" cy="114" rx="6" ry="7" fill="none" stroke="#28A040" stroke-width="2.5"/>
+          <line x1="0" y1="108" x2="218" y2="108" stroke="rgba(80,80,90,.35)" stroke-width="1.2"/>
+          <line x1="382" y1="108" x2="600" y2="108" stroke="rgba(80,80,90,.35)" stroke-width="1.2"/>
+          <rect x="20" y="10" width="160" height="18" rx="2" fill="rgba(200,205,210,.7)"/>
+          <rect x="420" y="10" width="160" height="18" rx="2" fill="rgba(200,205,210,.7)"/>
+          <circle cx="220" cy="12" r="5" fill="rgba(30,30,40,.7)"/>
+          <circle cx="380" cy="12" r="5" fill="rgba(30,30,40,.7)"/>
+          <circle cx="300" cy="140" r="30" fill="rgba(255,255,255,.06)"/>
+          <circle cx="300" cy="140" r="10" fill="rgba(255,255,255,.06)"/>
+        </svg>
+      </div>
+    </div>
+    <div class="intSide">
+      <div class="isCrd rv d1"><div class="isN">42</div><div class="isL">Kursi Kabin/Gerbong</div></div>
+      <div class="isCrd rv d2"><div class="isN">54</div><div class="isL">Kursi Non-Kabin</div></div>
+      <div class="isCrd rv d3"><div class="isN">300<span style="font-size:28px;color:var(--dimmer)">+</span></div><div class="isL">Kapasitas Total/Gerbong</div></div>
+      <div class="isCrd rv d4" style="background:rgba(232,0,30,.06);border-color:rgba(232,0,30,.15)">
+        <div style="font-family:'Space Mono',monospace;font-size:8px;letter-spacing:2px;color:var(--red);margin-bottom:12px;text-transform:uppercase">Warna Identitas</div>
+        <div style="display:flex;gap:10px;align-items:center">
+          <div style="width:32px;height:32px;background:var(--red);border-radius:3px"></div>
+          <div style="width:32px;height:32px;background:#28A040;border-radius:3px"></div>
+          <div style="width:32px;height:32px;background:#C4C8CC;border-radius:3px"></div>
+          <div style="font-size:10px;color:var(--dimmer)">Merah · Hijau · Silver</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="fBrand">
+    <div class="fbL">KAI <span>COMMUTER</span></div>
+    <p>Dokumentasi teknis CLI-125 — Commuter Line Indonesia Generasi Pertama. Beroperasi sejak 1 Juni 2025.</p>
+  </div>
+  <div class="fCol">
+    <h5>Seri KRL</h5>
+    <ul>
+      <li>CLI-125 (Aktif ●)</li>
+      <li>CLI-225 (Segera)</li>
+      <li>JR 203 Series</li>
+      <li>JR 205 Series</li>
+      <li>TM 6000 Series</li>
+      <li>TM 7000 Series</li>
+      <li>Tokyo 8000 / 8500</li>
+    </ul>
+  </div>
+  <div class="fCol">
+    <h5>Data Teknis</h5>
+    <ul>
+      <li>Model: SFC120-V (SFM138)</li>
+      <li>Produksi: CRRC Qingdao Sifang</li>
+      <li>Propulsi: 1500V DC VVVF-IGBT</li>
+      <li>Formasi: SF12 (6M+6T)</li>
+      <li>Kec. Maks: 120 km/h</li>
+      <li>Sertifikasi: DJKA Kemenhub</li>
+    </ul>
+  </div>
+</footer>
+<div class="fBot">
+  <p>Data berdasarkan informasi resmi KAI Commuter per Juni 2025</p>
+  <p style="color:rgba(232,0,30,.4)">● CLI-125 AKTIF BEROPERASI</p>
+</div>
+
+</div><!-- end #main -->
+
+<!-- ============================================================ -->
+<!-- COMPLETE & FIXED JAVASCRIPT BLOCK                            -->
+<!-- ============================================================ -->
+<script>
+/* ===== CURSOR ===== */
+const cur=document.getElementById('cur'),curR=document.getElementById('curR');
+let mx=0,my=0,rx=0,ry=0;
+document.addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY;
+  cur.style.left=mx+'px';cur.style.top=my+'px'});
+(function ring(){rx+=(mx-rx)*.15;ry+=(my-ry)*.15;
+  curR.style.left=rx+'px';curR.style.top=ry+'px';requestAnimationFrame(ring)})();
+
+/* ===== PARTICLES ===== */
+const ptcl=document.getElementById('ptcl');
+for(let i=0;i<28;i++){
+  const p=document.createElement('div');
+  p.className='pt';
+  const dx=(Math.random()-.5)*200;
+  p.style.cssText=`left:${Math.random()*100}%;--dx:${dx}px;
+    animation-duration:${8+Math.random()*14}s;
+    animation-delay:-${Math.random()*15}s;
+    width:${Math.random()>.7?2:1}px;height:${Math.random()>.7?2:1}px;
+    opacity:${.4+Math.random()*.6}`;
+  ptcl.appendChild(p);
+}
+
+/* ===== INTRO & REVEAL SYSTEM ===== */
+window.addEventListener('DOMContentLoaded', () => {
+  const intro = document.getElementById('intro');
+  const main = document.getElementById('main');
+  const iBarF = document.getElementById('iBarF');
+  
+  setTimeout(() => document.getElementById('il1').classList.add('show'), 300);
+  setTimeout(() => document.getElementById('il2').classList.add('show'), 500);
+  setTimeout(() => document.getElementById('iLogo').classList.add('show'), 800);
+  setTimeout(() => document.getElementById('iSub').classList.add('show'), 1200);
+  setTimeout(() => iBarF.classList.add('go'), 200);
+  
+  setTimeout(() => {
+    intro.classList.add('out');
+    main.style.opacity = '1';
+  }, 3200);
+});
+
+/* ===== SCROLL REVEAL ===== */
+const reveals = document.querySelectorAll('.rv, .hItem');
+const observer = new IntersectionObserver(entries => {
+  entries.forEach(entry => {
+    if(entry.isIntersecting) {
+      entry.target.classList.add('vis');
+    }
+  });
+}, { threshold: 0.1 });
+reveals.forEach(r => observer.observe(r));
+
+/* ===== SF12 TRAINSET GENERATOR ===== */
+const tsRow = document.getElementById('tsRow');
+for(let i=1; i<=12; i++) {
+  const car = document.createElement('div');
+  // Labeled based on livery constraints: 1-6 Up Wave (Mundur), 7-12 Dn Wave (Maju)
+  car.className = `car ${i <= 6 ? 'up' : 'dn'} ${i === 1 ? 'hf' : i === 12 ? 'hr' : ''}`;
+  
+  car.innerHTML = `
+    <div class="carTip">Gerbong ${i} — ${i <= 6 ? 'Kepala Mundur (Foto 1)' : 'Kepala Maju (Foto 2)'}</div>
+    <div class="carBody">
+      <div class="carWin"></div>
+      <div class="carDoor d1"></div>
+      <div class="carDoor d2"></div>
+      <div class="carDoor d3"></div>
+      <div class="carDoor d4"></div>
+      <div class="carNum">${i}</div>
+    </div>
+    <div class="carLbl">Gbg ${i}</div>
+    <div class="carType">${i === 1 || i === 12 ? 'Tc' : (i===2||i===5||i===8||i===11?'M':'T')}</div>
+  `;
+  tsRow.appendChild(car);
+}
+
+/* ===== DATA COUNTER ANIMATION ===== */
+const counters = document.querySelectorAll('.hvN, .fcN');
+const counterObserver = new IntersectionObserver(entries => {
+  entries.forEach(entry => {
+    if(entry.isIntersecting) {
+      const target = entry.target;
+      const to = parseInt(target.getAttribute('data-to') || target.innerText);
+      if(target.innerText === '0' || target.innerText === '') {
+        let count = 0;
+        const speed = to / 40;
+        const updateCount = () => {
+          count += speed;
+          if(count < to) {
+            target.innerText = Math.floor(count);
+            setTimeout(updateCount, 20);
+          } else {
+            target.innerText = to;
+          }
+        };
+        updateCount();
+      }
+    }
+  });
+}, { threshold: 0.5 });
+
+counters.forEach(c => {
+  if(c.id === 'ctr1') c.setAttribute('data-to', '84');
+  if(c.id === 'ctr2') c.setAttribute('data-to', '7');
+  if(c.id === 'ctr3') c.setAttribute('data-to', '334');
+  counterObserver.observe(c);
+});
+
+/* ===== FRONT CABIN INTERACTIVE TOGGLE ===== */
+function setMode(mode) {
+  const s21 = document.getElementById('s21Board');
+  const btnMundur = document.getElementById('btnMundur');
+  const btnMaju = document.getElementById('btnMaju');
+  const ledGrad = document.getElementById('ledGrad');
+  
+  if(mode === 'maju') {
+    if(s21) s21.style.display = 'none';
+    btnMaju.style.background = 'var(--red)';
+    btnMaju.style.color = '#fff';
+    btnMundur.style.background = 'rgba(255,255,255,.06)';
+    btnMundur.style.color = 'var(--white)';
+    if(ledGrad) {
+      ledGrad.innerHTML = `
+        <stop offset="0%" stop-color="rgba(255,255,220,0)"/>
+        <stop offset="15%" stop-color="#FFFFE0"/>
+        <stop offset="50%" stop-color="#FFFFFF"/>
+        <stop offset="85%" stop-color="#FFFFE0"/>
+        <stop offset="100%" stop-color="rgba(255,255,220,0)"/>
+      `;
+    }
+  } else {
+    if(s21) s21.style.display = 'block';
+    btnMundur.style.background = 'var(--red)';
+    btnMundur.style.color = '#fff';
+    btnMaju.style.background = 'rgba(255,255,255,.06)';
+    btnMaju.style.color = 'var(--white)';
+    if(ledGrad) {
+      ledGrad.innerHTML = `
+        <stop offset="0%" stop-color="rgba(232,0,30,0)"/>
+        <stop offset="15%" stop-color="#FF1830"/>
+        <stop offset="50%" stop-color="#FF2233"/>
+        <stop offset="85%" stop-color="#FF1830"/>
+        <stop offset="100%" stop-color="rgba(232,0,30,0)"/>
+      `;
+    }
+  }
+}
+
+window.addEventListener('scroll', () => {
+  const nav = document.getElementById('nav');
+  if(window.scrollY > 50) nav.classList.add('bg');
+  else nav.classList.remove('bg');
+});
+</script>
 </body>
 </html>
