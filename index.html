@@ -1,1362 +1,784 @@
+```html
 <!DOCTYPE html>
 <html lang="id">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>CLI-125 — KAI Commuter Line Indonesia</title>
-<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Rajdhani:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
-<style>
-*{margin:0;padding:0;box-sizing:border-box}
-:root{
-  --red:#E8001E;--red2:#FF2233;--silver:#C4C8CC;--dark-silver:#888C90;
-  --bg:#060608;--bg2:#0A0A0E;
-  --white:#F0F2F5;--dim:rgba(240,242,245,0.5);--dimmer:rgba(240,242,245,0.25);
-}
-html{scroll-behavior:smooth;overflow-x:hidden}
-body{background:var(--bg);color:var(--white);font-family:'Rajdhani',sans-serif;overflow-x:hidden}
-::-webkit-scrollbar{width:2px}
-::-webkit-scrollbar-track{background:var(--bg)}
-::-webkit-scrollbar-thumb{background:var(--red)}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Immersive 3D Web 2026</title>
+    <!-- Tailwind CSS untuk Styling UI -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Google Google -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #0b0c10;
+            overflow: hidden;
+        }
+        .hud-font {
+            font-family: 'Share Tech Mono', monospace;
+        }
+        /* Efek Pendaran Glow */
+        .neon-glow {
+            text-shadow: 0 0 10px rgba(100, 255, 218, 0.5), 0 0 20px rgba(100, 255, 218, 0.2);
+        }
+        .neon-border {
+            box-shadow: 0 0 15px rgba(100, 255, 218, 0.15);
+            border: 1px solid rgba(100, 255, 218, 0.2);
+        }
+        /* Sembunyikan scrollbar */
+        ::-webkit-scrollbar {
+            display: none;
+        }
+    </style>
+</head>
+<body class="text-white h-screen w-screen relative select-none">
 
-/* ===== CUSTOM CURSOR ===== */
-#cur{position:fixed;width:6px;height:6px;background:var(--red);border-radius:50%;
-  pointer-events:none;z-index:9999;transform:translate(-50%,-50%);
-  transition:width .25s,height .25s,background .25s}
-#curR{position:fixed;width:28px;height:28px;border:1px solid rgba(232,0,30,.5);
-  border-radius:50%;pointer-events:none;z-index:9998;transform:translate(-50%,-50%);
-  transition:all .18s ease}
+    <!-- Canvas Utama untuk Rendering Three.js -->
+    <canvas id="webgl-canvas" class="absolute top-0 left-0 w-full h-full z-0"></canvas>
 
-/* ===== INTRO OVERLAY ===== */
-#intro{
-  position:fixed;inset:0;z-index:8000;background:#000;
-  display:flex;flex-direction:column;align-items:center;justify-content:center;
-  gap:0;
-}
-#intro.out{animation:introOut 1.2s cubic-bezier(.76,0,.24,1) forwards}
-@keyframes introOut{
-  0%{opacity:1;transform:scale(1)}
-  60%{opacity:1;transform:scale(1.04)}
-  100%{opacity:0;transform:scale(1.08);pointer-events:none}
-}
-.il{font-family:'Space Mono',monospace;font-size:10px;letter-spacing:5px;
-  color:rgba(255,255,255,.15);text-transform:uppercase;overflow:hidden;height:14px;margin-bottom:5px}
-.il span{display:block;transform:translateY(110%);transition:transform .7s cubic-bezier(.16,1,.3,1)}
-.il.show span{transform:translateY(0)}
-#iLogo{font-family:'Bebas Neue',sans-serif;font-size:clamp(64px,11vw,130px);
-  letter-spacing:6px;color:#fff;opacity:0;transform:translateY(16px);
-  transition:opacity 1s ease .7s,transform 1s ease .7s;margin:8px 0 4px}
-#iLogo.show{opacity:1;transform:translateY(0)}
-#iLogo span{color:var(--red)}
-#iSub{font-family:'Space Mono',monospace;font-size:9px;letter-spacing:7px;
-  color:rgba(255,255,255,.12);text-transform:uppercase;
-  opacity:0;transition:opacity .8s ease 1.3s}
-#iSub.show{opacity:1}
-.iBar{position:absolute;bottom:48px;left:50%;transform:translateX(-50%);
-  width:180px;height:1px;background:rgba(255,255,255,.06)}
-.iBarF{height:100%;width:0;background:var(--red);
-  transition:width 2.6s cubic-bezier(.25,.46,.45,.94) .3s}
-.iBarF.go{width:100%}
+    <!-- UI Overlay / HUD (Heads Up Display) -->
+    <div class="absolute inset-0 z-10 pointer-events-none flex flex-col justify-between p-6 md:p-10">
+        
+        <!-- HEADER HUD -->
+        <header class="flex justify-between items-start w-full">
+            <div class="pointer-events-auto flex flex-col">
+                <div class="flex items-center gap-2">
+                    <span class="w-3 h-3 bg-cyan-400 rounded-full animate-ping"></span>
+                    <h1 class="hud-font text-lg md:text-xl font-bold tracking-widest text-cyan-400 neon-glow">NEXUS.STUDIOS</h1>
+                </div>
+                <p class="text-[10px] md:text-xs text-gray-500 tracking-wider mt-1 uppercase">Sistem Portal Portofolio v3.06</p>
+            </div>
+            
+            <div class="pointer-events-auto text-right hud-font text-xs text-cyan-400/80 bg-black/40 backdrop-blur-md p-3 rounded-lg neon-border">
+                <div>KOORDINAT: <span id="hud-coords">X: 0.00 | Y: 0.00</span></div>
+                <div class="text-[10px] text-gray-400 mt-1">STATUS: <span class="text-emerald-400">ONLINE</span></div>
+            </div>
+        </header>
 
-/* ===== NAV ===== */
-nav{position:fixed;top:0;left:0;right:0;z-index:700;
-  padding:22px 56px;display:flex;justify-content:space-between;align-items:center;
-  transition:background .4s,backdrop-filter .4s}
-nav.bg{background:rgba(6,6,8,.94);backdrop-filter:blur(18px)}
-.nLogo{font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:5px;color:var(--white)}
-.nLogo span{color:var(--red)}
-.nLinks{display:flex;gap:32px;list-style:none}
-.nLinks a{font-family:'Space Mono',monospace;font-size:8px;letter-spacing:3px;
-  color:var(--dimmer);text-decoration:none;text-transform:uppercase;transition:color .3s}
-.nLinks a:hover{color:var(--white)}
-.nTag{font-family:'Space Mono',monospace;font-size:8px;letter-spacing:2px;
-  border:1px solid rgba(232,0,30,.35);color:var(--red);padding:5px 14px}
-
-/* ===== HERO ===== */
-#hero{position:relative;height:100vh;min-height:680px;overflow:hidden;
-  display:flex;align-items:center}
-
-/* Cinematic fog/ambient */
-.fogWrap{position:absolute;inset:0;pointer-events:none;overflow:hidden}
-.fogBlob{position:absolute;border-radius:50%;filter:blur(120px);animation:blobDrift ease-in-out infinite alternate}
-.fogBlob.b1{width:70vw;height:70vw;background:radial-gradient(ellipse,rgba(232,0,30,.055) 0%,transparent 70%);
-  top:-20%;right:-20%;animation-duration:22s}
-.fogBlob.b2{width:60vw;height:50vw;background:radial-gradient(ellipse,rgba(30,30,50,.18) 0%,transparent 70%);
-  bottom:-10%;left:-10%;animation-duration:30s;animation-delay:-12s}
-.fogBlob.b3{width:40vw;height:40vw;background:radial-gradient(ellipse,rgba(232,0,30,.025) 0%,transparent 70%);
-  top:30%;left:30%;animation-duration:18s;animation-delay:-6s}
-@keyframes blobDrift{0%{transform:translate(0,0) scale(1)}100%{transform:translate(4%,3%) scale(1.08)}}
-
-/* Particles */
-#ptcl{position:absolute;inset:0;pointer-events:none;overflow:hidden}
-.pt{position:absolute;width:1.5px;height:1.5px;background:rgba(232,0,30,.7);
-  border-radius:50%;animation:ptFloat linear infinite}
-@keyframes ptFloat{
-  0%{transform:translateY(110vh) translateX(0) scale(0);opacity:0}
-  5%{opacity:1;transform:translateY(100vh) translateX(0) scale(1)}
-  95%{opacity:.2}
-  100%{transform:translateY(-5vh) translateX(var(--dx)) scale(.5);opacity:0}
-}
-
-/* Scanline */
-.scanline{position:absolute;inset:0;pointer-events:none;
-  background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,.04) 2px,rgba(0,0,0,.04) 4px)}
-
-/* Hero layout */
-.heroInner{position:relative;z-index:10;width:100%;padding:0 56px;
-  display:grid;grid-template-columns:1fr 1fr;gap:40px;align-items:center}
-
-/* Hero Left */
-.hL{}
-.hTag{font-family:'Space Mono',monospace;font-size:9px;letter-spacing:5px;color:var(--red);
-  text-transform:uppercase;display:flex;align-items:center;gap:12px;margin-bottom:22px;
-  opacity:0;animation:suA .8s ease forwards .2s}
-.hTag::before{content:'';width:28px;height:1px;background:var(--red)}
-.hH1{font-family:'Bebas Neue',sans-serif;font-size:clamp(76px,11vw,152px);
-  line-height:.88;letter-spacing:2px;
-  opacity:0;animation:suA .9s cubic-bezier(.16,1,.3,1) forwards .4s}
-.hH1 .outline{-webkit-text-stroke:1px rgba(240,242,245,.18);color:transparent}
-.hH1 .red{color:var(--red)}
-.hDesc{font-size:14px;font-weight:400;line-height:1.85;color:var(--dim);
-  max-width:360px;margin-top:24px;
-  opacity:0;animation:suA .9s ease forwards .6s}
-.hBtns{display:flex;gap:14px;margin-top:36px;
-  opacity:0;animation:suA .9s ease forwards .8s}
-.bRed{background:var(--red);color:#fff;font-family:'Space Mono',monospace;font-size:8px;
-  letter-spacing:3px;text-transform:uppercase;padding:13px 28px;border:none;
-  cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:8px;
-  transition:all .3s;position:relative;overflow:hidden}
-.bRed::after{content:'';position:absolute;left:-100%;top:0;bottom:0;width:100%;
-  background:rgba(255,255,255,.15);transition:left .3s}
-.bRed:hover::after{left:0}
-.bRed:hover{transform:translateY(-2px)}
-.bGhost{background:transparent;color:var(--white);font-family:'Space Mono',monospace;font-size:8px;
-  letter-spacing:3px;text-transform:uppercase;padding:13px 28px;
-  border:1px solid rgba(240,242,245,.12);cursor:pointer;text-decoration:none;
-  display:inline-flex;align-items:center;transition:all .3s}
-.bGhost:hover{border-color:var(--red);background:rgba(232,0,30,.05)}
-
-/* Hero Right — HUD panel */
-.hR{opacity:0;animation:slL 1s ease forwards 1s}
-@keyframes slL{from{opacity:0;transform:translateX(30px)}to{opacity:1;transform:translateX(0)}}
-.hudPanel{border:1px solid rgba(240,242,245,.06);padding:36px;
-  background:rgba(255,255,255,.018);backdrop-filter:blur(8px);position:relative}
-.hudCorner{position:absolute;width:10px;height:10px}
-.hudCorner.tl{top:-1px;left:-1px;border-top:1.5px solid var(--red);border-left:1.5px solid var(--red)}
-.hudCorner.tr{top:-1px;right:-1px;border-top:1.5px solid var(--red);border-right:1.5px solid var(--red)}
-.hudCorner.bl{bottom:-1px;left:-1px;border-bottom:1.5px solid var(--red);border-left:1.5px solid var(--red)}
-.hudCorner.br{bottom:-1px;right:-1px;border-bottom:1.5px solid var(--red);border-right:1.5px solid var(--red)}
-.hudLbl{font-family:'Space Mono',monospace;font-size:8px;letter-spacing:3px;color:var(--red);
-  text-transform:uppercase;padding-bottom:16px;border-bottom:1px solid rgba(240,242,245,.05);margin-bottom:20px}
-.hudRow{display:flex;justify-content:space-between;align-items:baseline;
-  padding:10px 0;border-bottom:1px solid rgba(240,242,245,.04)}
-.hudRow:last-child{border-bottom:none}
-.hK{font-size:10px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:rgba(240,242,245,.28)}
-.hV{font-family:'Bebas Neue',sans-serif;font-size:24px;color:var(--white)}
-.hV em{font-style:normal;font-size:12px;color:var(--red);margin-left:2px}
-
-/* Scroll hint */
-.scrollHint{position:absolute;bottom:28px;left:50%;transform:translateX(-50%);
-  display:flex;flex-direction:column;align-items:center;gap:8px;
-  opacity:0;animation:fadeIn .8s ease forwards 2.2s}
-.shLine{width:1px;height:44px;background:linear-gradient(to bottom,var(--red),transparent);
-  animation:shPulse 2s ease-in-out infinite}
-.shTxt{font-family:'Space Mono',monospace;font-size:7px;letter-spacing:3px;
-  color:rgba(240,242,245,.2);text-transform:uppercase}
-@keyframes shPulse{0%,100%{opacity:.4;height:44px}50%{opacity:1;height:54px}}
-@keyframes fadeIn{from{opacity:0}to{opacity:1}}
-@keyframes suA{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:translateY(0)}}
-
-/* ===== SECTION BASE ===== */
-.sec{position:relative;padding:110px 56px;overflow:hidden}
-.secDark{background:var(--bg)}
-.secMid{background:var(--bg2)}
-.sep{height:1px;margin:0 56px;background:linear-gradient(90deg,transparent,rgba(232,0,30,.18),transparent)}
-
-/* Section header */
-.secHead{margin-bottom:70px}
-.secEye{font-family:'Space Mono',monospace;font-size:8px;letter-spacing:5px;
-  color:var(--red);text-transform:uppercase;margin-bottom:14px;
-  display:flex;align-items:center;gap:10px}
-.secEye::before{content:'';width:22px;height:1px;background:var(--red)}
-.secTitle{font-family:'Bebas Neue',sans-serif;font-size:clamp(44px,6vw,78px);
-  line-height:1;letter-spacing:2px}
-
-/* Reveal util */
-.rv{opacity:0;transform:translateY(28px);transition:opacity .7s ease,transform .7s ease}
-.rv.vis{opacity:1;transform:translateY(0)}
-.rv.d1{transition-delay:.1s}.rv.d2{transition-delay:.2s}.rv.d3{transition-delay:.3s}
-.rv.d4{transition-delay:.4s}.rv.d5{transition-delay:.5s}
-
-/* ===== FRONT-FACE SVG STYLES ===== */
-.frontWrap{display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:center}
-.frontSvgBox{position:relative}
-.frontSvgBox svg{width:100%;filter:drop-shadow(0 0 60px rgba(232,0,30,.18)) drop-shadow(0 30px 80px rgba(0,0,0,.8))}
-.featureList{display:flex;flex-direction:column;gap:0}
-.fItem{padding:22px 0;border-bottom:1px solid rgba(240,242,245,.05);
-  display:grid;grid-template-columns:44px 1fr;gap:14px;align-items:start}
-.fItem:last-child{border-bottom:none}
-.fN{font-family:'Bebas Neue',sans-serif;font-size:38px;color:rgba(232,0,30,.22);line-height:1}
-.fBody h4{font-weight:700;font-size:14px;letter-spacing:2px;margin-bottom:4px;text-transform:uppercase}
-.fBody p{font-size:12px;color:var(--dim);line-height:1.65}
-
-/* ===== SIDE VIEW ===== */
-.sideWrap{width:calc(100% + 112px);margin-left:-56px;position:relative;
-  padding:20px 56px 50px;overflow:hidden}
-.sideWrap svg{width:100%;height:auto;display:block}
-.sideLabel{display:flex;justify-content:space-between;padding:0 0;margin-top:12px}
-.sideLabel span{font-family:'Space Mono',monospace;font-size:8px;letter-spacing:2px;
-  color:rgba(240,242,245,.25);text-transform:uppercase}
-
-/* ===== LIVERY COMPARE ===== */
-.livGrid{display:grid;grid-template-columns:1fr 1fr;gap:4px;margin-top:60px}
-.livCard{background:rgba(255,255,255,.022);border:1px solid rgba(240,242,245,.05);
-  padding:36px;position:relative;overflow:hidden}
-.livCard::before{content:attr(data-lbl);position:absolute;top:0;left:36px;
-  font-family:'Space Mono',monospace;font-size:8px;letter-spacing:3px;
-  background:var(--red);color:#fff;padding:5px 12px}
-.livCard svg{width:100%;margin-top:28px}
-.livDesc{font-size:12px;color:var(--dim);line-height:1.7;margin-top:18px}
-
-/* ===== SPECS GRID ===== */
-.specsGrid{display:grid;grid-template-columns:repeat(3,1fr);gap:2px}
-.spBlk{background:rgba(255,255,255,.02);border:1px solid rgba(240,242,245,.05);
-  padding:34px;position:relative;overflow:hidden;
-  transition:background .4s,border-color .4s}
-.spBlk:hover{background:rgba(232,0,30,.035);border-color:rgba(232,0,30,.2)}
-.spBlk::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;
-  background:linear-gradient(90deg,transparent,var(--red),transparent);
-  transform:scaleX(0);transition:transform .5s}
-.spBlk:hover::after{transform:scaleX(1)}
-.spBlk.span2{grid-column:span 2}
-.spBlk.span3{grid-column:span 3;display:grid;grid-template-columns:repeat(4,1fr);gap:36px}
-.spIco{font-size:26px;margin-bottom:14px;display:block}
-.spBig{font-family:'Bebas Neue',sans-serif;font-size:52px;line-height:1;margin-bottom:6px}
-.spBig em{font-style:normal;font-size:22px;color:var(--red);margin-left:2px}
-.spK{font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:rgba(240,242,245,.3)}
-.spV{font-size:12px;color:rgba(240,242,245,.22);margin-top:6px;line-height:1.55}
-
-/* ===== TECH SECTION ===== */
-.techGrid{display:grid;grid-template-columns:repeat(3,1fr);gap:2px}
-.tCard{background:rgba(255,255,255,.02);border:1px solid rgba(240,242,245,.05);
-  padding:40px;position:relative;overflow:hidden;transition:transform .4s}
-.tCard:hover{transform:translateY(-5px)}
-.tCard::before{content:'';position:absolute;inset:0;
-  background:radial-gradient(ellipse at 50% 110%,rgba(232,0,30,.07),transparent 65%);
-  opacity:0;transition:opacity .4s}
-.tCard:hover::before{opacity:1}
-.tIco{width:48px;height:48px;border:1px solid rgba(232,0,30,.2);border-radius:6px;
-  display:flex;align-items:center;justify-content:center;font-size:24px;
-  margin-bottom:22px;background:rgba(232,0,30,.06)}
-.tCard h4{font-family:'Bebas Neue',sans-serif;font-size:28px;letter-spacing:2px;margin-bottom:10px}
-.tCard p{font-size:12px;color:var(--dim);line-height:1.7}
-.tBadge{display:inline-flex;font-family:'Space Mono',monospace;font-size:8px;letter-spacing:2px;
-  border:1px solid rgba(232,0,30,.3);color:var(--red);padding:4px 10px;margin-top:14px}
-
-/* ===== HISTORY ===== */
-.histLayout{display:grid;grid-template-columns:1fr 380px;gap:70px;align-items:start}
-.histTL{position:relative;padding-top:10px}
-.histTL::before{content:'';position:absolute;left:0;top:0;bottom:0;width:1px;
-  background:linear-gradient(to bottom,var(--red),rgba(232,0,30,.04))}
-.hItem{padding:0 0 52px 34px;position:relative;
-  opacity:0;transform:translateX(-14px);transition:opacity .6s ease,transform .6s ease}
-.hItem.vis{opacity:1;transform:translateX(0)}
-.hDot{position:absolute;left:-5px;top:10px;width:10px;height:10px;
-  background:var(--red);border-radius:50%;box-shadow:0 0 14px rgba(232,0,30,.55)}
-.hYr{font-family:'Bebas Neue',sans-serif;font-size:48px;color:rgba(232,0,30,.22);
-  line-height:1;margin-bottom:6px}
-.hTi{font-weight:700;font-size:15px;letter-spacing:1px;margin-bottom:6px;text-transform:uppercase}
-.hTx{font-size:12px;color:var(--dim);line-height:1.7}
-.histVis{position:sticky;top:110px;
-  background:rgba(255,255,255,.02);border:1px solid rgba(240,242,245,.05);padding:44px}
-.hvStat{text-align:center;padding:24px 0;border-bottom:1px solid rgba(240,242,245,.04)}
-.hvStat:last-child{border-bottom:none}
-.hvN{font-family:'Bebas Neue',sans-serif;font-size:72px;line-height:1;color:var(--red)}
-.hvL{font-family:'Space Mono',monospace;font-size:8px;letter-spacing:3px;
-  color:var(--dimmer);text-transform:uppercase;margin-top:4px}
-
-/* ===== FLEET ===== */
-.fleetRow{display:grid;grid-template-columns:repeat(4,1fr);gap:2px;margin-bottom:50px}
-.fCard{background:rgba(255,255,255,.02);border:1px solid rgba(240,242,245,.05);
-  padding:32px 24px;text-align:center}
-.fcN{font-family:'Bebas Neue',sans-serif;font-size:62px;line-height:1}
-.fcU{font-family:'Bebas Neue',sans-serif;font-size:26px;color:var(--red);margin-left:3px}
-.fcL{font-family:'Space Mono',monospace;font-size:7px;letter-spacing:2px;
-  color:var(--dimmer);text-transform:uppercase;margin-top:5px}
-.routeList{display:flex;gap:10px;flex-wrap:wrap}
-.rPill{display:flex;align-items:center;gap:9px;
-  border:1px solid rgba(240,242,245,.07);padding:10px 18px;
-  font-weight:600;font-size:13px;letter-spacing:1px}
-.rDot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
-
-/* ===== INTERIOR ===== */
-.intLayout{display:grid;grid-template-columns:1fr 340px;gap:4px}
-.intMain{background:rgba(255,255,255,.02);border:1px solid rgba(240,242,245,.05);
-  padding:50px;position:relative;overflow:hidden}
-.intMain::after{content:'INTERIOR';position:absolute;bottom:-28px;right:-16px;
-  font-family:'Bebas Neue',sans-serif;font-size:160px;letter-spacing:-6px;
-  color:rgba(255,255,255,.013);pointer-events:none;line-height:1}
-.intFeat{padding:18px 0;border-bottom:1px solid rgba(240,242,245,.04)}
-.intFeat:last-child{border-bottom:none}
-.ifH{display:flex;align-items:center;gap:12px;margin-bottom:6px}
-.ifBar{width:18px;height:1.5px;background:var(--red);flex-shrink:0}
-.ifTitle{font-weight:700;font-size:13px;letter-spacing:2px;text-transform:uppercase}
-.ifDesc{font-size:12px;color:var(--dim);line-height:1.65;padding-left:30px}
-.intSide{display:flex;flex-direction:column;gap:4px}
-.isCrd{background:rgba(255,255,255,.02);border:1px solid rgba(240,242,245,.05);
-  padding:28px;flex:1;display:flex;flex-direction:column;justify-content:flex-end}
-.isN{font-family:'Bebas Neue',sans-serif;font-size:60px;line-height:1;color:var(--red)}
-.isL{font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;
-  color:rgba(240,242,245,.28);margin-top:4px}
-
-/* ===== FOOTER ===== */
-footer{padding:70px 56px;border-top:1px solid rgba(240,242,245,.04);
-  display:grid;grid-template-columns:1fr 1fr 1fr;gap:50px;background:var(--bg)}
-.fBrand .fbL{font-family:'Bebas Neue',sans-serif;font-size:28px;letter-spacing:5px}
-.fBrand .fbL span{color:var(--red)}
-.fBrand p{font-size:12px;color:var(--dim);line-height:1.7;margin-top:10px;max-width:210px}
-.fCol h5{font-family:'Space Mono',monospace;font-size:7px;letter-spacing:3px;
-  color:var(--red);text-transform:uppercase;margin-bottom:14px}
-.fCol ul{list-style:none;display:flex;flex-direction:column;gap:9px}
-.fCol ul li{font-size:12px;color:var(--dim)}
-.fBot{padding:20px 56px;border-top:1px solid rgba(240,242,245,.03);
-  display:flex;justify-content:space-between;align-items:center}
-.fBot p{font-family:'Space Mono',monospace;font-size:8px;letter-spacing:2px;
-  color:rgba(240,242,245,.18)}
-
-/* ===== TRAINSET DIAGRAM ===== */
-.tsWrap{overflow-x:auto;padding-bottom:16px}
-.tsWrap::-webkit-scrollbar{height:2px}
-.tsRow{display:flex;gap:4px;min-width:max-content;padding:50px 0 16px}
-.car{width:86px;cursor:pointer;position:relative;flex-shrink:0}
-.car:hover .carBody{transform:translateY(-8px)}
-.carBody{height:48px;border-radius:5px;position:relative;overflow:hidden;
-  transition:transform .35s cubic-bezier(.16,1,.3,1)}
-/* up wave cars 1-6 */
-.car.up .carBody{background:linear-gradient(145deg,#BFC3C7,#CDD1D5)}
-.car.up .carBody::before{content:'';position:absolute;bottom:0;left:-8%;right:-8%;height:58%;
-  background:var(--red);
-  clip-path:polygon(0% 55%,18% 5%,36% 42%,54% 0%,72% 32%,88% 8%,100% 38%,100% 100%,0% 100%)}
-/* down wave cars 7-12 */
-.car.dn .carBody{background:linear-gradient(145deg,#BFC3C7,#CDD1D5)}
-.car.dn .carBody::before{content:'';position:absolute;top:0;left:-8%;right:-8%;height:58%;
-  background:var(--red);
-  clip-path:polygon(0% 0%,100% 0%,100% 38%,88% 90%,72% 62%,54% 95%,36% 58%,18% 90%,0% 55%)}
-/* head front (facing forward = car 1 in forward direction, car 12 tail) */
-.car.hf .carBody{border-radius:18px 5px 5px 5px}
-.car.hr .carBody{border-radius:5px 18px 5px 5px}
-.carWin{position:absolute;top:6px;left:6px;right:6px;height:13px;
-  background:rgba(90,130,170,.5);border-radius:2px;z-index:2}
-.carDoor{position:absolute;top:5px;height:28px;width:7px;
-  background:rgba(20,20,30,.35);border-radius:1px;z-index:3}
-.carDoor.d1{left:16px}.carDoor.d2{left:32px}.carDoor.d3{right:32px}.carDoor.d4{right:16px}
-.carNum{font-family:'Space Mono',monospace;font-size:9px;font-weight:700;
-  color:rgba(0,0,0,.5);position:relative;z-index:4;
-  display:flex;align-items:center;justify-content:center;height:100%;padding-top:10px}
-.carLbl{text-align:center;font-size:9px;font-weight:700;letter-spacing:1px;
-  color:rgba(240,242,245,.28);margin-top:7px;text-transform:uppercase}
-.carType{text-align:center;font-family:'Space Mono',monospace;font-size:7px;
-  color:var(--red);margin-top:3px;letter-spacing:.5px}
-/* Tooltip */
-.carTip{position:absolute;bottom:calc(100% + 10px);left:50%;transform:translateX(-50%);
-  background:var(--bg2);border:1px solid rgba(240,242,245,.07);
-  padding:8px 12px;font-size:10px;white-space:nowrap;
-  pointer-events:none;opacity:0;transition:opacity .2s;z-index:20;color:var(--white)}
-.car:hover .carTip{opacity:1}
-</style></head><body>
-<!-- CURSOR --><div id="cur"></div><div id="curR"></div>
-
-<!-- INTRO -->
-<div id="intro">
-  <div class="il" id="il1"><span>COMMUTER LINE INDONESIA</span></div>
-  <div class="il" id="il2"><span>GENERASI PERTAMA · BUATAN CRRC QINGDAO</span></div>
-  <div id="iLogo">KAI <span>CLI</span>–125</div>
-  <div id="iSub">BEROPERASI SEJAK 1 JUNI 2025</div>
-  <div class="iBar"><div class="iBarF" id="iBarF"></div></div>
-</div>
-
-<!-- MAIN -->
-<div id="main" style="opacity:0;transition:opacity .8s ease">
-
-<!-- NAV -->
-<nav id="nav">
-  <div class="nLogo">KAI <span>COMMUTER</span></div>
-  <ul class="nLinks">
-    <li><a href="#eksterior">Eksterior</a></li>
-    <li><a href="#livery">Livery</a></li>
-    <li><a href="#spesifikasi">Spesifikasi</a></li>
-    <li><a href="#teknologi">Teknologi</a></li>
-    <li><a href="#sejarah">Sejarah</a></li>
-    <li><a href="#armada">Armada</a></li>
-  </ul>
-  <div class="nTag">● AKTIF 2025</div>
-</nav>
-
-<!-- HERO -->
-<section id="hero">
-  <div class="fogWrap">
-    <div class="fogBlob b1"></div>
-    <div class="fogBlob b2"></div>
-    <div class="fogBlob b3"></div>
-  </div>
-  <div id="ptcl"></div>
-  <div class="scanline"></div>
-
-  <div class="heroInner">
-    <div class="hL">
-      <div class="hTag">Commuter Line Indonesia · Generasi Pertama</div>
-      <h1 class="hH1">
-        <span class="red">CLI</span><br>
-        <span class="outline">–125</span>
-      </h1>
-      <p class="hDesc">Kereta rel listrik pertama yang diproduksi khusus untuk KAI Commuter. Beroperasi di lintas Jabodetabek sejak 1 Juni 2025 — membawa era baru transportasi urban Indonesia.</p>
-      <div class="hBtns">
-        <a class="bRed" href="#eksterior">Jelajahi Kereta</a>
-        <a class="bGhost" href="#sejarah">Sejarah</a>
-      </div>
-    </div>
-    <div class="hR">
-      <div class="hudPanel">
-        <div class="hudCorner tl"></div><div class="hudCorner tr"></div>
-        <div class="hudCorner bl"></div><div class="hudCorner br"></div>
-        <div class="hudLbl">SISTEM DATA · CLI-125-1012</div>
-        <div class="hudRow"><span class="hK">Produsen</span><span class="hV">CRRC <em>QS</em></span></div>
-        <div class="hudRow"><span class="hK">Model</span><span class="hV">SFC120<em>-V</em></span></div>
-        <div class="hudRow"><span class="hK">Formasi</span><span class="hV">SF<em>12</em></span></div>
-        <div class="hudRow"><span class="hK">Kec. Maks</span><span class="hV">120<em>km/h</em></span></div>
-        <div class="hudRow"><span class="hK">Propulsi</span><span class="hV">1500<em>V DC</em></span></div>
-        <div class="hudRow"><span class="hK">Inverter</span><span class="hV">VVVF<em>IGBT</em></span></div>
-        <div class="hudRow"><span class="hK">Operasi</span><span class="hV" style="color:var(--red)">2025<em>●</em></span></div>
-      </div>
-    </div>
-  </div>
-
-  <div class="scrollHint">
-    <div class="shLine"></div>
-    <div class="shTxt">Scroll</div>
-  </div>
-</section>
-
-<div class="sep"></div>
-
-<!-- SCENE 1: EKSTERIOR — KEPALA -->
-<section class="sec secDark" id="eksterior">
-  <div class="secHead rv">
-    <div class="secEye">01 · Eksterior</div>
-    <div class="secTitle">KEPALA<br>CLI–125</div>
-  </div>
-
-  <div class="frontWrap rv d1">
-    <div class="frontSvgBox">
-      <svg id="frontSvg" viewBox="0 0 480 500" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <defs>
-          <radialGradient id="bodyGrad" cx="50%" cy="35%" r="65%">
-            <stop offset="0%" stop-color="#D8DCDF"/>
-            <stop offset="100%" stop-color="#B0B5B9"/>
-          </radialGradient>
-          <radialGradient id="blackFaceGrad" cx="50%" cy="40%" r="60%">
-            <stop offset="0%" stop-color="#1A1A22"/>
-            <stop offset="100%" stop-color="#0A0A0E"/>
-          </radialGradient>
-          <radialGradient id="windshieldGrad" cx="45%" cy="35%" r="65%">
-            <stop offset="0%" stop-color="rgba(100,150,200,.55)"/>
-            <stop offset="60%" stop-color="rgba(60,100,160,.4)"/>
-            <stop offset="100%" stop-color="rgba(20,40,80,.6)"/>
-          </radialGradient>
-          <linearGradient id="ledGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-            <stop offset="0%" stop-color="rgba(232,0,30,0)"/>
-            <stop offset="15%" stop-color="#FF1830"/>
-            <stop offset="50%" stop-color="#FF2233"/>
-            <stop offset="85%" stop-color="#FF1830"/>
-            <stop offset="100%" stop-color="rgba(232,0,30,0)"/>
-          </linearGradient>
-          <filter id="ledGlow">
-            <feGaussianBlur stdDeviation="5" result="b"/>
-            <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
-          </filter>
-          <filter id="redGlow">
-            <feGaussianBlur stdDeviation="8" result="b"/>
-            <feFlood flood-color="#E8001E" flood-opacity=".35" result="c"/>
-            <feComposite in="c" in2="b" operator="in" result="s"/>
-            <feMerge><feMergeNode in="s"/><feMergeNode in="SourceGraphic"/></feMerge>
-          </filter>
-          <filter id="softShadow">
-            <feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="rgba(0,0,0,.5)"/>
-          </filter>
-          <linearGradient id="redStripeGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-            <stop offset="0%" stop-color="#C8001A"/>
-            <stop offset="50%" stop-color="#E8001E"/>
-            <stop offset="100%" stop-color="#C8001A"/>
-          </linearGradient>
-          <clipPath id="bodyClip">
-            <rect x="18" y="20" width="444" height="400" rx="28"/>
-          </clipPath>
-        </defs>
-
-        <!-- BODY SHELL -->
-        <rect x="18" y="20" width="444" height="400" rx="28" fill="url(#bodyGrad)" filter="url(#softShadow)"/>
-        <rect x="18" y="20" width="444" height="7" rx="4" fill="url(#redStripeGrad)"/>
-        <rect x="18" y="20" width="22" height="400" rx="4" fill="#C8001A"/>
-        <rect x="18" y="20" width="22" height="400" rx="4" fill="url(#redStripeGrad)" opacity=".9"/>
-        <rect x="440" y="20" width="22" height="400" rx="4" fill="#C8001A"/>
-        <rect x="440" y="20" width="22" height="400" rx="4" fill="url(#redStripeGrad)" opacity=".9"/>
-
-        <!-- BLACK FRONT FACE -->
-        <path d="M 80 27 L 400 27 Q 430 27 445 55 L 445 240 Q 445 265 420 275 L 240 290 L 60 275 Q 35 265 35 240 L 35 55 Q 35 27 80 27 Z"
-          fill="url(#blackFaceGrad)" clip-path="url(#bodyClip)"/>
-
-        <!-- WINDSHIELD -->
-        <path d="M 68 42 L 412 42 Q 424 42 428 52 L 430 175 Q 430 188 416 192 L 240 200 L 64 192 Q 50 188 50 175 L 52 52 Q 52 42 68 42 Z"
-          fill="rgba(15,20,30,.9)" rx="4"/>
-        <path d="M 72 48 L 408 48 Q 418 48 420 57 L 422 172 Q 422 183 410 186 L 240 193 L 70 186 Q 58 183 58 172 L 60 57 Q 60 48 72 48 Z"
-          fill="url(#windshieldGrad)"/>
-        <line x1="240" y1="48" x2="240" y2="193" stroke="rgba(30,40,60,.8)" stroke-width="5"/>
-        <path d="M 72 48 L 408 48 Q 418 48 420 57 L 72 57 Q 60 57 60 57 L 60 57 Q 60 48 72 48Z" fill="rgba(150,160,170,.3)"/>
-        <line x1="140" y1="190" x2="90" y2="120" stroke="rgba(60,70,80,.8)" stroke-width="3" stroke-linecap="round"/>
-        <line x1="340" y1="190" x2="390" y2="120" stroke="rgba(60,70,80,.8)" stroke-width="3" stroke-linecap="round"/>
-        <line x1="155" y1="192" x2="108" y2="128" stroke="rgba(60,70,80,.5)" stroke-width="1.5" stroke-linecap="round"/>
-        <line x1="325" y1="192" x2="372" y2="128" stroke="rgba(60,70,80,.5)" stroke-width="1.5" stroke-linecap="round"/>
-        <path d="M 80 60 L 160 60 L 140 100 L 70 100 Z" fill="rgba(255,255,255,.04)"/>
-        <path d="M 300 60 L 380 60 L 400 100 L 310 100 Z" fill="rgba(255,255,255,.03)"/>
-
-        <!-- PANTOGRAPH MOUNT -->
-        <rect x="190" y="18" width="100" height="10" rx="3" fill="rgba(80,85,90,.8)"/>
-        <rect x="215" y="10" width="50" height="10" rx="2" fill="rgba(90,95,100,.7)"/>
-        <line x1="240" y1="10" x2="220" y2="-5" stroke="rgba(100,105,110,.6)" stroke-width="2"/>
-        <line x1="240" y1="10" x2="260" y2="-5" stroke="rgba(100,105,110,.6)" stroke-width="2"/>
-
-        <!-- NOSE LOWER -->
-        <path d="M 50 210 L 430 210 L 426 280 Q 424 294 410 296 L 240 304 L 70 296 Q 56 294 54 280 Z" fill="#0E0E18"/>
-        <rect x="175" y="240" width="130" height="28" rx="3" fill="rgba(255,255,255,.04)"/>
-        <text x="240" y="259" text-anchor="middle" font-family="'Rajdhani',sans-serif" font-weight="700" font-size="11" fill="rgba(255,255,255,.75)" letter-spacing="2">KAI</text>
-        <text x="240" y="272" text-anchor="middle" font-family="'Rajdhani',sans-serif" font-weight="400" font-size="8" fill="rgba(255,255,255,.45)" letter-spacing="3">Commuter</text>
-
-        <!-- S21 MARKER BOARD -->
-        <g id="s21Board">
-          <rect x="24" y="200" width="16" height="50" rx="2" fill="#1A1A22"/>
-          <rect x="20" y="204" width="22" height="42" rx="2" fill="var(--red)"/>
-          <rect x="22" y="206" width="18" height="38" rx="1.5" fill="#C80018"/>
-          <text x="31" y="230" text-anchor="middle" font-family="'Space Mono',monospace" font-weight="700" font-size="7" fill="rgba(255,255,255,.85)" letter-spacing=".5">S</text>
-          <text x="31" y="240" text-anchor="middle" font-family="'Space Mono',monospace" font-weight="700" font-size="7" fill="rgba(255,255,255,.85)" letter-spacing=".5">21</text>
-        </g>
-
-        <!-- LED HEADLIGHT BAR -->
-        <rect x="42" y="215" width="88" height="8" rx="4" fill="rgba(10,10,20,.9)"/>
-        <rect x="44" y="216" width="84" height="6" rx="3" fill="url(#ledGrad)" filter="url(#ledGlow)" opacity=".95"/>
-        <ellipse cx="86" cy="219" rx="46" ry="8" fill="rgba(232,0,30,.18)" filter="url(#ledGlow)"/>
-
-        <rect x="350" y="215" width="88" height="8" rx="4" fill="rgba(10,10,20,.9)"/>
-        <rect x="352" y="216" width="84" height="6" rx="3" fill="url(#ledGrad)" filter="url(#ledGlow)" opacity=".95"/>
-        <ellipse cx="394" cy="219" rx="46" ry="8" fill="rgba(232,0,30,.18)" filter="url(#ledGlow)"/>
-
-        <circle cx="42" cy="209" r="4" fill="rgba(232,0,30,.7)"/>
-        <circle cx="42" cy="209" r="4" fill="rgba(232,0,30,.5)" filter="url(#ledGlow)"/>
-        <circle cx="438" cy="209" r="4" fill="rgba(232,0,30,.7)"/>
-        <circle cx="438" cy="209" r="4" fill="rgba(232,0,30,.5)" filter="url(#ledGlow)"/>
-
-        <!-- NUMBER PLATE -->
-        <rect x="168" y="308" width="144" height="20" rx="3" fill="rgba(255,255,255,.035)"/>
-        <text x="240" y="322" text-anchor="middle" font-family="'Space Mono',monospace" font-size="9" fill="rgba(240,242,245,.45)" letter-spacing="2">CLI-125.1012</text>
-
-        <!-- LOWER BODY / SKIRT -->
-        <path d="M 54 300 L 426 300 L 440 340 L 440 400 Q 440 420 420 420 L 60 420 Q 40 420 40 400 L 40 340 Z" fill="#B8BCC0"/>
-        <rect x="40" y="380" width="400" height="12" rx="2" fill="url(#redStripeGrad)"/>
-        <rect x="192" y="400" width="96" height="30" rx="6" fill="#888C90"/>
-        <rect x="208" y="410" width="64" height="14" rx="3" fill="#666A6E"/>
-        <rect x="224" y="422" width="32" height="12" rx="4" fill="#555"/>
-
-        <!-- BOGIES/WHEELS -->
-        <ellipse cx="110" cy="440" rx="44" ry="24" fill="#1A1A22" stroke="#2A2A32" stroke-width="2"/>
-        <ellipse cx="110" cy="440" rx="26" ry="14" fill="#252530"/>
-        <ellipse cx="110" cy="440" rx="12" ry="7" fill="#1A1A22"/>
-        <ellipse cx="158" cy="445" rx="36" ry="20" fill="#1A1A22" stroke="#2A2A32" stroke-width="2"/>
-        <ellipse cx="158" cy="445" rx="20" ry="11" fill="#252530"/>
-        <ellipse cx="370" cy="440" rx="44" ry="24" fill="#1A1A22" stroke="#2A2A32" stroke-width="2"/>
-        <ellipse cx="370" cy="440" rx="26" ry="14" fill="#252530"/>
-        <ellipse cx="370" cy="440" rx="12" ry="7" fill="#1A1A22"/>
-        <ellipse cx="322" cy="445" rx="36" ry="20" fill="#1A1A22" stroke="#2A2A32" stroke-width="2"/>
-        <ellipse cx="322" cy="445" rx="20" ry="11" fill="#252530"/>
-
-        <rect x="0" y="462" width="480" height="3" rx="1.5" fill="rgba(200,205,210,.08)"/>
-        <rect x="0" y="468" width="480" height="2" rx="1" fill="rgba(200,205,210,.04)"/>
-
-        <path d="M 40 20 L 40 420" stroke="rgba(255,255,255,.06)" stroke-width="1"/>
-        <path d="M 440 20 L 440 420" stroke="rgba(0,0,0,.2)" stroke-width="1"/>
-        <path d="M 40 20 L 440 20" stroke="rgba(255,255,255,.04)" stroke-width="1"/>
-      </svg>
-
-      <div style="margin-top:20px;display:flex;gap:10px">
-        <button id="btnMundur" onclick="setMode('mundur')"
-          style="font-family:'Space Mono',monospace;font-size:8px;letter-spacing:2px;text-transform:uppercase;
-          padding:8px 16px;background:var(--red);color:#fff;border:none;cursor:pointer">
-          ← MUNDUR (FOTO 1)
-        </button>
-        <button id="btnMaju" onclick="setMode('maju')"
-          style="font-family:'Space Mono',monospace;font-size:8px;letter-spacing:2px;text-transform:uppercase;
-          padding:8px 16px;background:rgba(255,255,255,.06);color:var(--white);border:1px solid rgba(255,255,255,.12);cursor:pointer">
-          → MAJU (FOTO 2)
-        </button>
-      </div>
-    </div>
-
-    <div class="featureList">
-      <div class="fItem rv d1">
-        <span class="fN">01</span>
-        <div class="fBody">
-          <h4>Lampu LED S21-Style</h4>
-          <p>Dua strip LED merah panjang yang khas — mirip desain lampu Samsung Galaxy S21. Terdapat juga DRL posisi di sudut kanan-kiri. Saat kereta mundur (arah berlawanan tujuan), strip menyala penuh.</p>
+        <!-- PANDUAN TENGAH (Hanya Muncul di Awal) -->
+        <div id="central-guide" class="self-center text-center transition-all duration-1000 transform translate-y-0 opacity-100">
+            <div class="hud-font text-xs text-cyan-400 tracking-[0.3em] uppercase mb-4 animate-pulse">Inisialisasi Lingkungan 3D</div>
+            <h2 class="text-3xl md:text-6xl font-extrabold tracking-tight mb-6">WEBSITE MASA DEPAN</h2>
+            <button id="btn-start" class="pointer-events-auto px-8 py-3 bg-cyan-500/10 hover:bg-cyan-500/30 text-cyan-400 border border-cyan-400/40 rounded-full text-xs tracking-widest font-bold transition-all duration-300 transform hover:scale-105 neon-glow">
+                MASUK DECK INTERAKTIF
+            </button>
         </div>
-      </div>
-      <div class="fItem rv d2">
-        <span class="fN">02</span>
-        <div class="fBody">
-          <h4>Papan S21 (Marker Board)</h4>
-          <p>Tanda destinasi merah di sisi kiri kepala. Terbuka (terlihat merah) saat kereta berjalan mundur dari tujuan, tertutup saat kereta maju sesuai arah tujuan.</p>
+
+        <!-- FOOTER HUD & NAVIGASI KONTROL -->
+        <footer class="flex flex-col md:flex-row justify-between items-center gap-6 w-full">
+            
+            <!-- Metadata Samping -->
+            <div class="hidden md:flex flex-col hud-font text-[10px] text-gray-500 gap-1">
+                <div>MODEL PERSPEKTIF: PARTICLE_MORPH_ENGINE_v2</div>
+                <div>RENDER: WEBGL_2.0_LATENCY_LOW</div>
+                <div>AUDIO UTAMA: SYNTH_GENERATIVE_ON</div>
+            </div>
+
+            <!-- Navigasi Utama -->
+            <div id="nav-container" class="pointer-events-auto opacity-0 translate-y-10 transition-all duration-1000 flex bg-black/60 backdrop-blur-xl p-2 rounded-2xl neon-border gap-2">
+                <button onclick="switchScene(1)" id="nav-btn-1" class="px-5 py-3 rounded-xl text-xs font-bold tracking-wider transition-all duration-300 flex items-center gap-2 bg-cyan-500/20 text-cyan-400 border border-cyan-400/30">
+                    <span class="w-1.5 h-1.5 bg-cyan-400 rounded-full"></span> 01. IGLO CORE
+                </button>
+                <button onclick="switchScene(2)" id="nav-btn-2" class="px-5 py-3 rounded-xl text-xs font-bold tracking-wider transition-all duration-300 flex items-center gap-2 text-gray-400 hover:text-white">
+                    <span class="w-1.5 h-1.5 bg-gray-500 rounded-full"></span> 02. CRYSTAL
+                </button>
+                <button onclick="switchScene(3)" id="nav-btn-3" class="px-5 py-3 rounded-xl text-xs font-bold tracking-wider transition-all duration-300 flex items-center gap-2 text-gray-400 hover:text-white">
+                    <span class="w-1.5 h-1.5 bg-gray-500 rounded-full"></span> 03. HOLO PENGUIN
+                </button>
+            </footer>
         </div>
-      </div>
-      <div class="fItem rv d3">
-        <span class="fN">03</span>
-        <div class="fBody">
-          <h4>Kaca Depan Lebar</h4>
-          <p>Windshield dua panel besar dengan frame hitam elegan. Berbeda dari KRL generasi lama — desain lebih aerodinamis dan modern. Tiap unit berdiri sendiri, bukan terhubung seperti lokomotif.</p>
+    </div>
+
+    <!-- Panel Informasi Dinamis (Berubah sesuai Scene) -->
+    <div id="info-panel" class="absolute bottom-28 left-6 md:left-10 z-10 w-[85%] md:w-[350px] bg-black/50 backdrop-blur-md p-6 rounded-xl border border-white/5 opacity-0 transform translate-y-10 transition-all duration-1000 pointer-events-none">
+        <div class="hud-font text-[10px] text-cyan-400 tracking-wider mb-1" id="panel-meta">PORTFOLIO_CD_01</div>
+        <h3 class="text-xl font-bold tracking-tight mb-2" id="panel-title">Situs Iglo Modular</h3>
+        <p class="text-xs text-gray-400 leading-relaxed" id="panel-desc">Situs yang dibangun dengan perpaduan balok geometri 3D interaktif. Coba gerakkan kursor Anda untuk melihat balok-balok yang bereaksi terhadap gravitasi virtual.</p>
+        <div class="mt-4 pt-4 border-t border-white/5 flex justify-between items-center text-[10px] hud-font text-gray-500">
+            <span>SISTEM: AKTIF</span>
+            <span id="panel-stat">STABILITAS: 98.4%</span>
         </div>
-      </div>
-      <div class="fItem rv d4">
-        <span class="fN">04</span>
-        <div class="fBody">
-          <h4>Hidung Hitam (Black Nose)</h4>
-          <p>Bagian muka dicat hitam kontras dengan bodi silver dan aksen merah di sisi samping. Memberikan tampilan sporty dan modern khas CRRC Qingdao Sifang SFC120-V.</p>
-        </div>
-      </div>
     </div>
-  </div>
-</section>
-<div class="sep"></div>
 
-<!-- ============================================================ -->
-<!-- SCENE 2: LIVERY SAMPING — KOREKSI MODEL MAJU/MUNDUR           -->
-<!-- ============================================================ -->
-<section class="sec secMid" id="livery">
-  <div class="secHead rv">
-    <div class="secEye">02 · Desain Livery</div>
-    <div class="secTitle">LIVERY<br>GROWING</div>
-  </div>
-
-  <div style="display:grid;grid-template-columns:1fr 1fr;gap:40px;align-items:start" class="rv d1">
-    <div>
-      <p style="font-size:14px;line-height:1.8;color:var(--dim);margin-bottom:24px">
-        Desain eksterior "Growing" — ombak merah-putih yang asimetris. Gerbong <strong style="color:var(--white)">1–6</strong> merupakan formasi <strong style="color:var(--red)">Kepala Mundur (Foto 1)</strong> dengan pola ombak yang <strong style="color:var(--red)">naik ke atas ↗</strong>, sedangkan gerbong <strong style="color:var(--white)">7–12</strong> merupakan formasi <strong style="color:var(--white)">Kepala Maju (Foto 2)</strong> dengan pola ombak <strong style="color:var(--red)">turun ke bawah ↘</strong>.
-      </p>
-      <div style="display:flex;gap:8px;flex-wrap:wrap">
-        <span style="font-family:'Space Mono',monospace;font-size:8px;letter-spacing:2px;
-          background:rgba(232,0,30,.1);border:1px solid rgba(232,0,30,.25);color:var(--red);padding:5px 12px">
-          GROWING THEME
-        </span>
-        <span style="font-family:'Space Mono',monospace;font-size:8px;letter-spacing:2px;
-          background:rgba(232,0,30,.1);border:1px solid rgba(232,0,30,.25);color:var(--red);padding:5px 12px">
-          MERAH–PUTIH
-        </span>
-        <span style="font-family:'Space Mono',monospace;font-size:8px;letter-spacing:2px;
-          background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);color:var(--dim);padding:5px 12px">
-          STAINLESS STEEL
-        </span>
-        <span style="font-family:'Space Mono',monospace;font-size:8px;letter-spacing:2px;
-          background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);color:var(--dim);padding:5px 12px">
-          CRRC SFM138
-        </span>
-      </div>
-    </div>
-    <div style="background:rgba(255,255,255,.02);border:1px solid rgba(240,242,245,.05);padding:28px">
-      <div style="font-family:'Space Mono',monospace;font-size:8px;letter-spacing:3px;color:var(--red);text-transform:uppercase;margin-bottom:16px">Pola Livery SF12</div>
-      <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--dimmer);margin-bottom:8px">
-        <span>← GBG 1–6 · MUNDUR (↗)</span>
-        <span>GBG 7–12 · MAJU (↘) →</span>
-      </div>
-      <svg viewBox="0 0 400 40" style="width:100%">
-        <!-- cars 1-6 up wave -->
-        <g opacity=".9">
-          <rect x="0" y="8" width="30" height="28" rx="3" fill="#C4C8CC"/>
-          <path d="M0 30 Q8 14 16 24 Q22 32 30 18 L30 36 L0 36Z" fill="#E8001E"/>
-          <rect x="32" y="8" width="30" height="28" rx="3" fill="#C4C8CC"/>
-          <path d="M32 30 Q40 14 48 24 Q54 32 62 18 L62 36 L32 36Z" fill="#E8001E"/>
-          <rect x="64" y="8" width="30" height="28" rx="3" fill="#C4C8CC"/>
-          <path d="M64 30 Q72 14 80 24 Q86 32 94 18 L94 36 L64 36Z" fill="#E8001E"/>
-          <rect x="96" y="8" width="30" height="28" rx="3" fill="#C4C8CC"/>
-          <path d="M96 30 Q104 14 112 24 Q118 32 126 18 L126 36 L96 36Z" fill="#E8001E"/>
-          <rect x="128" y="8" width="30" height="28" rx="3" fill="#C4C8CC"/>
-          <path d="M128 30 Q136 14 144 24 Q150 32 158 18 L158 36 L128 36Z" fill="#E8001E"/>
-          <rect x="160" y="8" width="30" height="28" rx="3" fill="#C4C8CC"/>
-          <path d="M160 30 Q168 14 176 24 Q182 32 190 18 L190 36 L160 36Z" fill="#E8001E"/>
-        </g>
-        <!-- divider -->
-        <line x1="196" y1="4" x2="196" y2="40" stroke="rgba(232,0,30,.4)" stroke-width="1" stroke-dasharray="3 3"/>
-        <!-- cars 7-12 down wave -->
-        <g opacity=".9">
-          <rect x="200" y="8" width="30" height="28" rx="3" fill="#C4C8CC"/>
-          <path d="M200 8 L230 8 L230 22 Q222 36 214 26 Q208 18 200 30 Z" fill="#E8001E"/>
-          <rect x="232" y="8" width="30" height="28" rx="3" fill="#C4C8CC"/>
-          <path d="M232 8 L262 8 L262 22 Q254 36 246 26 Q240 18 232 30 Z" fill="#E8001E"/>
-          <rect x="264" y="8" width="30" height="28" rx="3" fill="#C4C8CC"/>
-          <path d="M264 8 L294 8 L294 22 Q286 36 278 26 Q272 18 264 30 Z" fill="#E8001E"/>
-          <rect x="296" y="8" width="30" height="28" rx="3" fill="#C4C8CC"/>
-          <path d="M296 8 L326 8 L326 22 Q318 36 310 26 Q304 18 296 30 Z" fill="#E8001E"/>
-          <rect x="328" y="8" width="30" height="28" rx="3" fill="#C4C8CC"/>
-          <path d="M328 8 L358 8 L358 22 Q350 36 342 26 Q336 18 328 30 Z" fill="#E8001E"/>
-          <rect x="360" y="8" width="30" height="28" rx="3" fill="#C4C8CC"/>
-          <path d="M360 8 L390 8 L390 22 Q382 36 374 26 Q368 18 360 30 Z" fill="#E8001E"/>
-        </g>
-        <text x="95" y="6" text-anchor="middle" font-family="monospace" font-size="5" fill="rgba(232,0,30,.5)">↗ MUNDUR</text>
-        <text x="305" y="6" text-anchor="middle" font-family="monospace" font-size="5" fill="rgba(232,0,30,.5)">↘ MAJU</text>
-      </svg>
-    </div>
-  </div>
-
-  <!-- FULL SIDE VIEW SVG — REVISED MODEL -->
-  <div class="sideWrap rv d2" style="margin-top:60px">
-    <svg viewBox="0 0 1200 180" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <defs>
-        <linearGradient id="sBodyG" x1="0%" y1="0%" x2="0%" y2="100%">
-          <stop offset="0%" stop-color="#D0D4D8"/>
-          <stop offset="50%" stop-color="#C4C8CC"/>
-          <stop offset="100%" stop-color="#B4B8BC"/>
-        </linearGradient>
-        <clipPath id="sClip1"><rect x="4" y="8" width="155" height="130" rx="16"/></clipPath>
-        <clipPath id="sClip2"><rect x="165" y="16" width="132" height="122" rx="4"/></clipPath>
-        <clipPath id="sClip3"><rect x="303" y="16" width="132" height="122" rx="4"/></clipPath>
-        <clipPath id="sClip4"><rect x="441" y="16" width="132" height="122" rx="4"/></clipPath>
-        <clipPath id="sClip5"><rect x="579" y="16" width="132" height="122" rx="4"/></clipPath>
-        <clipPath id="sClip6"><rect x="717" y="16" width="132" height="122" rx="4"/></clipPath>
-        <clipPath id="sClip7"><rect x="855" y="16" width="132" height="122" rx="4"/></clipPath>
-        <clipPath id="sClipEnd"><rect x="1041" y="8" width="155" height="130" rx="16"/></clipPath>
-      </defs>
-
-      <!-- ============ KEPALA MUNDUR (GERBONG 1) — FOTO 1 STYLE ============ -->
-      <rect x="4" y="8" width="155" height="130" rx="16" fill="url(#sBodyG)"/>
-      <path d="M4 8 Q4 8 40 8 L40 140 L4 140 Q4 140 4 8Z" fill="#1A1A22" clip-path="url(#sClip1)"/>
-      <rect x="4" y="8" width="155" height="6" rx="3" fill="var(--red)"/>
-      <rect x="4" y="132" width="155" height="6" rx="3" fill="#C8001A"/>
-      <rect x="48" y="24" width="106" height="42" rx="3" fill="rgba(70,110,150,.6)"/>
-      <rect x="50" y="26" width="22" height="38" rx="2" fill="rgba(255,255,255,.08)"/>
-      <!-- UP WAVE (Gerbong 1-6) -->
-      <path d="M48 100 Q75 62 102 88 Q122 106 159 72 L159 138 L48 138Z" fill="var(--red)" opacity=".92" clip-path="url(#sClip1)"/>
-      <rect x="56" y="88" width="10" height="44" rx="2" fill="rgba(20,20,30,.3)"/>
-      <rect x="120" y="88" width="10" height="44" rx="2" fill="rgba(20,20,30,.3)"/>
-      <!-- LED Tail Light (Mundur = Red) -->
-      <rect x="4" y="75" width="30" height="6" rx="3" fill="#FF2233"/>
-      <rect x="4" y="75" width="30" height="6" rx="3" fill="rgba(232,0,30,.4)" filter="url(#ledGlow)"/>
-      <text x="85" y="120" text-anchor="middle" font-family="'Rajdhani',sans-serif" font-weight="700" font-size="8" fill="rgba(255,255,255,.5)" letter-spacing="1">CLI-125.1001</text>
-      <text x="10" y="20" font-family="monospace" font-size="7" fill="rgba(255,255,255,.3)">1 (Mundur)</text>
-
-      <!-- ============ GERBONG 2–6 (UP WAVE / MUNDUR POLA) ============ -->
-      <!-- CAR 2 -->
-      <rect x="165" y="16" width="132" height="122" rx="4" fill="url(#sBodyG)"/>
-      <rect x="165" y="16" width="132" height="5" fill="var(--red)"/>
-      <rect x="165" y="133" width="132" height="5" fill="#C8001A"/>
-      <rect x="176" y="30" width="110" height="36" rx="3" fill="rgba(70,110,150,.55)"/>
-      <rect x="178" y="32" width="18" height="32" rx="2" fill="rgba(255,255,255,.07)"/>
-      <path d="M165 98 Q192 60 219 84 Q239 102 297 68 L297 138 L165 138Z" fill="var(--red)" opacity=".92" clip-path="url(#sClip2)"/>
-      <rect x="176" y="86" width="9" height="46" rx="2" fill="rgba(20,20,30,.28)"/>
-      <rect x="210" y="86" width="9" height="46" rx="2" fill="rgba(20,20,30,.28)"/>
-      <rect x="252" y="86" width="9" height="46" rx="2" fill="rgba(20,20,30,.28)"/>
-      <rect x="278" y="86" width="9" height="46" rx="2" fill="rgba(20,20,30,.28)"/>
-      <text x="231" y="128" text-anchor="middle" font-family="monospace" font-size="6" fill="rgba(255,255,255,.25)">CLI-125.1002</text>
-      <text x="170" y="24" font-family="monospace" font-size="7" fill="rgba(0,0,0,.3)">2</text>
-
-      <!-- CAR 3 -->
-      <rect x="303" y="16" width="132" height="122" rx="4" fill="url(#sBodyG)"/>
-      <rect x="303" y="16" width="132" height="5" fill="var(--red)"/>
-      <rect x="303" y="133" width="132" height="5" fill="#C8001A"/>
-      <rect x="314" y="30" width="110" height="36" rx="3" fill="rgba(70,110,150,.55)"/>
-      <path d="M303 96 Q330 58 357 82 Q377 100 435 66 L435 138 L303 138Z" fill="var(--red)" opacity=".92" clip-path="url(#sClip3)"/>
-      <rect x="314" y="86" width="9" height="46" rx="2" fill="rgba(20,20,30,.28)"/>
-      <rect x="348" y="86" width="9" height="46" rx="2" fill="rgba(20,20,30,.28)"/>
-      <rect x="390" y="86" width="9" height="46" rx="2" fill="rgba(20,20,30,.28)"/>
-      <rect x="416" y="86" width="9" height="46" rx="2" fill="rgba(20,20,30,.28)"/>
-      <text x="369" y="128" text-anchor="middle" font-family="monospace" font-size="6" fill="rgba(255,255,255,.25)">CLI-125.1003</text>
-      <text x="308" y="24" font-family="monospace" font-size="7" fill="rgba(0,0,0,.3)">3</text>
-
-      <!-- CAR 4 -->
-      <rect x="441" y="16" width="132" height="122" rx="4" fill="url(#sBodyG)"/>
-      <rect x="441" y="16" width="132" height="5" fill="var(--red)"/>
-      <rect x="441" y="133" width="132" height="5" fill="#C8001A"/>
-      <rect x="452" y="30" width="110" height="36" rx="3" fill="rgba(70,110,150,.55)"/>
-      <path d="M441 100 Q468 62 495 86 Q515 104 573 70 L573 138 L441 138Z" fill="var(--red)" opacity=".92" clip-path="url(#sClip4)"/>
-      <rect x="452" y="86" width="9" height="46" rx="2" fill="rgba(20,20,30,.28)"/>
-      <rect x="486" y="86" width="9" height="46" rx="2" fill="rgba(20,20,30,.28)"/>
-      <text x="507" y="128" text-anchor="middle" font-family="monospace" font-size="6" fill="rgba(255,255,255,.25)">CLI-125.1004</text>
-      <text x="446" y="24" font-family="monospace" font-size="7" fill="rgba(0,0,0,.3)">4</text>
-
-      <!-- CAR 5 -->
-      <rect x="579" y="16" width="132" height="122" rx="4" fill="url(#sBodyG)"/>
-      <rect x="579" y="16" width="132" height="5" fill="var(--red)"/>
-      <rect x="579" y="133" width="132" height="5" fill="#C8001A"/>
-      <rect x="590" y="30" width="110" height="36" rx="3" fill="rgba(70,110,150,.55)"/>
-      <path d="M579 98 Q606 60 633 84 Q653 102 711 68 L711 138 L579 138Z" fill="var(--red)" opacity=".92" clip-path="url(#sClip5)"/>
-      <rect x="590" y="86" width="9" height="46" rx="2" fill="rgba(20,20,30,.28)"/>
-      <rect x="624" y="86" width="9" height="46" rx="2" fill="rgba(20,20,30,.28)"/>
-      <text x="645" y="128" text-anchor="middle" font-family="monospace" font-size="6" fill="rgba(255,255,255,.25)">CLI-125.1005</text>
-      <text x="584" y="24" font-family="monospace" font-size="7" fill="rgba(0,0,0,.3)">5</text>
-
-      <!-- CAR 6 -->
-      <rect x="717" y="16" width="132" height="122" rx="4" fill="url(#sBodyG)"/>
-      <rect x="717" y="16" width="132" height="5" fill="var(--red)"/>
-      <rect x="717" y="133" width="132" height="5" fill="#C8001A"/>
-      <rect x="728" y="30" width="110" height="36" rx="3" fill="rgba(70,110,150,.55)"/>
-      <path d="M717 102 Q744 64 771 88 Q791 106 849 72 L849 138 L717 138Z" fill="var(--red)" opacity=".92" clip-path="url(#sClip6)"/>
-      <rect x="728" y="86" width="9" height="46" rx="2" fill="rgba(20,20,30,.28)"/>
-      <rect x="762" y="86" width="9" height="46" rx="2" fill="rgba(20,20,30,.28)"/>
-      <text x="783" y="128" text-anchor="middle" font-family="monospace" font-size="6" fill="rgba(255,255,255,.25)">CLI-125.1006</text>
-      <text x="722" y="24" font-family="monospace" font-size="7" fill="rgba(0,0,0,.3)">6</text>
-
-      <!-- WAVE TRANSITION -->
-      <line x1="851" y1="8" x2="851" y2="148" stroke="rgba(232,0,30,.35)" stroke-width="1" stroke-dasharray="5 4"/>
-
-      <!-- ============ GERBONG 7–11 (DOWN WAVE / MAJU POLA) ============ -->
-      <!-- CAR 7 -->
-      <rect x="855" y="16" width="132" height="122" rx="4" fill="url(#sBodyG)"/>
-      <rect x="855" y="16" width="132" height="5" fill="var(--red)"/>
-      <rect x="855" y="133" width="132" height="5" fill="#C8001A"/>
-      <rect x="866" y="30" width="110" height="36" rx="3" fill="rgba(70,110,150,.55)"/>
-      <!-- DOWN WAVE (Gerbong 7-12) -->
-      <path d="M855 16 L987 16 L987 52 Q960 90 933 66 Q913 48 855 80 Z" fill="var(--red)" opacity=".92" clip-path="url(#sClip7)"/>
-      <rect x="866" y="70" width="9" height="62" rx="2" fill="rgba(20,20,30,.28)"/>
-      <rect x="900" y="70" width="9" height="62" rx="2" fill="rgba(20,20,30,.28)"/>
-      <text x="921" y="128" text-anchor="middle" font-family="monospace" font-size="6" fill="rgba(255,255,255,.25)">CLI-125.1007</text>
-      <text x="860" y="24" font-family="monospace" font-size="7" fill="rgba(0,0,0,.3)">7</text>
-
-      <!-- ============ KEPALA MAJU (GERBONG 12) — FOTO 2 STYLE ============ -->
-      <rect x="1041" y="8" width="155" height="130" rx="16" fill="url(#sBodyG)"/>
-      <path d="M1160 8 Q1196 8 1196 8 L1196 140 L1160 140 Z" fill="#1A1A22" clip-path="url(#sClipEnd)"/>
-      <rect x="1041" y="8" width="155" height="6" rx="3" fill="var(--red)"/>
-      <rect x="1041" y="132" width="155" height="6" rx="3" fill="#C8001A"/>
-      <rect x="1046" y="24" width="106" height="42" rx="3" fill="rgba(70,110,150,.6)"/>
-      <!-- DOWN WAVE -->
-      <path d="M1041 16 L1196 16 L1196 60 Q1168 96 1140 70 Q1120 52 1041 88 Z" fill="var(--red)" opacity=".92" clip-path="url(#sClipEnd)"/>
-      <rect x="1060" y="88" width="10" height="44" rx="2" fill="rgba(20,20,30,.3)"/>
-      <rect x="1124" y="88" width="10" height="44" rx="2" fill="rgba(20,20,30,.3)"/>
-      <!-- Headlight LED (Maju = Yellow/White Light) -->
-      <rect x="1166" y="75" width="26" height="6" rx="3" fill="#FFFFCC"/>
-      <text x="1100" y="120" text-anchor="middle" font-family="monospace" font-size="6" fill="rgba(255,255,255,.25)">CLI-125.1012</text>
-      <text x="1150" y="20" font-family="monospace" font-size="7" fill="rgba(255,255,255,.3)">12 (Maju)</text>
-
-      <!-- intermediate indicator for 8-11 -->
-      <rect x="993" y="16" width="42" height="122" rx="3" fill="rgba(196,200,204,.5)"/>
-      <text x="1014" y="82" text-anchor="middle" font-family="monospace" font-size="8" fill="rgba(0,0,0,.3)" transform="rotate(-90,1014,82)">8–11</text>
-
-      <!-- Rails -->
-      <rect x="0" y="150" width="1200" height="2" rx="1" fill="rgba(200,205,210,.1)"/>
-      <rect x="0" y="156" width="1200" height="2" rx="1" fill="rgba(200,205,210,.05)"/>
-
-      <!-- Labels -->
-      <text x="851" y="164" text-anchor="middle" font-family="monospace" font-size="7" fill="rgba(232,0,30,.5)">TRANSISI TRANSISI LIVERY</text>
-      <text x="420" y="164" text-anchor="middle" font-family="monospace" font-size="7" fill="rgba(232,0,30,.35)">GBG 1–6 · KEPALA MUNDUR (↗ NAIK)</text>
-      <text x="1100" y="164" text-anchor="middle" font-family="monospace" font-size="7" fill="rgba(232,0,30,.35)">GBG 7–12 · KEPALA MAJU (↘ TURUN)</text>
-    </svg>
-
-    <div class="sideLabel">
-      <span>← KEPALA MUNDUR (MC1) · GERBONG 1</span>
-      <span>GERBONG 12 · KEPALA MAJU (MC2) →</span>
-    </div>
-  </div>
-</section>
-<div class="sep"></div>
-
-<!-- TRAINSET DIAGRAM -->
-<section class="sec secDark">
-  <div class="secHead rv">
-    <div class="secEye">03 · Rangkaian</div>
-    <div class="secTitle">SF12<br>TRAINSET</div>
-  </div>
-  <div class="tsWrap rv d1">
-    <div class="tsRow" id="tsRow"></div>
-  </div>
-</section>
-
-<div class="sep"></div>
-
-<!-- SPECS -->
-<section class="sec secMid" id="spesifikasi">
-  <div class="secHead rv">
-    <div class="secEye">04 · Spesifikasi Teknis</div>
-    <div class="secTitle">DATA<br>TEKNIS</div>
-  </div>
-  <div class="specsGrid">
-    <div class="spBlk rv d1">
-      <span class="spIco">⚡</span>
-      <div class="spBig">1500<em>V DC</em></div>
-      <div class="spK">Sistem Kelistrikan</div>
-      <div class="spV">Overhead Catenary Wire · Pantograf tunggal per gerbong bermotor</div>
-    </div>
-    <div class="spBlk rv d2">
-      <span class="spIco">🏎</span>
-      <div class="spBig">120<em>km/h</em></div>
-      <div class="spK">Kecepatan Maksimum</div>
-      <div class="spV">Operasional 75–95 km/h di lintas Jabodetabek</div>
-    </div>
-    <div class="spBlk rv d3">
-      <span class="spIco">📐</span>
-      <div class="spBig">20<em>m</em></div>
-      <div class="spK">Panjang Per Gerbong</div>
-      <div class="spV">Lebar 3000mm · Tinggi 3985mm · Bodi Stainless Steel SUS301L</div>
-    </div>
-    <div class="spBlk span2 rv d1" style="display:flex;gap:50px;align-items:center">
-      <div>
-        <span class="spIco">🚃</span>
-        <div class="spBig">12<em>gbg</em></div>
-        <div class="spK">Formasi SF12</div>
-        <div class="spV">6M+6T (Motor + Trailer) per rangkaian penuh</div>
-      </div>
-      <div>
-        <span class="spIco">🚪</span>
-        <div class="spBig">4<em>×2</em></div>
-        <div class="spK">Pintu Per Gerbong</div>
-        <div class="spV">4 pasang pintu geser otomatis · Anti Trap Door System</div>
-      </div>
-    </div>
-    <div class="spBlk rv d2">
-      <span class="spIco">❄️</span>
-      <div class="spBig">2<em>unit</em></div>
-      <div class="spK">AC Per Gerbong</div>
-      <div class="spV">INKA I-Cond ACI 3501 · Dirancang untuk iklim tropis</div>
-    </div>
-    <div class="spBlk span3 rv">
-      <div>
-        <div class="spBig">42<em>krs</em></div>
-        <div class="spK">Kursi Kabin</div>
-        <div class="spV">Per gerbong kabin</div>
-      </div>
-      <div>
-        <div class="spBig">54<em>krs</em></div>
-        <div class="spK">Kursi Non-Kabin</div>
-        <div class="spV">Per gerbong non-kabin</div>
-      </div>
-      <div>
-        <div class="spBig">300<em>+</em></div>
-        <div class="spK">Kapasitas/Gerbong</div>
-        <div class="spV">Duduk + berdiri penuh</div>
-      </div>
-      <div>
-        <div class="spBig">2025<em></em></div>
-        <div class="spK">Mulai Operasi</div>
-        <div class="spV">1 Juni 2025</div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<div class="sep"></div>
-
-<!-- TEKNOLOGI -->
-<section class="sec secDark" id="teknologi">
-  <div class="secHead rv">
-    <div class="secEye">05 · Teknologi</div>
-    <div class="secTitle">SISTEM<br>PROPULSI</div>
-  </div>
-  <div class="techGrid">
-    <div class="tCard rv d1">
-      <div class="tIco">⚙️</div>
-      <h4>VVVF–IGBT</h4>
-      <p>Variable Voltage Variable Frequency dengan Insulated Gate Bipolar Transistor. Sistem ini memungkinkan kontrol kecepatan halus dan efisiensi energi tinggi — termasuk pengereman regeneratif yang mengembalikan listrik ke jaringan.</p>
-      <span class="tBadge">TOYO DENKI RG6061-A-M</span>
-    </div>
-    <div class="tCard rv d2">
-      <div class="tIco">🖥️</div>
-      <h4>TCMS</h4>
-      <p>Train Control and Monitoring System — sistem terpusat yang memantau seluruh parameter kereta secara real-time: traksi, rem, pintu, AC, dan diagnostik. Data terpantau dari kabin masinis hingga pusat kendali.</p>
-      <span class="tBadge">INTEGRATED CONTROL</span>
-    </div>
-    <div class="tCard rv d3">
-      <div class="tIco">🚪</div>
-      <h4>Anti Trap Door</h4>
-      <p>Sistem sensor canggih pada pintu otomatis yang mendeteksi hambatan sebelum pintu menutup penuh. Meningkatkan keselamatan penumpang signifikan dibanding generasi KRL lama yang tidak memiliki fitur ini.</p>
-      <span class="tBadge">SAFETY CERTIFIED</span>
-    </div>
-  </div>
-</section>
-
-<div class="sep"></div>
-
-<!-- SEJARAH -->
-<section class="sec secMid" id="sejarah">
-  <div class="secHead rv">
-    <div class="secEye">06 · Sejarah</div>
-    <div class="secTitle">KRONOLOGI<br>CLI–125</div>
-  </div>
-  <div class="histLayout">
-    <div class="histTL">
-      <div class="hItem" data-delay="0">
-        <div class="hDot"></div>
-        <div class="hYr">2023</div>
-        <div class="hTi">Polemik Impor KRL Bekas</div>
-        <div class="hTx">Kontroversi rencana impor KRL bekas dari Jepang berujung pembatalan. Pemerintah memutuskan mencari pengadaan KRL baru untuk meremajakan armada Jabodetabek yang terus bertumbuh.</div>
-      </div>
-      <div class="hItem" data-delay="100">
-        <div class="hDot"></div>
-        <div class="hYr">2024</div>
-        <div class="hTi">Kontrak CRRC Qingdao Sifang</div>
-        <div class="hTx">KAI Commuter menandatangani kontrak pengadaan dengan CRRC Qingdao Sifang Co., Ltd. — produsen kereta terbesar di Tiongkok. Model yang dipilih: SFC120-V (kode internal SFM138), dengan pembiayaan melalui PMN.</div>
-      </div>
-      <div class="hItem" data-delay="200">
-        <div class="hDot"></div>
-        <div class="hYr">2024</div>
-        <div class="hTi">Produksi & Pengiriman</div>
-        <div class="hTx">Produksi dimulai di fasilitas CRRC di Qingdao, Shandong. Rangkaian pertama dikirim ke Indonesia dan menjalani serangkaian uji kelayakan serta sertifikasi keselamatan oleh DJKA Kemenhub sesuai Permenhub No. PM 49 Tahun 2023.</div>
-      </div>
-      <div class="hItem" data-delay="300">
-        <div class="hDot"></div>
-        <div class="hYr">2025</div>
-        <div class="hTi">Operasi Perdana — 1 Juni 2025</div>
-        <div class="hTx">KAI Commuter resmi mengoperasikan tiga rangkaian CLI-125 perdana. Dua rangkaian untuk Lin Bogor (KA 11 dan KA 12), satu untuk Lin Cikarang. Diresmikan oleh Direktur Utama Asdo Artriviyanto di Stasiun Manggarai.</div>
-      </div>
-      <div class="hItem" data-delay="400">
-        <div class="hDot"></div>
-        <div class="hYr">2025+</div>
-        <div class="hTi">Ekspansi Armada Berlanjut</div>
-        <div class="hTx">Total 84 gerbong (7 trainset) telah terkirim, 108 gerbong (9 trainset) dalam produksi. Rencana perluasan ke lintas lain menyusul. Ridership Commuter Line terus tumbuh: 334,36 juta penumpang sepanjang 2024.</div>
-      </div>
-    </div>
-    <div class="histVis rv">
-      <div class="hvStat">
-        <div class="hvN" id="ctr1">0</div>
-        <div class="hvL">Gerbong Dibangun</div>
-      </div>
-      <div class="hvStat">
-        <div class="hvN" id="ctr2">0</div>
-        <div class="hvL">Trainset Aktif</div>
-      </div>
-      <div class="hvStat">
-        <div class="hvN" id="ctr3">0</div>
-        <div class="hvL">Juta Penumpang/Tahun</div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<div class="sep"></div>
-
-<!-- ARMADA -->
-<section class="sec secDark" id="armada">
-  <div class="secHead rv">
-    <div class="secEye">07 · Status Armada</div>
-    <div class="secTitle">ARMADA<br>CLI–125</div>
-  </div>
-  <div class="fleetRow">
-    <div class="fCard rv d1">
-      <div><span class="fcN" data-to="84">0</span><span class="fcU">unit</span></div>
-      <div class="fcL">Gerbong Terkirim</div>
-    </div>
-    <div class="fCard rv d2">
-      <div><span class="fcN" data-to="7">0</span><span class="fcU">set</span></div>
-      <div class="fcL">Trainset Aktif</div>
-    </div>
-    <div class="fCard rv d3">
-      <div><span class="fcN" data-to="108">0</span><span class="fcU">unit</span></div>
-      <div class="fcL">Dalam Konstruksi</div>
-    </div>
-    <div class="fCard rv d4">
-      <div><span class="fcN" data-to="12">0</span><span class="fcU">gbg</span></div>
-      <div class="fcL">Per Trainset (SF12)</div>
-    </div>
-  </div>
-  <div class="secEye rv" style="margin-bottom:16px">Jalur Operasi</div>
-  <div class="routeList rv d1">
-    <div class="rPill"><div class="rDot" style="background:#E8001E"></div>Lin Bogor (Bogor–Jakarta Kota)</div>
-    <div class="rPill"><div class="rDot" style="background:#F7A800"></div>Lin Cikarang (Cikarang–Angke)</div>
-    <div class="rPill" style="opacity:.35"><div class="rDot" style="background:#666"></div>Lintas lain (segera)</div>
-  </div>
-</section>
-
-<div class="sep"></div>
-
-<!-- INTERIOR -->
-<section class="sec secMid" id="interior">
-  <div class="secHead rv">
-    <div class="secEye">08 · Interior</div>
-    <div class="secTitle">KABIN<br>PENUMPANG</div>
-  </div>
-  <div class="intLayout">
-    <div class="intMain rv">
-      <div class="intFeat">
-        <div class="ifH"><div class="ifBar"></div><div class="ifTitle">Kursi Sideway Merah</div></div>
-        <p class="ifDesc">Kursi memanjang (sideway) berbalut material merah yang ikonik — sama dengan foto interior. 42 kursi di gerbong kabin, 54 di gerbong non-kabin. Desain kokoh dan mudah dibersihkan.</p>
-      </div>
-      <div class="intFeat">
-        <div class="ifH"><div class="ifBar"></div><div class="ifTitle">Strap Pegangan Hijau</div></div>
-        <p class="ifDesc">Pegangan gantung berwarna hijau cerah yang terdistribusi merata di sepanjang interior. Mudah dijangkau penumpang berdiri berbagai ketinggian, dengan tiang vertikal stainless yang kokoh.</p>
-      </div>
-      <div class="intFeat">
-        <div class="ifH"><div class="ifBar"></div><div class="ifTitle">Pencahayaan LED Penuh</div></div>
-        <p class="ifDesc">Strip LED putih di sepanjang langit-langit memberikan pencahayaan merata dan terang. Panel overhead juga mencakup kisi-kisi AC dan kamera CCTV terintegrasi di setiap gerbong.</p>
-      </div>
-      <div class="intFeat">
-        <div class="ifH"><div class="ifBar"></div><div class="ifTitle">HVAC Tropis INKA I-Cond</div></div>
-        <p class="ifDesc">Sistem pendingin AC model ACI 3501 buatan INKA — 2 unit per gerbong — khusus dirancang untuk suhu dan kelembaban ekstrem Indonesia. Distribusi udara dingin merata ke seluruh kabin.</p>
-      </div>
-      
-      <div style="margin-top:32px;background:rgba(0,0,0,.4);border:1px solid rgba(240,242,245,.04);overflow:hidden">
-        <svg viewBox="0 0 600 280" fill="none" style="width:100%;display:block">
-          <path d="M0 280 L600 280 L380 140 L220 140Z" fill="#484848"/>
-          <path d="M0 280 L600 280 L380 140 L220 140Z" fill="url(#floorGrad)"/>
-          <defs>
-            <linearGradient id="floorGrad" x1="50%" y1="100%" x2="50%" y2="0%">
-              <stop offset="0%" stop-color="#3C3C3C"/>
-              <stop offset="100%" stop-color="#585858"/>
-            </linearGradient>
-          </defs>
-          <path d="M0 0 L600 0 L380 140 L220 140Z" fill="#D0D2D4"/>
-          <path d="M0 0 L0 280 L220 140Z" fill="#B8BCBE"/>
-          <path d="M600 0 L600 280 L380 140Z" fill="#B0B4B6"/>
-          <path d="M0 180 L0 280 L200 210 L220 140Z" fill="#C8001E"/>
-          <path d="M0 180 L0 280 L200 210 L220 140Z" fill="rgba(0,0,0,.15)"/>
-          <line x1="0" y1="200" x2="215" y2="148" stroke="rgba(0,0,0,.2)" stroke-width="1.5"/>
-          <line x1="0" y1="220" x2="215" y2="158" stroke="rgba(0,0,0,.2)" stroke-width="1.5"/>
-          <line x1="0" y1="240" x2="215" y2="168" stroke="rgba(0,0,0,.2)" stroke-width="1.5"/>
-          <line x1="0" y1="260" x2="215" y2="178" stroke="rgba(0,0,0,.2)" stroke-width="1.5"/>
-          <path d="M600 180 L600 280 L400 210 L380 140Z" fill="#C8001E"/>
-          <path d="M600 180 L600 280 L400 210 L380 140Z" fill="rgba(0,0,0,.1)"/>
-          <line x1="600" y1="200" x2="385" y2="148" stroke="rgba(0,0,0,.15)" stroke-width="1.5"/>
-          <line x1="600" y1="220" x2="385" y2="158" stroke="rgba(0,0,0,.15)" stroke-width="1.5"/>
-          <line x1="600" y1="240" x2="385" y2="168" stroke="rgba(0,0,0,.15)" stroke-width="1.5"/>
-          <rect x="0" y="30" width="80" height="90" rx="3" fill="rgba(140,180,220,.55)"/>
-          <rect x="90" y="30" width="80" height="90" rx="3" fill="rgba(140,180,220,.55)"/>
-          <rect x="180" y="30" width="40" height="70" rx="3" fill="rgba(140,180,220,.4)"/>
-          <rect x="520" y="30" width="80" height="90" rx="3" fill="rgba(180,210,240,.5)"/>
-          <rect x="430" y="30" width="80" height="90" rx="3" fill="rgba(180,210,240,.5)"/>
-          <rect x="380" y="30" width="40" height="70" rx="3" fill="rgba(180,210,240,.4)"/>
-          <rect x="0" y="0" width="220" height="8" fill="rgba(255,255,240,.9)"/>
-          <rect x="0" y="0" width="220" height="8" fill="rgba(255,255,255,.3)"/>
-          <rect x="380" y="0" width="220" height="8" fill="rgba(255,255,240,.9)"/>
-          <line x1="50" y1="0" x2="50" y2="110" stroke="rgba(80,80,90,.5)" stroke-width="1.5"/>
-          <ellipse cx="50" cy="114" rx="6" ry="7" fill="none" stroke="#28A040" stroke-width="2.5"/>
-          <line x1="110" y1="0" x2="110" y2="110" stroke="rgba(80,80,90,.5)" stroke-width="1.5"/>
-          <ellipse cx="110" cy="114" rx="6" ry="7" fill="none" stroke="#28A040" stroke-width="2.5"/>
-          <line x1="170" y1="0" x2="170" y2="110" stroke="rgba(80,80,90,.4)" stroke-width="1.5"/>
-          <ellipse cx="170" cy="114" rx="6" ry="7" fill="none" stroke="#28A040" stroke-width="2.5"/>
-          <line x1="550" y1="0" x2="550" y2="110" stroke="rgba(80,80,90,.5)" stroke-width="1.5"/>
-          <ellipse cx="550" cy="114" rx="6" ry="7" fill="none" stroke="#28A040" stroke-width="2.5"/>
-          <line x1="490" y1="0" x2="490" y2="110" stroke="rgba(80,80,90,.5)" stroke-width="1.5"/>
-          <ellipse cx="490" cy="114" rx="6" ry="7" fill="none" stroke="#28A040" stroke-width="2.5"/>
-          <line x1="430" y1="0" x2="430" y2="110" stroke="rgba(80,80,90,.4)" stroke-width="1.5"/>
-          <ellipse cx="430" cy="114" rx="6" ry="7" fill="none" stroke="#28A040" stroke-width="2.5"/>
-          <line x1="0" y1="108" x2="218" y2="108" stroke="rgba(80,80,90,.35)" stroke-width="1.2"/>
-          <line x1="382" y1="108" x2="600" y2="108" stroke="rgba(80,80,90,.35)" stroke-width="1.2"/>
-          <rect x="20" y="10" width="160" height="18" rx="2" fill="rgba(200,205,210,.7)"/>
-          <rect x="420" y="10" width="160" height="18" rx="2" fill="rgba(200,205,210,.7)"/>
-          <circle cx="220" cy="12" r="5" fill="rgba(30,30,40,.7)"/>
-          <circle cx="380" cy="12" r="5" fill="rgba(30,30,40,.7)"/>
-          <circle cx="300" cy="140" r="30" fill="rgba(255,255,255,.06)"/>
-          <circle cx="300" cy="140" r="10" fill="rgba(255,255,255,.06)"/>
+    <!-- Tombol Suara Mute/Unmute -->
+    <button id="btn-sound" class="absolute top-6 right-6 md:top-10 md:right-10 z-20 w-10 h-10 bg-black/40 backdrop-blur-md rounded-full border border-white/10 flex items-center justify-center text-gray-400 hover:text-white transition-all pointer-events-auto">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" id="sound-icon">
+            <path fill-rule="evenodd" d="M9.383 3.076A1 1 0 0110 4v12a1 1 0 01-1.707.707L4.586 13H2a1 1 0 01-1-1V8a1 1 0 011-1h2.586l3.693-3.693a1 1 0 011.104-.231zM13.586 10l2.293-2.293a1 1 0 10-1.414-1.414L12.172 8.586l-2.293-2.293a1 1 0 10-1.414 1.414L10.758 10l-2.293 2.293a1 1 0 101.414 1.414l2.293-2.293 2.293 2.293a1 1 0 001.414-1.414L13.586 10z" clip-rule="evenodd" />
         </svg>
-      </div>
-    </div>
-    <div class="intSide">
-      <div class="isCrd rv d1"><div class="isN">42</div><div class="isL">Kursi Kabin/Gerbong</div></div>
-      <div class="isCrd rv d2"><div class="isN">54</div><div class="isL">Kursi Non-Kabin</div></div>
-      <div class="isCrd rv d3"><div class="isN">300<span style="font-size:28px;color:var(--dimmer)">+</span></div><div class="isL">Kapasitas Total/Gerbong</div></div>
-      <div class="isCrd rv d4" style="background:rgba(232,0,30,.06);border-color:rgba(232,0,30,.15)">
-        <div style="font-family:'Space Mono',monospace;font-size:8px;letter-spacing:2px;color:var(--red);margin-bottom:12px;text-transform:uppercase">Warna Identitas</div>
-        <div style="display:flex;gap:10px;align-items:center">
-          <div style="width:32px;height:32px;background:var(--red);border-radius:3px"></div>
-          <div style="width:32px;height:32px;background:#28A040;border-radius:3px"></div>
-          <div style="width:32px;height:32px;background:#C4C8CC;border-radius:3px"></div>
-          <div style="font-size:10px;color:var(--dimmer)">Merah · Hijau · Silver</div>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
+    </button>
 
-<!-- FOOTER -->
-<footer>
-  <div class="fBrand">
-    <div class="fbL">KAI <span>COMMUTER</span></div>
-    <p>Dokumentasi teknis CLI-125 — Commuter Line Indonesia Generasi Pertama. Beroperasi sejak 1 Juni 2025.</p>
-  </div>
-  <div class="fCol">
-    <h5>Seri KRL</h5>
-    <ul>
-      <li>CLI-125 (Aktif ●)</li>
-      <li>CLI-225 (Segera)</li>
-      <li>JR 203 Series</li>
-      <li>JR 205 Series</li>
-      <li>TM 6000 Series</li>
-      <li>TM 7000 Series</li>
-      <li>Tokyo 8000 / 8500</li>
-    </ul>
-  </div>
-  <div class="fCol">
-    <h5>Data Teknis</h5>
-    <ul>
-      <li>Model: SFC120-V (SFM138)</li>
-      <li>Produksi: CRRC Qingdao Sifang</li>
-      <li>Propulsi: 1500V DC VVVF-IGBT</li>
-      <li>Formasi: SF12 (6M+6T)</li>
-      <li>Kec. Maks: 120 km/h</li>
-      <li>Sertifikasi: DJKA Kemenhub</li>
-    </ul>
-  </div>
-</footer>
-<div class="fBot">
-  <p>Data berdasarkan informasi resmi KAI Commuter per Juni 2025</p>
-  <p style="color:rgba(232,0,30,.4)">● CLI-125 AKTIF BEROPERASI</p>
-</div>
+    <!-- Memuat Library Three.js dan GSAP untuk Animasi Kelas Atas -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
 
-</div><!-- end #main -->
+    <script>
+        // --- 1. CONFIG & SYSTEM STATE ---
+        let currentScene = 1;
+        let isStarted = false;
+        let soundEnabled = false;
+        let mouseX = 0, mouseY = 0;
+        let targetMouseX = 0, targetMouseY = 0;
 
-<!-- ============================================================ -->
-<!-- COMPLETE & FIXED JAVASCRIPT BLOCK                            -->
-<!-- ============================================================ -->
-<script>
-/* ===== CURSOR ===== */
-const cur=document.getElementById('cur'),curR=document.getElementById('curR');
-let mx=0,my=0,rx=0,ry=0;
-document.addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY;
-  cur.style.left=mx+'px';cur.style.top=my+'px'});
-(function ring(){rx+=(mx-rx)*.15;ry+=(my-ry)*.15;
-  curR.style.left=rx+'px';curR.style.top=ry+'px';requestAnimationFrame(ring)})();
+        // Web Audio Context (Procedural Sound Engine)
+        let audioCtx = null;
 
-/* ===== PARTICLES ===== */
-const ptcl=document.getElementById('ptcl');
-for(let i=0;i<28;i++){
-  const p=document.createElement('div');
-  p.className='pt';
-  const dx=(Math.random()-.5)*200;
-  p.style.cssText=`left:${Math.random()*100}%;--dx:${dx}px;
-    animation-duration:${8+Math.random()*14}s;
-    animation-delay:-${Math.random()*15}s;
-    width:${Math.random()>.7?2:1}px;height:${Math.random()>.7?2:1}px;
-    opacity:${.4+Math.random()*.6}`;
-  ptcl.appendChild(p);
-}
+        // --- 2. THREE.JS INITIALIZATION ---
+        const canvas = document.getElementById('webgl-canvas');
+        const scene = new THREE.Scene();
+        
+        // Menambahkan Kabut (Fog) untuk Kedalaman Sinematik
+        scene.background = new THREE.Color(0x0a0c10);
+        scene.fog = new THREE.FogExp2(0x0a0c10, 0.05);
 
-/* ===== INTRO & REVEAL SYSTEM ===== */
-window.addEventListener('DOMContentLoaded', () => {
-  const intro = document.getElementById('intro');
-  const main = document.getElementById('main');
-  const iBarF = document.getElementById('iBarF');
-  
-  setTimeout(() => document.getElementById('il1').classList.add('show'), 300);
-  setTimeout(() => document.getElementById('il2').classList.add('show'), 500);
-  setTimeout(() => document.getElementById('iLogo').classList.add('show'), 800);
-  setTimeout(() => document.getElementById('iSub').classList.add('show'), 1200);
-  setTimeout(() => iBarF.classList.add('go'), 200);
-  
-  setTimeout(() => {
-    intro.classList.add('out');
-    main.style.opacity = '1';
-  }, 3200);
-});
+        // Pengaturan Kamera
+        const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 100);
+        camera.position.set(0, 2, 8);
 
-/* ===== SCROLL REVEAL ===== */
-const reveals = document.querySelectorAll('.rv, .hItem');
-const observer = new IntersectionObserver(entries => {
-  entries.forEach(entry => {
-    if(entry.isIntersecting) {
-      entry.target.classList.add('vis');
-    }
-  });
-}, { threshold: 0.1 });
-reveals.forEach(r => observer.observe(r));
+        const renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true, alpha: false });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        renderer.shadowMap.enabled = true;
 
-/* ===== SF12 TRAINSET GENERATOR ===== */
-const tsRow = document.getElementById('tsRow');
-for(let i=1; i<=12; i++) {
-  const car = document.createElement('div');
-  // Labeled based on livery constraints: 1-6 Up Wave (Mundur), 7-12 Dn Wave (Maju)
-  car.className = `car ${i <= 6 ? 'up' : 'dn'} ${i === 1 ? 'hf' : i === 12 ? 'hr' : ''}`;
-  
-  car.innerHTML = `
-    <div class="carTip">Gerbong ${i} — ${i <= 6 ? 'Kepala Mundur (Foto 1)' : 'Kepala Maju (Foto 2)'}</div>
-    <div class="carBody">
-      <div class="carWin"></div>
-      <div class="carDoor d1"></div>
-      <div class="carDoor d2"></div>
-      <div class="carDoor d3"></div>
-      <div class="carDoor d4"></div>
-      <div class="carNum">${i}</div>
-    </div>
-    <div class="carLbl">Gbg ${i}</div>
-    <div class="carType">${i === 1 || i === 12 ? 'Tc' : (i===2||i===5||i===8||i===11?'M':'T')}</div>
-  `;
-  tsRow.appendChild(car);
-}
+        // Pencahayaan (Lighting)
+        const ambientLight = new THREE.AmbientLight(0x1a2436, 1.2);
+        scene.add(ambientLight);
 
-/* ===== DATA COUNTER ANIMATION ===== */
-const counters = document.querySelectorAll('.hvN, .fcN');
-const counterObserver = new IntersectionObserver(entries => {
-  entries.forEach(entry => {
-    if(entry.isIntersecting) {
-      const target = entry.target;
-      const to = parseInt(target.getAttribute('data-to') || target.innerText);
-      if(target.innerText === '0' || target.innerText === '') {
-        let count = 0;
-        const speed = to / 40;
-        const updateCount = () => {
-          count += speed;
-          if(count < to) {
-            target.innerText = Math.floor(count);
-            setTimeout(updateCount, 20);
-          } else {
-            target.innerText = to;
-          }
+        const directionalLight = new THREE.DirectionalLight(0x00ffff, 2.5);
+        directionalLight.position.set(5, 10, 7);
+        scene.add(directionalLight);
+
+        const pointLight = new THREE.PointLight(0xff00ff, 3, 15);
+        pointLight.position.set(0, 1, 0);
+        scene.add(pointLight);
+
+        // --- 3. PROCEDURAL SOUND GENERATOR (Web Audio API) ---
+        function initAudio() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+        }
+
+        function playSynthSound(freq, type, duration, vol) {
+            if (!soundEnabled || !audioCtx) return;
+            try {
+                let osc = audioCtx.createOscillator();
+                let gainNode = audioCtx.createGain();
+                
+                osc.type = type;
+                osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+                
+                gainNode.gain.setValueAtTime(vol, audioCtx.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.00001, audioCtx.currentTime + duration);
+                
+                osc.connect(gainNode);
+                gainNode.connect(audioCtx.destination);
+                
+                osc.start();
+                osc.stop(audioCtx.currentTime + duration);
+            } catch(e) {
+                console.log("Gagal memutar audio:", e);
+            }
+        }
+
+        // Suara Transisi Ruang Angkasa
+        function playTransitionSound() {
+            playSynthSound(100, 'sawtooth', 1.2, 0.15);
+            playSynthSound(220, 'sine', 1.5, 0.25);
+            setTimeout(() => {
+                playSynthSound(440, 'triangle', 0.8, 0.1);
+            }, 300);
+        }
+
+        // Suara Klik Ringan
+        function playClickSound() {
+            playSynthSound(880, 'sine', 0.1, 0.1);
+        }
+
+        // --- 4. SCENE OBJECT CREATIONS ---
+
+        // ==========================================
+        // SCENE 1: IGLO STRUCTURE CORE
+        // ==========================================
+        const iglooGroup = new THREE.Group();
+        scene.add(iglooGroup);
+
+        const blocksArray = [];
+        const blockMaterial = new THREE.MeshStandardMaterial({
+            color: 0xcccccc,
+            roughness: 0.1,
+            metalness: 0.8,
+            flatShading: true
+        });
+
+        // Membuat Struktur Kubah Iglo Secara Matematika
+        const radius = 3;
+        const rows = 6;
+        for (let i = 0; i < rows; i++) {
+            const phi = (Math.PI / 2) * (i / (rows - 1)); // Sudut elevasi
+            const currentRadius = radius * Math.cos(phi);
+            const circumference = 2 * Math.PI * currentRadius;
+            const blockCount = Math.max(4, Math.floor(circumference / 0.8));
+
+            for (let j = 0; j < blockCount; j++) {
+                const theta = (2 * Math.PI) * (j / blockCount);
+
+                // Tambah variasi ukuran balok
+                const w = 0.5 + Math.random() * 0.1;
+                const h = 0.35;
+                const d = 0.4;
+                const geom = new THREE.BoxGeometry(w, h, d);
+                const block = new THREE.Mesh(geom, blockMaterial);
+
+                // Hitung posisi berbentuk kubah setengah bola
+                const posX = currentRadius * Math.sin(theta);
+                const posY = radius * Math.sin(phi);
+                const posZ = currentRadius * Math.cos(theta);
+
+                block.position.set(posX, posY, posZ);
+                
+                // Atur rotasi balok agar menghadap ke pusat kubah
+                block.lookAt(0, posY, 0);
+
+                // Simpan koordinat awal untuk efek animasi meledak (Scatter)
+                block.userData = {
+                    originalPos: block.position.clone(),
+                    originalRot: block.rotation.clone(),
+                    randomDir: new THREE.Vector3(
+                        (Math.random() - 0.5) * 6,
+                        (Math.random() - 0.5) * 6 + 2,
+                        (Math.random() - 0.5) * 6
+                    )
+                };
+
+                iglooGroup.add(block);
+                blocksArray.push(block);
+            }
+        }
+        
+        // Menempatkan iglo sedikit di bawah pusat visual
+        iglooGroup.position.y = -0.5;
+
+        // ==========================================
+        // SCENE 2: CRYSTAL CHAMBER (CORE KOSMIK)
+        // ==========================================
+        const crystalGroup = new THREE.Group();
+        crystalGroup.position.set(0, 10, -20); // Ditempatkan jauh di belakang / atas pada awalnya
+        scene.add(crystalGroup);
+
+        // Bentuk Geometri Kristal Utama
+        const crystalGeom = new THREE.OctahedronGeometry(2.2, 0);
+        const crystalMat = new THREE.MeshStandardMaterial({
+            color: 0x00ffff,
+            roughness: 0.05,
+            metalness: 0.9,
+            flatShading: true,
+            transparent: true,
+            opacity: 0.95
+        });
+        const crystalMesh = new THREE.Mesh(crystalGeom, crystalMat);
+        crystalGroup.add(crystalMesh);
+
+        // Kristal Pelindung Luar (Wireframe)
+        const crystalOuterGeom = new THREE.OctahedronGeometry(2.6, 1);
+        const crystalOuterMat = new THREE.MeshBasicMaterial({
+            color: 0xff00ff,
+            wireframe: true,
+            transparent: true,
+            opacity: 0.3
+        });
+        const crystalOuterMesh = new THREE.Mesh(crystalOuterGeom, crystalOuterMat);
+        crystalGroup.add(crystalOuterMesh);
+
+        // Cincin Partikel Di Sekeliling Kristal
+        const ringGeom = new THREE.BufferGeometry();
+        const ringCount = 600;
+        const ringPositions = new Float32Array(ringCount * 3);
+        const ringColors = new Float32Array(ringCount * 3);
+
+        for(let i = 0; i < ringCount; i++) {
+            const angle = (i / ringCount) * Math.PI * 2 + Math.random() * 0.2;
+            const r = 4.5 + (Math.random() - 0.5) * 0.8;
+            ringPositions[i*3] = Math.cos(angle) * r;
+            ringPositions[i*3+1] = (Math.random() - 0.5) * 0.5;
+            ringPositions[i*3+2] = Math.sin(angle) * r;
+
+            ringColors[i*3] = 0;     // R
+            ringColors[i*3+1] = 1;   // G
+            ringColors[i*3+2] = 1;   // B
+        }
+
+        ringGeom.setAttribute('position', new THREE.BufferAttribute(ringPositions, 3));
+        ringGeom.setAttribute('color', new THREE.BufferAttribute(ringColors, 3));
+
+        const particleMaterial = new THREE.PointsMaterial({
+            size: 0.08,
+            vertexColors: true,
+            transparent: true,
+            opacity: 0.8
+        });
+
+        const ringParticles = new THREE.Points(ringGeom, particleMaterial);
+        crystalGroup.add(ringParticles);
+
+        // ==========================================
+        // SCENE 3: HOLO PENGUIN & TRANSISI LOGO "X" (MORPHING SYSTEM)
+        // ==========================================
+        const particleGroup = new THREE.Group();
+        particleGroup.position.set(0, -15, -40); // Ditaruh jauh di bawah & belakang
+        scene.add(particleGroup);
+
+        const particleCount = 7000;
+        const mainParticleGeom = new THREE.BufferGeometry();
+        
+        // Array posisi saat ini, target 1 (Penguin), dan target 2 (Logo X)
+        const positions = new Float32Array(particleCount * 3);
+        const p1Targets = new Float32Array(particleCount * 3); // Posisi Bentuk Penguin
+        const p2Targets = new Float32Array(particleCount * 3); // Posisi Bentuk Logo X
+        const pColors = new Float32Array(particleCount * 3);
+
+        // Menghitung Koordinat Bentuk Penguin & Logo X secara Matematis
+        for (let i = 0; i < particleCount; i++) {
+            // Posisi Awal (Acak Berhamburan)
+            positions[i*3] = (Math.random() - 0.5) * 30;
+            positions[i*3+1] = (Math.random() - 0.5) * 30;
+            positions[i*3+2] = (Math.random() - 0.5) * 30;
+
+            // --- BENTUK 1: PENGUIN DENGAN HEADPHONE ---
+            let tx, ty, tz;
+            const rVal = Math.random();
+
+            if (rVal < 0.5) {
+                // Badan Penguin (Elipsoid Tegak)
+                const theta = Math.random() * Math.PI * 2;
+                const phi = Math.acos((Math.random() * 2) - 1);
+                tx = 1.3 * Math.sin(phi) * Math.cos(theta);
+                ty = 2.1 * Math.cos(phi) + 1.2;
+                tz = 1.3 * Math.sin(phi) * Math.sin(theta);
+            } else if (rVal < 0.75) {
+                // Kepala Penguin (Bola Atas)
+                const theta = Math.random() * Math.PI * 2;
+                const phi = Math.acos((Math.random() * 2) - 1);
+                tx = 0.9 * Math.sin(phi) * Math.cos(theta);
+                ty = 0.9 * Math.cos(phi) + 3.1;
+                tz = 0.9 * Math.sin(phi) * Math.sin(theta);
+            } else if (rVal < 0.88) {
+                // Sayap/Flippers Kiri Kanan
+                const side = Math.random() > 0.5 ? 1 : -1;
+                tx = side * (1.3 + Math.random() * 0.4);
+                ty = 1.5 + (Math.random() - 0.5) * 1.2 - (Math.abs(tx) * 0.3);
+                tz = (Math.random() - 0.5) * 0.3;
+            } else {
+                // Headphone (Busur di atas kepala & bantalan telinga)
+                const arcAngle = (Math.random() * Math.PI) - Math.PI; // Setengah lingkaran atas
+                const isPad = Math.random() > 0.8;
+                if (isPad) {
+                    // Bantalan telinga headphone kiri/kanan
+                    const side = Math.random() > 0.5 ? 1 : -1;
+                    tx = side * 1.0;
+                    ty = 3.1 + (Math.random() - 0.5) * 0.4;
+                    tz = (Math.random() - 0.5) * 0.4;
+                } else {
+                    // Ikat Kepala Headphone
+                    tx = Math.cos(arcAngle) * 1.05;
+                    ty = Math.sin(arcAngle) * 1.05 + 3.2;
+                    tz = (Math.random() - 0.5) * 0.2;
+                }
+            }
+
+            p1Targets[i*3] = tx;
+            p1Targets[i*3+1] = ty - 1.2; // Offset posisi y agar seimbang di porosnya
+            p1Targets[i*3+2] = tz;
+
+            // --- BENTUK 2: LOGO HURUF "X" ---
+            let px, py, pz;
+            const xVal = Math.random();
+            if (xVal < 0.45) {
+                // Batang Utama Kiri ke Kanan Atas
+                const progress = (Math.random() - 0.5) * 4.5;
+                px = progress;
+                py = progress * 1.1;
+                pz = (Math.random() - 0.5) * 0.6;
+            } else if (xVal < 0.90) {
+                // Batang Utama Kanan ke Kiri Atas
+                const progress = (Math.random() - 0.5) * 4.5;
+                px = progress;
+                py = -progress * 1.1;
+                pz = (Math.random() - 0.5) * 0.6;
+            } else {
+                // Partikel Aura Acak di Tengah Logo X
+                const theta = Math.random() * Math.PI * 2;
+                const rRadius = Math.random() * 2;
+                px = Math.cos(theta) * rRadius;
+                py = Math.sin(theta) * rRadius;
+                pz = (Math.random() - 0.5) * 1.2;
+            }
+
+            p2Targets[i*3] = px;
+            p2Targets[i*3+1] = py;
+            p2Targets[i*3+2] = pz;
+
+            // Pewarnaan Partikel (Gradasi Sian ke Ungu Holografik)
+            const mixRatio = Math.random();
+            pColors[i*3] = mixRatio * 0.2;               // Red (Sangat sedikit merah)
+            pColors[i*3+1] = (1 - mixRatio) * 0.9 + 0.1; // Green
+            pColors[i*3+2] = 1.0;                        // Blue (Dominan Sian ke Biru)
+        }
+
+        mainParticleGeom.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+        mainParticleGeom.setAttribute('color', new THREE.BufferAttribute(pColors, 3));
+
+        // Menggunakan shader bawaan PointsMaterial yang responsif terhadap pencahayaan
+        const hologramMaterial = new THREE.PointsMaterial({
+            size: 0.05,
+            vertexColors: true,
+            transparent: true,
+            opacity: 0.85,
+            blending: THREE.AdditiveBlending
+        });
+
+        const mainHoloPoints = new THREE.Points(mainParticleGeom, hologramMaterial);
+        particleGroup.add(mainHoloPoints);
+
+        // --- Variabel Morphing Engine ---
+        let morphState = { progress: 0 }; // 0 = Bebas, 1 = Penguin, 2 = Logo X
+        let currentMorphTarget = p1Targets;
+
+        // Fungsi memperbarui transisi partikel di setiap frame
+        function updateMorphingParticles() {
+            const posAttr = mainParticleGeom.attributes.position;
+            const currentArr = posAttr.array;
+
+            for (let i = 0; i < particleCount; i++) {
+                const idx = i * 3;
+                let targetX, targetY, targetZ;
+
+                if (morphState.progress <= 1) {
+                    // Transisi dari hamburan awal ke Penguin
+                    const t = morphState.progress;
+                    targetX = THREE.MathUtils.lerp(positions[idx], p1Targets[idx], t);
+                    targetY = THREE.MathUtils.lerp(positions[idx+1], p1Targets[idx+1], t);
+                    targetZ = THREE.MathUtils.lerp(positions[idx+2], p1Targets[idx+2], t);
+                } else {
+                    // Transisi dari Penguin ke Logo "X" (progress bernilai 1 sampai 2)
+                    const t = morphState.progress - 1;
+                    // Formula transisi halus Ease-InOut
+                    const easeT = t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
+                    targetX = THREE.MathUtils.lerp(p1Targets[idx], p2Targets[idx], easeT);
+                    targetY = THREE.MathUtils.lerp(p1Targets[idx+1], p2Targets[idx+1], easeT);
+                    targetZ = THREE.MathUtils.lerp(p1Targets[idx+2], p2Targets[idx+2], easeT);
+                }
+
+                currentArr[idx] = targetX;
+                currentArr[idx+1] = targetY;
+                currentArr[idx+2] = targetZ;
+            }
+            posAttr.needsUpdate = true;
+        }
+
+
+        // --- 5. INTERACTION & INTERFACE EVENTS ---
+
+        // Integrasi Audio dan Mulai Navigasi Utama
+        document.getElementById('btn-start').addEventListener('click', () => {
+            initAudio();
+            isStarted = true;
+            playClickSound();
+            playTransitionSound();
+
+            // Sembunyikan panduan pusat dengan efek GSAP yang super mulus
+            gsap.to('#central-guide', {
+                opacity: 0,
+                y: -50,
+                duration: 1,
+                onComplete: () => {
+                    document.getElementById('central-guide').classList.add('hidden');
+                }
+            });
+
+            // Munculkan menu navigasi utama dan panel info
+            gsap.to('#nav-container', { opacity: 1, y: 0, duration: 1.2, delay: 0.5 });
+            gsap.to('#info-panel', { opacity: 1, y: 0, duration: 1.2, delay: 0.7 });
+        });
+
+        // Kontrol Suara (Mute/Unmute Toggle)
+        const btnSound = document.getElementById('btn-sound');
+        btnSound.addEventListener('click', () => {
+            initAudio();
+            soundEnabled = !soundEnabled;
+            if (soundEnabled) {
+                btnSound.classList.add('text-cyan-400');
+                btnSound.innerHTML = `
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
+                    </svg>
+                `;
+                playClickSound();
+            } else {
+                btnSound.classList.remove('text-cyan-400');
+                btnSound.innerHTML = `
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M9.383 3.076A1 1 0 0110 4v12a1 1 0 01-1.707.707L4.586 13H2a1 1 0 01-1-1V8a1 1 0 011-1h2.586l3.693-3.693a1 1 0 011.104-.231zM13.586 10l2.293-2.293a1 1 0 10-1.414-1.414L12.172 8.586l-2.293-2.293a1 1 0 10-1.414 1.414L10.758 10l-2.293 2.293a1 1 0 101.414 1.414l2.293-2.293 2.293 2.293a1 1 0 001.414-1.414L13.586 10z" clip-rule="evenodd" />
+                    </svg>
+                `;
+            }
+        });
+
+        // Deteksi Posisi Mouse untuk Efek Parallax Kamera Sinematik
+        window.addEventListener('mousemove', (e) => {
+            targetMouseX = (e.clientX / window.innerWidth - 0.5) * 2;
+            targetMouseY = (e.clientY / window.innerHeight - 0.5) * 2;
+
+            // Tampilkan koordinat di HUD
+            document.getElementById('hud-coords').innerText = `X: ${targetMouseX.toFixed(2)} | Y: ${targetMouseY.toFixed(2)}`;
+        });
+
+        // Dukungan Pergerakan Sentuhan Layar (Mobile Responsive Touch Support)
+        window.addEventListener('touchmove', (e) => {
+            if (e.touches.length > 0) {
+                targetMouseX = (e.touches[0].clientX / window.innerWidth - 0.5) * 2;
+                targetMouseY = (e.touches[0].clientY / window.innerHeight - 0.5) * 2;
+                document.getElementById('hud-coords').innerText = `X: ${targetMouseX.toFixed(2)} | Y: ${targetMouseY.toFixed(2)}`;
+            }
+        }, { passive: true });
+
+
+        // --- 6. TRANSISI ANTAR SCENE SECARA SINEMATIK ---
+
+        const sceneData = {
+            1: {
+                title: "Situs Iglo Modular",
+                meta: "PORTFOLIO_CD_01",
+                desc: "Situs yang dibangun dengan perpaduan balok geometri 3D interaktif. Coba gerakkan kursor Anda untuk melihat balok-balok yang bereaksi terhadap gravitasi virtual.",
+                stat: "STABILITAS: 98.4%"
+            },
+            2: {
+                title: "Ruang Inti Kristal",
+                meta: "PORTFOLIO_CD_02",
+                desc: "Energi inti murni bersinar di dalam formasi kristal octahedron. Sistem partikel berkecepatan tinggi berputar di sekitar struktur kristal, merespons setiap ketukan navigasi.",
+                stat: "KESTABILAN DAYA: 100%"
+            },
+            3: {
+                title: "Holo Penguin ke Logo X",
+                meta: "PORTFOLIO_CD_03",
+                desc: "Saksikan jutaan partikel holografik berkumpul membentuk karakter Penguin dengan Headphone ikonik, kemudian meleleh dan menyatu kembali membentuk logo ikonik platform X secara dinamis.",
+                stat: "DENSITAS PARTIKEL: 7K"
+            }
         };
-        updateCount();
-      }
-    }
-  });
-}, { threshold: 0.5 });
 
-counters.forEach(c => {
-  if(c.id === 'ctr1') c.setAttribute('data-to', '84');
-  if(c.id === 'ctr2') c.setAttribute('data-to', '7');
-  if(c.id === 'ctr3') c.setAttribute('data-to', '334');
-  counterObserver.observe(c);
-});
+        function updateHUDtext(sceneNum) {
+            const data = sceneData[sceneNum];
+            
+            // Animasi transisi keluar masuk teks HUD
+            gsap.to('#info-panel', {
+                opacity: 0,
+                y: 15,
+                duration: 0.4,
+                onComplete: () => {
+                    document.getElementById('panel-meta').innerText = data.meta;
+                    document.getElementById('panel-title').innerText = data.title;
+                    document.getElementById('panel-desc').innerText = data.desc;
+                    document.getElementById('panel-stat').innerText = data.stat;
+                    
+                    gsap.to('#info-panel', { opacity: 1, y: 0, duration: 0.6 });
+                }
+            });
+        }
 
-/* ===== FRONT CABIN INTERACTIVE TOGGLE ===== */
-function setMode(mode) {
-  const s21 = document.getElementById('s21Board');
-  const btnMundur = document.getElementById('btnMundur');
-  const btnMaju = document.getElementById('btnMaju');
-  const ledGrad = document.getElementById('ledGrad');
-  
-  if(mode === 'maju') {
-    if(s21) s21.style.display = 'none';
-    btnMaju.style.background = 'var(--red)';
-    btnMaju.style.color = '#fff';
-    btnMundur.style.background = 'rgba(255,255,255,.06)';
-    btnMundur.style.color = 'var(--white)';
-    if(ledGrad) {
-      ledGrad.innerHTML = `
-        <stop offset="0%" stop-color="rgba(255,255,220,0)"/>
-        <stop offset="15%" stop-color="#FFFFE0"/>
-        <stop offset="50%" stop-color="#FFFFFF"/>
-        <stop offset="85%" stop-color="#FFFFE0"/>
-        <stop offset="100%" stop-color="rgba(255,255,220,0)"/>
-      `;
-    }
-  } else {
-    if(s21) s21.style.display = 'block';
-    btnMundur.style.background = 'var(--red)';
-    btnMundur.style.color = '#fff';
-    btnMaju.style.background = 'rgba(255,255,255,.06)';
-    btnMaju.style.color = 'var(--white)';
-    if(ledGrad) {
-      ledGrad.innerHTML = `
-        <stop offset="0%" stop-color="rgba(232,0,30,0)"/>
-        <stop offset="15%" stop-color="#FF1830"/>
-        <stop offset="50%" stop-color="#FF2233"/>
-        <stop offset="85%" stop-color="#FF1830"/>
-        <stop offset="100%" stop-color="rgba(232,0,30,0)"/>
-      `;
-    }
-  }
-}
+        function switchScene(sceneNum) {
+            if (currentScene === sceneNum) return;
+            playClickSound();
+            playTransitionSound();
 
-window.addEventListener('scroll', () => {
-  const nav = document.getElementById('nav');
-  if(window.scrollY > 50) nav.classList.add('bg');
-  else nav.classList.remove('bg');
-});
-</script>
+            const oldScene = currentScene;
+            currentScene = sceneNum;
+
+            // Perbarui warna tombol navigasi aktif
+            for (let i = 1; i <= 3; i++) {
+                const btn = document.getElementById(`nav-btn-${i}`);
+                if (i === sceneNum) {
+                    btn.className = "px-5 py-3 rounded-xl text-xs font-bold tracking-wider transition-all duration-300 flex items-center gap-2 bg-cyan-500/20 text-cyan-400 border border-cyan-400/30";
+                    btn.querySelector('span').className = "w-1.5 h-1.5 bg-cyan-400 rounded-full";
+                } else {
+                    btn.className = "px-5 py-3 rounded-xl text-xs font-bold tracking-wider transition-all duration-300 flex items-center gap-2 text-gray-400 hover:text-white";
+                    btn.querySelector('span').className = "w-1.5 h-1.5 bg-gray-500 rounded-full";
+                }
+            }
+
+            updateHUDtext(sceneNum);
+
+            // --- ANIMASI TIMELINE TRANSISI METODE UTAMA ---
+            const transitionTimeline = gsap.timeline();
+
+            if (oldScene === 1) {
+                // LEDAKKAN IGLO: Balok-balok meluncur berhamburan ke luar
+                blocksArray.forEach(block => {
+                    transitionTimeline.to(block.position, {
+                        x: block.userData.originalPos.x + block.userData.randomDir.x,
+                        y: block.userData.originalPos.y + block.userData.randomDir.y,
+                        z: block.userData.originalPos.z + block.userData.randomDir.z,
+                        duration: 1.5,
+                        ease: "power2.out"
+                    }, 0);
+                    transitionTimeline.to(block.rotation, {
+                        x: block.rotation.x + Math.random() * 4,
+                        y: block.rotation.y + Math.random() * 4,
+                        duration: 1.5
+                    }, 0);
+                });
+                
+                // Redupkan grup iglo secara keseluruhan
+                transitionTimeline.to(iglooGroup.position, { y: -10, duration: 1.2 }, 0);
+            }
+
+            if (sceneNum === 1) {
+                // Kembalikan susunan balok iglo ke bentuk aslinya
+                transitionTimeline.to(iglooGroup.position, { y: -0.5, duration: 1.5, ease: "power2.out" }, 0);
+                blocksArray.forEach(block => {
+                    transitionTimeline.to(block.position, {
+                        x: block.userData.originalPos.x,
+                        y: block.userData.originalPos.y,
+                        z: block.userData.originalPos.z,
+                        duration: 2,
+                        ease: "elastic.out(1, 0.75)"
+                    }, 0.2);
+                    transitionTimeline.to(block.rotation, {
+                        x: block.userData.originalRot.x,
+                        y: block.userData.originalRot.y,
+                        z: block.userData.originalRot.z,
+                        duration: 1.5
+                    }, 0.2);
+                });
+
+                // Zoom Posisi Kamera Kembali ke Iglo
+                transitionTimeline.to(camera.position, { x: 0, y: 2, z: 8, duration: 2.2, ease: "power3.inOut" }, 0);
+            }
+
+            else if (sceneNum === 2) {
+                // Munculkan Kristal dari atas dan dekatkan kamera ke Inti
+                crystalGroup.position.set(0, 15, -25);
+                transitionTimeline.to(crystalGroup.position, { x: 0, y: 1.5, z: 0, duration: 2.2, ease: "power3.out" }, 0);
+                transitionTimeline.to(camera.position, { x: 0, y: 1.8, z: 7.5, duration: 2.2, ease: "power3.inOut" }, 0);
+
+                // Tambahkan efek kilau pada kristal luar
+                transitionTimeline.to(crystalOuterMesh.scale, { x: 1.3, y: 1.3, z: 1.3, duration: 0.5, yoyo: true, repeat: 1 }, 0.5);
+            }
+
+            else if (sceneNum === 3) {
+                // Mulai Proses Animasi Partikel Morphing
+                // Pertama: Partikel menyusut merapat membentuk PENGUIN
+                particleGroup.position.set(0, 0, 0);
+                
+                // Reset morphProgress ke 0 sebelum memulai
+                morphState.progress = 0;
+
+                // Tahap 1: Morphing ke Penguin (durasi 2.5 detik)
+                transitionTimeline.to(morphState, {
+                    progress: 1.0,
+                    duration: 2.5,
+                    ease: "power2.inOut",
+                    onUpdate: updateMorphingParticles
+                }, 0);
+
+                // Gerakkan Kamera Menghadap Penguin dari Samping Secara Sinematik
+                transitionTimeline.to(camera.position, { x: 1.8, y: 2, z: 5.5, duration: 3.5, ease: "power3.inOut" }, 0);
+
+                // Tahap 2: Jeda singkat, lalu lelehkan menjadi Logo "X" (setelah 4 detik berlalu)
+                transitionTimeline.to(morphState, {
+                    progress: 2.0,
+                    duration: 3.0,
+                    ease: "sine.inOut",
+                    onUpdate: updateMorphingParticles,
+                    onStart: () => {
+                        if (currentScene === 3) {
+                            playTransitionSound(); // Mainkan suara efek morphing logo
+                        }
+                    }
+                }, 4.0);
+
+                // Putar balik kamera saat transisi ke Logo X
+                transitionTimeline.to(camera.position, { x: -1.5, y: 1.2, z: 6.2, duration: 3.5, ease: "power2.inOut" }, 4.0);
+            }
+
+            // Sembunyikan objek-objek dari scene yang tidak aktif
+            if (sceneNum !== 2 && oldScene === 2) {
+                transitionTimeline.to(crystalGroup.position, { y: -15, z: -20, duration: 1.5, ease: "power2.in" }, 0);
+            }
+            if (sceneNum !== 3 && oldScene === 3) {
+                // Hamburkan kembali partikel hologram
+                transitionTimeline.to(morphState, {
+                    progress: 0,
+                    duration: 1.5,
+                    onUpdate: updateMorphingParticles
+                }, 0);
+                transitionTimeline.to(particleGroup.position, { y: -20, z: -40, duration: 1.5 }, 0);
+            }
+        }
+
+
+        // --- 7. GAME LOOP / ANIMATION LOOP ---
+        const clock = new THREE.Clock();
+
+        function animate() {
+            requestAnimationFrame(animate);
+
+            const elapsedTime = clock.getElapsedTime();
+
+            // 1. Efek Mouse Parallax (Kamera Mengikuti Gerakan Kursor dengan Lembut)
+            mouseX += (targetMouseX - mouseX) * 0.05;
+            mouseY += (targetMouseY - mouseY) * 0.05;
+
+            camera.position.x += (mouseX * 1.5 - camera.position.x * 0.1) * 0.05;
+            camera.position.y += ((-mouseY * 1.2 + 2) - camera.position.y * 0.1) * 0.05;
+            camera.lookAt(0, 1.2, 0);
+
+            // 2. Animasi Obyek Scene 1: Rotasi Lambat Kubah Iglo
+            if (currentScene === 1) {
+                iglooGroup.rotation.y = elapsedTime * 0.08;
+                // Balok bergerak membal halus (idle floating animation)
+                blocksArray.forEach((block, index) => {
+                    block.position.y = block.userData.originalPos.y + Math.sin(elapsedTime * 1.5 + index) * 0.03;
+                });
+            }
+
+            // 3. Animasi Obyek Scene 2: Putaran Kristal & Cincin Partikel
+            if (currentScene === 2 || crystalGroup.position.y > -10) {
+                crystalMesh.rotation.y = elapsedTime * 0.3;
+                crystalMesh.rotation.x = Math.sin(elapsedTime * 0.5) * 0.2;
+                crystalOuterMesh.rotation.y = -elapsedTime * 0.15;
+                ringParticles.rotation.y = elapsedTime * 0.1;
+                
+                // Efek denyut nafas kristal virtual
+                const pulse = 1 + Math.sin(elapsedTime * 2) * 0.05;
+                crystalMesh.scale.set(pulse, pulse, pulse);
+            }
+
+            // 4. Animasi Obyek Scene 3: Rotasi Lambat Hologram
+            if (currentScene === 3) {
+                particleGroup.rotation.y = elapsedTime * 0.12;
+                // Gerakan naik turun yang halus untuk efek terbang (Hologram Floating Effect)
+                particleGroup.position.y = Math.sin(elapsedTime * 1.2) * 0.15;
+            }
+
+            renderer.render(scene, camera);
+        }
+
+        // Jalankan Loop Animasi Setelah Jendela Siap Dimuat
+        window.onload = function() {
+            animate();
+        };
+
+        // --- 8. RESPONSIVE WINDOW RESIZE HANDLER ---
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        });
+
+    </script>
 </body>
 </html>
+
+```
