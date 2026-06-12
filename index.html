@@ -1,784 +1,1070 @@
 ```html
 <!DOCTYPE html>
 <html lang="id">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Immersive 3D Web 2026</title>
-    <!-- Tailwind CSS untuk Styling UI -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Font Google Google -->
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&family=Share+Tech+Mono&display=swap" rel="stylesheet">
-    
-    <style>
-        body {
-            font-family: 'Plus Jakarta Sans', sans-serif;
-            background-color: #0b0c10;
-            overflow: hidden;
-        }
-        .hud-font {
-            font-family: 'Share Tech Mono', monospace;
-        }
-        /* Efek Pendaran Glow */
-        .neon-glow {
-            text-shadow: 0 0 10px rgba(100, 255, 218, 0.5), 0 0 20px rgba(100, 255, 218, 0.2);
-        }
-        .neon-border {
-            box-shadow: 0 0 15px rgba(100, 255, 218, 0.15);
-            border: 1px solid rgba(100, 255, 218, 0.2);
-        }
-        /* Sembunyikan scrollbar */
-        ::-webkit-scrollbar {
-            display: none;
-        }
-    </style>
-</head>
-<body class="text-white h-screen w-screen relative select-none">
+<head> 
+import { useState, useEffect, useRef } from "react";
 
-    <!-- Canvas Utama untuk Rendering Three.js -->
-    <canvas id="webgl-canvas" class="absolute top-0 left-0 w-full h-full z-0"></canvas>
+// ─────────────────────────────────────────────────────────────────────────────
+// AI HELPER
+// ─────────────────────────────────────────────────────────────────────────────
+async function tanyaAI(prompt) {
+  const res = await fetch("https://api.anthropic.com/v1/messages", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      model: "claude-sonnet-4-6",
+      max_tokens: 1400,
+      messages: [{ role: "user", content: prompt }],
+    }),
+  });
+  const data = await res.json();
+  return data.content?.map((b) => b.text || "").join("") || "";
+}
 
-    <!-- UI Overlay / HUD (Heads Up Display) -->
-    <div class="absolute inset-0 z-10 pointer-events-none flex flex-col justify-between p-6 md:p-10">
-        
-        <!-- HEADER HUD -->
-        <header class="flex justify-between items-start w-full">
-            <div class="pointer-events-auto flex flex-col">
-                <div class="flex items-center gap-2">
-                    <span class="w-3 h-3 bg-cyan-400 rounded-full animate-ping"></span>
-                    <h1 class="hud-font text-lg md:text-xl font-bold tracking-widest text-cyan-400 neon-glow">NEXUS.STUDIOS</h1>
+// ─────────────────────────────────────────────────────────────────────────────
+// DATA
+// ─────────────────────────────────────────────────────────────────────────────
+const SAHAM_DATA = [
+  { ticker:"NVDA", nama:"NVIDIA",        harga:205.38, ubah:-1.24, vol:"158M", rsi:46.9,  ma50:214.66, ma200:214.78, sinyal:"TUNGGU", kat:"Pemulihan",    info:"Koreksi dari ATH, potensi rebound kuat jika $195 hold" },
+  { ticker:"TSLA", nama:"Tesla",         harga:248.12, ubah:2.83,  vol:"92M",  rsi:54.2,  ma50:241.30, ma200:228.10, sinyal:"BELI",   kat:"Momentum",     info:"Breakout MA50, momentum EV meningkat pesat" },
+  { ticker:"PLTR", nama:"Palantir",      harga:38.74,  ubah:6.21,  vol:"47M",  rsi:62.1,  ma50:31.20,  ma200:25.80,  sinyal:"PANTAU", kat:"Lonjakan",     info:"Kontrak AI pemerintah melonjak, institusi beli 3x lipat" },
+  { ticker:"SMCI", nama:"Super Micro",   harga:42.18,  ubah:8.34,  vol:"31M",  rsi:41.2,  ma50:44.50,  ma200:38.20,  sinyal:"BELI",   kat:"Oversold",     info:"Oversold parah, demand server AI tinggi, RSI mulai balik" },
+  { ticker:"MSTR", nama:"MicroStrategy", harga:385.50, ubah:4.77,  vol:"18M",  rsi:58.4,  ma50:340.00, ma200:290.00, sinyal:"PANTAU", kat:"BTC Proxy",    info:"Korelasi langsung BTC, proxy terbaik untuk exposure Bitcoin" },
+  { ticker:"IONQ", nama:"IonQ Quantum",  harga:28.45,  ubah:12.30, vol:"9M",   rsi:71.2,  ma50:19.80,  ma200:14.20,  sinyal:"WASPADA",kat:"Spekulatif",   info:"Quantum computing meledak, overbought — hati-hati entry" },
+  { ticker:"AMD",  nama:"AMD",           harga:165.77, ubah:-0.44, vol:"58M",  rsi:43.1,  ma50:171.50, ma200:163.20, sinyal:"TUNGGU", kat:"Pemulihan",    info:"Pesaing NVDA di chip AI, accumulate pelan-pelan di support" },
+  { ticker:"AAPL", nama:"Apple",         harga:213.45, ubah:0.62,  vol:"74M",  rsi:51.8,  ma50:208.80, ma200:199.40, sinyal:"TAHAN",  kat:"Stabil",       info:"Stabil, cocok untuk hold jangka menengah-panjang" },
+];
+
+const KRIPTO_DATA = [
+  { ticker:"BTC",    nama:"Bitcoin",   harga:104220, ubah:1.88,  vol:"$28B",  rsi:61.2, funding:0.012,  ls:1.42, sinyal:"BELI",    kat:"Raja",      info:"Konsolidasi sehat $100K, breakout menuju ATH baru" },
+  { ticker:"ETH",    nama:"Ethereum",  harga:2612,   ubah:3.11,  vol:"$14B",  rsi:58.7, funding:0.008,  ls:1.21, sinyal:"BELI",    kat:"Layer 1",   info:"Upgrade jaringan + ETF ETH berpotensi disetujui" },
+  { ticker:"SOL",    nama:"Solana",    harga:168,    ubah:5.40,  vol:"$4B",   rsi:67.4, funding:0.031,  ls:0.89, sinyal:"PANTAU",  kat:"Layer 1",   info:"DeFi tumbuh pesat, bisa kejar $200 jika BTC kuat" },
+  { ticker:"TAO",    nama:"Bittensor", harga:487,    ubah:14.22, vol:"$890M", rsi:73.1, funding:0.041,  ls:0.78, sinyal:"WASPADA", kat:"AI Kripto", info:"AI+crypto narrative kuat, whale aktif 5x — waspada overbought" },
+  { ticker:"RENDER", nama:"Render",    harga:8.24,   ubah:9.87,  vol:"$420M", rsi:64.3, funding:0.018,  ls:1.15, sinyal:"PANTAU",  kat:"AI Kripto", info:"GPU blockchain, narasi AI masih sangat panas" },
+  { ticker:"FET",    nama:"Fetch.ai",  harga:1.84,   ubah:7.43,  vol:"$310M", rsi:60.8, funding:0.014,  ls:1.08, sinyal:"PANTAU",  kat:"AI Kripto", info:"Altcoin AI belum kemahalan, potensi 2–3x jika narasi lanjut" },
+  { ticker:"BNB",    nama:"BNB",       harga:712,    ubah:0.95,  vol:"$2B",   rsi:52.9, funding:0.005,  ls:1.10, sinyal:"TAHAN",   kat:"Exchange",  info:"Stabil, ikuti gerakan BTC secara umum" },
+  { ticker:"DOGE",   nama:"Dogecoin",  harga:0.1842, ubah:-2.34, vol:"$1B",   rsi:38.2, funding:-0.015, ls:0.71, sinyal:"HINDARI", kat:"Meme",      info:"Momentum lemah, tunggu catalyst yang jelas dulu" },
+];
+
+const BERITA = [
+  { waktu:"2 mnt",   judul:"NVIDIA umumkan chip Blackwell Ultra generasi baru untuk AI 2026",    dampak:"bullish", aset:"NVDA",   kat:"Saham US" },
+  { waktu:"9 mnt",   judul:"Bitcoin tembus $105.000 setelah data inflasi AS lebih rendah",        dampak:"bullish", aset:"BTC",    kat:"Kripto" },
+  { waktu:"17 mnt",  judul:"SEC setujui 3 ETF Ethereum dari asset manager kelas dunia",           dampak:"bullish", aset:"ETH",    kat:"Kripto" },
+  { waktu:"24 mnt",  judul:"Tesla kirim 500.000 unit Q2, jauh melampaui ekspektasi pasar",        dampak:"bullish", aset:"TSLA",   kat:"Saham US" },
+  { waktu:"33 mnt",  judul:"Fed isyaratkan pemangkasan suku bunga di bulan September",            dampak:"bullish", aset:"Makro",  kat:"Makro" },
+  { waktu:"47 mnt",  judul:"Bittensor (TAO) terima investasi $200 juta dari a16z Crypto",        dampak:"bullish", aset:"TAO",    kat:"Kripto" },
+  { waktu:"58 mnt",  judul:"IonQ menangkan kontrak quantum computing NASA $180 juta",             dampak:"bullish", aset:"IONQ",   kat:"Saham US" },
+  { waktu:"1 j",     judul:"Render Network umumkan partnership dengan Apple Vision Pro 2",        dampak:"bullish", aset:"RENDER", kat:"Kripto" },
+  { waktu:"1.5 j",   judul:"DXY turun ke 104 — dolar melemah, bagus untuk aset risiko",          dampak:"bullish", aset:"Makro",  kat:"Makro" },
+  { waktu:"2 j",     judul:"Super Micro (SMCI) earnings melampaui ekspektasi 40%",               dampak:"bullish", aset:"SMCI",   kat:"Saham US" },
+  { waktu:"3 j",     judul:"China larang ekspor mineral langka — chip maker AS tertekan",         dampak:"bearish", aset:"NVDA",   kat:"Saham US" },
+  { waktu:"4 j",     judul:"Dogecoin kehilangan momentum, whale besar mulai distribusi",          dampak:"bearish", aset:"DOGE",   kat:"Kripto" },
+  { waktu:"5 j",     judul:"Palantir amankan kontrak AI Pentagon senilai $480 juta",              dampak:"bullish", aset:"PLTR",   kat:"Saham US" },
+  { waktu:"6 j",     judul:"Solana DEX pecahkan rekor volume 24 jam $8 miliar",                   dampak:"bullish", aset:"SOL",    kat:"Kripto" },
+  { waktu:"8 j",     judul:"MicroStrategy beli 2.500 BTC lagi, total koleksi 214.000 BTC",       dampak:"bullish", aset:"MSTR",   kat:"Saham US" },
+];
+
+const MATERI = [
+  { id:1, judul:"📊 RSI — Murah atau Mahal?",  level:"Pemula",
+    isi:`RSI adalah angka 0–100 yang kasih tahu kamu apakah harga suatu aset lagi TERLALU MAHAL atau TERLALU MURAH.
+
+🔴 RSI di atas 70 → Overbought (terlalu mahal, kemungkinan akan koreksi)
+🟢 RSI di bawah 35 → Oversold (terlalu murah, kemungkinan akan rebound)
+⚪ RSI 40–60 → Normal, belum ada sinyal kuat
+
+Contoh: NVDA RSI-nya 46 sekarang — itu zona normal-menuju-murah. Artinya ada peluang entry yang bagus kalau fundamental-nya masih kuat.
+
+💡 Tips: RSI paling ampuh dikombinasikan dengan Moving Average dan Support/Resistance, jangan dipakai sendirian.` },
+  { id:2, judul:"📈 Moving Average — Kompas Tren", level:"Pemula",
+    isi:`Moving Average (MA) adalah rata-rata harga dalam periode tertentu. Fungsinya: kasih lihat arah tren secara bersih, tanpa noise naik-turun harian.
+
+MA 20 = rata-rata 20 hari (cepat, sensitif)
+MA 50 = rata-rata 50 hari (menengah)
+MA 200 = rata-rata 200 hari (paling penting!)
+
+Cara baca simpel:
+• Harga di ATAS MA200 → tren jangka panjang sehat ✅
+• Harga di BAWAH MA200 → hati-hati, sedang lemah ⚠️
+
+🔥 Golden Cross: MA50 potong naik MA200 = sinyal BELI kuat
+💀 Death Cross: MA50 potong turun MA200 = sinyal JUAL / keluar` },
+  { id:3, judul:"🛑 Stop Loss — Tameng Modalmu", level:"Pemula",
+    isi:`Stop Loss adalah batas harga di mana kamu otomatis keluar dari posisi supaya tidak rugi terlalu banyak.
+
+Contoh nyata:
+• Kamu beli NVDA di $205
+• Kamu pasang Stop Loss di $195
+• Kalau harga turun ke $195 → posisi otomatis terjual
+• Rugimu hanya $10 per saham (~5%), bukan lebih
+
+Kenapa WAJIB pakai Stop Loss?
+Tanpa SL, kalau harga terus turun kamu akan bingung kapan harus keluar. Dengan SL, kerugian terbatas dan kamu punya modal untuk kesempatan berikutnya.
+
+⚠️ Aturan besi: Jangan geser SL ke bawah karena "berharap harga balik" — itu jebakan mental yang sudah ruin banyak trader!` },
+  { id:4, judul:"🎯 Take Profit — Kapan Jual?", level:"Pemula",
+    isi:`Take Profit adalah target harga di mana kamu mengambil keuntungan sebelum harga berpotensi balik.
+
+Contoh:
+• Beli BTC di $100.000
+• Pasang Take Profit di $110.000
+• Harga naik ke $110K → posisi terjual otomatis, untung 10%
+
+Strategi TP bertingkat (lebih aman):
+• TP1 → jual 50% posisi di target pertama (amankan sebagian profit)
+• TP2 → jual 30% di target kedua
+• Sisa 20% → biarkan jalan, pakai trailing stop
+
+Kenapa perlu TP? Karena keserakahan sering bikin trader yang sudah untung akhirnya balik rugi karena tidak mau jual.` },
+  { id:5, judul:"📐 Risk/Reward Ratio", level:"Menengah",
+    isi:`Risk/Reward (R:R) adalah perbandingan antara berapa yang bisa kamu RUGI vs berapa yang bisa kamu UNTUNG dalam satu trade.
+
+Formula: Potensi Untung ÷ Potensi Rugi
+
+Contoh:
+• Beli di $100 | SL di $95 | TP di $115
+• Risiko = $5 | Reward = $15
+• Ratio = 15÷5 = 3:1 ✅ Bagus!
+
+Aturan minimal: Ratio harus minimal 2:1
+Artinya: Meskipun kamu salah 2 dari 3 trade, kamu masih bisa impas atau bahkan untung!
+
+Itulah kenapa risk management lebih penting dari "nebak arah harga yang benar".` },
+  { id:6, judul:"🐋 Whale & Volume", level:"Menengah",
+    isi:`Whale adalah pemain besar (modal ratusan juta–miliaran dolar) yang gerakannya bisa gerakkan pasar. Cara deteksinya: pantau VOLUME.
+
+Normal vs Tidak Normal:
+• Volume biasa = aktivitas trading rutin
+• Volume meledak tiba-tiba 3–5x rata-rata = ada whale masuk!
+
+Cara baca:
+📗 Harga naik + volume tinggi = kenaikan VALID, banyak yang percaya
+📙 Harga naik + volume rendah = kenaikan LEMAH, waspadai balik
+📕 Harga turun + volume sangat tinggi = panic sell besar, mungkin segera rebound
+
+Di kripto, cek Whale Alert atau Glassnode untuk lihat transfer on-chain secara real-time.` },
+  { id:7, judul:"💸 Manajemen Modal", level:"Menengah",
+    isi:`Position Sizing = aturan berapa banyak modal yang boleh dipakai di satu trade.
+
+Aturan paling populer: Risiko maksimal 1–2% modal per trade.
+
+Contoh dengan modal Rp 1.000.000:
+• Risiko per trade = 1% = Rp 10.000
+• Kalau stop loss jaraknya 5%, berarti maksimal beli Rp 200.000 untuk aset itu
+• Sisa Rp 800.000 tetap aman meskipun trade ini kalah
+
+Kenapa penting?
+Kalau all-in di satu saham dan salah, bisa habis sekaligus. Dengan position sizing benar, kalah 10 kali berturut-turut pun total rugi hanya 10–20% modal.
+
+💡 Prinsipnya: Selamatkan modal dulu, profit mengikuti.` },
+  { id:8, judul:"🧠 Psikologi Trading", level:"Lanjutan",
+    isi:`Ini pelajaran terpenting yang paling sering diabaikan. Analisis bagus tapi mental lemah = tetap rugi.
+
+4 Musuh Terbesar Trader:
+
+😱 FEAR (Takut) — Takut rugi bikin kamu jual terlalu cepat, padahal harga masih bisa naik
+
+🤑 GREED (Serakah) — Tidak mau ambil profit karena ingin lebih, akhirnya balik rugi
+
+🎰 FOMO — Beli panik karena lihat orang lain profit, masuk di harga puncak
+
+💀 REVENGE TRADING — Habis rugi langsung trading lagi dengan modal lebih besar. Biasanya makin dalam.
+
+✅ Cara mengatasinya:
+Buat rencana SEBELUM masuk posisi (entry, SL, TP) dan PATUHI 100%. Trading itu soal disiplin, bukan soal siapa yang paling pintar analisis.` },
+];
+
+// ─────────────────────────────────────────────────────────────────────────────
+// DESIGN TOKENS
+// ─────────────────────────────────────────────────────────────────────────────
+const C = {
+  bg0:      "#03070f",
+  bg1:      "#060d1a",
+  bg2:      "#0a1525",
+  bg3:      "#0e1e33",
+  border:   "#112240",
+  dim:      "#1e3a5f",
+  muted:    "#3a5c80",
+  body:     "#8db4cc",
+  bright:   "#c8dff0",
+  white:    "#eaf2f8",
+  cyan:     "#00d4ff",
+  green:    "#00e676",
+  red:      "#ff3d5a",
+  amber:    "#ffb740",
+  purple:   "#a78bfa",
+  cyanGlow: "rgba(0,212,255,0.15)",
+  greenGlow:"rgba(0,230,118,0.15)",
+  redGlow:  "rgba(255,61,90,0.15)",
+};
+
+// ─────────────────────────────────────────────────────────────────────────────
+// HELPERS
+// ─────────────────────────────────────────────────────────────────────────────
+const fmtRp = (n) => "Rp " + Number(n).toLocaleString("id-ID");
+const fmtUSD = (p) => {
+  if (p >= 10000) return "$" + p.toLocaleString("id-ID", {maximumFractionDigits:0});
+  if (p >= 1)     return "$" + p.toLocaleString("en-US", {minimumFractionDigits:2, maximumFractionDigits:2});
+  return "$" + p.toFixed(4);
+};
+const warnaSinyal = (s) => ({BELI:C.green, PANTAU:C.cyan, TAHAN:C.amber, TUNGGU:C.muted, HINDARI:C.red, WASPADA:"#ff8c42"})[s] || C.muted;
+const warnaRSI    = (r) => r > 70 ? C.red : r < 35 ? C.green : C.amber;
+const levelWarna  = {Pemula:C.green, Menengah:C.amber, Lanjutan:C.red};
+
+function useKedip(val) {
+  const [f, setF] = useState(null);
+  const prev = useRef(val);
+  useEffect(() => {
+    if (prev.current !== val) { setF(val > prev.current ? "u" : "d"); const t = setTimeout(()=>setF(null),700); prev.current=val; return ()=>clearTimeout(t); }
+  }, [val]);
+  return f;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// KOMPONEN KECIL
+// ─────────────────────────────────────────────────────────────────────────────
+function Pill({ children, color, bg, border, size=9 }) {
+  return (
+    <span style={{display:"inline-flex",alignItems:"center",gap:4,padding:"3px 10px",borderRadius:20,
+      background:bg||`${color}18`,border:`1px solid ${border||color+"55"}`,
+      fontFamily:"'JetBrains Mono',monospace",fontSize:size,fontWeight:700,color,letterSpacing:"0.06em"}}>
+      {children}
+    </span>
+  );
+}
+
+function Card({ children, style={}, glow=false }) {
+  return (
+    <div style={{background:C.bg2,border:`1px solid ${C.border}`,borderRadius:14,
+      boxShadow: glow ? `0 0 30px ${C.cyanGlow}` : "none",
+      overflow:"hidden", ...style}}>
+      {children}
+    </div>
+  );
+}
+
+function SectionLabel({ children, icon="" }) {
+  return (
+    <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:9,color:C.muted,
+      textTransform:"uppercase",letterSpacing:"0.14em",marginBottom:14,display:"flex",alignItems:"center",gap:6}}>
+      {icon && <span style={{fontSize:12}}>{icon}</span>}{children}
+    </div>
+  );
+}
+
+function Btn({ children, onClick, variant="outline", disabled=false, style={} }) {
+  const variants = {
+    outline:  {bg:"transparent",      border:C.cyan,    color:C.cyan},
+    solid:    {bg:C.cyan,             border:C.cyan,    color:C.bg0},
+    green:    {bg:"transparent",      border:C.green,   color:C.green},
+    solidGreen:{bg:C.green,           border:C.green,   color:C.bg0},
+    ghost:    {bg:"transparent",      border:C.border,  color:C.muted},
+  };
+  const v = variants[variant] || variants.outline;
+  return (
+    <button onClick={onClick} disabled={disabled} style={{
+      padding:"8px 18px",borderRadius:8,cursor:disabled?"not-allowed":"pointer",
+      background:v.bg,border:`1px solid ${v.border}`,color:v.color,
+      fontFamily:"'JetBrains Mono',monospace",fontSize:11,fontWeight:700,
+      opacity:disabled?0.5:1,transition:"all 0.18s", ...style,
+    }}
+    onMouseEnter={e=>{if(!disabled){e.currentTarget.style.opacity="0.8";}}}
+    onMouseLeave={e=>{if(!disabled){e.currentTarget.style.opacity="1";}}}
+    >{children}</button>
+  );
+}
+
+function Input({ value, onChange, placeholder, onKeyDown, style={} }) {
+  return (
+    <input value={value} onChange={onChange} onKeyDown={onKeyDown} placeholder={placeholder}
+      style={{background:C.bg1,border:`1px solid ${C.border}`,borderRadius:8,
+        padding:"9px 13px",color:C.bright,fontFamily:"Inter,sans-serif",fontSize:13,outline:"none",
+        width:"100%", ...style}}
+    />
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// TICKER TAPE
+// ─────────────────────────────────────────────────────────────────────────────
+function TickerTape({ saham, kripto }) {
+  const all = [...saham, ...kripto, ...saham, ...kripto];
+  return (
+    <div style={{background:C.bg0,borderBottom:`1px solid ${C.border}`,overflow:"hidden",height:28,display:"flex",alignItems:"center"}}>
+      <div style={{display:"flex",gap:48,whiteSpace:"nowrap",animation:"geser 60s linear infinite"}}>
+        {all.map((a,i)=>(
+          <span key={i} style={{fontFamily:"'JetBrains Mono',monospace",fontSize:10,color:C.muted}}>
+            <span style={{color:C.bright,fontWeight:700}}>{a.ticker}</span>
+            {" "}<span style={{color:C.white}}>{fmtUSD(a.harga)}</span>
+            {" "}<span style={{color:a.ubah>=0?C.green:C.red}}>{a.ubah>=0?"▲":"▼"}{Math.abs(a.ubah).toFixed(2)}%</span>
+          </span>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// BARIS ASET
+// ─────────────────────────────────────────────────────────────────────────────
+function BarisAset({ a, onAnalisis }) {
+  const kedip = useKedip(a.harga);
+  return (
+    <div style={{
+      padding:"11px 16px",
+      borderBottom:`1px solid ${C.border}`,
+      background: kedip==="u"?"rgba(0,230,118,0.04)":kedip==="d"?"rgba(255,61,90,0.04)":"transparent",
+      transition:"background 0.5s",
+    }}>
+      {/* Baris atas */}
+      <div style={{display:"grid",gridTemplateColumns:"76px 1fr 104px 76px 64px 94px 64px",gap:8,alignItems:"center"}}>
+        {/* Kode */}
+        <div>
+          <div style={{fontFamily:"'JetBrains Mono',monospace",fontWeight:700,color:C.white,fontSize:13}}>{a.ticker}</div>
+          <div style={{color:C.dim,fontSize:9,marginTop:1}}>{a.nama}</div>
+        </div>
+        {/* RSI bar */}
+        <div>
+          <div style={{display:"flex",alignItems:"center",gap:6,marginBottom:2}}>
+            <div style={{flex:1,height:3,background:C.bg3,borderRadius:2,position:"relative"}}>
+              <div style={{position:"absolute",left:0,top:0,height:"100%",width:`${Math.min(100,a.rsi)}%`,background:warnaRSI(a.rsi),borderRadius:2}}/>
+            </div>
+            <span style={{fontFamily:"'JetBrains Mono',monospace",fontSize:10,color:warnaRSI(a.rsi),width:28,textAlign:"right"}}>{a.rsi.toFixed(0)}</span>
+          </div>
+          <Pill color={C.muted} size={8}>{a.kat}</Pill>
+        </div>
+        {/* Harga */}
+        <div style={{textAlign:"right",fontFamily:"'JetBrains Mono',monospace",fontWeight:700,fontSize:13,color:C.white}}>{fmtUSD(a.harga)}</div>
+        {/* Ubah */}
+        <div style={{textAlign:"right",fontFamily:"'JetBrains Mono',monospace",fontSize:12,fontWeight:700,color:a.ubah>=0?C.green:C.red}}>
+          {a.ubah>=0?"▲":"▼"}{Math.abs(a.ubah).toFixed(2)}%
+        </div>
+        {/* Vol */}
+        <div style={{textAlign:"right",fontFamily:"'JetBrains Mono',monospace",fontSize:10,color:C.muted}}>{a.vol}</div>
+        {/* Sinyal */}
+        <div style={{textAlign:"center"}}>
+          <Pill color={warnaSinyal(a.sinyal)}>
+            {a.sinyal==="BELI"&&<span style={{animation:"kedip 1.4s infinite"}}>●</span>} {a.sinyal}
+          </Pill>
+        </div>
+        {/* AI */}
+        <div style={{textAlign:"right"}}>
+          <Btn onClick={()=>onAnalisis(a)} variant="outline" style={{padding:"4px 10px",fontSize:10}}>⚡ AI</Btn>
+        </div>
+      </div>
+      {/* Baris potensi */}
+      <div style={{marginTop:6,fontSize:10,color:C.muted,fontFamily:"Inter,sans-serif",lineHeight:1.4,paddingLeft:2}}>
+        💡 {a.info}
+      </div>
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// MAKRO PANEL
+// ─────────────────────────────────────────────────────────────────────────────
+function PanelMakro() {
+  const items = [
+    {label:"DXY (Dolar AS)",       val:"104.28", tren:"turun", ket:"Dolar melemah → bagus untuk saham & kripto"},
+    {label:"Yield Obligasi 10 Thn",val:"4.31%",  tren:"turun", ket:"Turun → investor geser ke aset risiko"},
+    {label:"BTC Dominasi",         val:"62.4%",  tren:"naik",  ket:"Naik → belum musimnya altcoin"},
+    {label:"Fear & Greed",         val:"68",     tren:"naik",  ket:"Zona Serakah — mulai hati-hati"},
+  ];
+  return (
+    <Card style={{padding:16,marginBottom:14}}>
+      <SectionLabel icon="📡">Indikator Makro</SectionLabel>
+      <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(145px,1fr))",gap:10}}>
+        {items.map(m=>(
+          <div key={m.label} style={{background:C.bg1,borderRadius:10,padding:"11px 13px",border:`1px solid ${C.border}`}}>
+            <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:9,color:C.muted,marginBottom:4}}>{m.label}</div>
+            <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:17,fontWeight:700,color:C.white}}>{m.val}</div>
+            <div style={{fontSize:9,color:m.tren==="turun"?C.green:C.amber,marginTop:4,fontFamily:"Inter,sans-serif"}}>{m.ket}</div>
+          </div>
+        ))}
+      </div>
+    </Card>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// MODAL ANALISIS AI
+// ─────────────────────────────────────────────────────────────────────────────
+function ModalAI({ aset, tutup }) {
+  const [hasil, setHasil] = useState("");
+  const [loading, setLoading] = useState(true);
+  const isKripto = !!aset.funding;
+
+  useEffect(() => {
+    const p = isKripto
+      ? `Kamu trader profesional kripto. Analisis ${aset.ticker} (${aset.nama}) pakai Bahasa Indonesia santai tapi informatif. Data: Harga ${fmtUSD(aset.harga)}, Perubahan ${aset.ubah}%, RSI ${aset.rsi.toFixed(1)}, Funding ${aset.funding}%, L/S Ratio ${aset.ls}, Volume ${aset.vol}, Kategori: ${aset.kat}. Potensi: ${aset.info}.
+Tulis persis format ini (jangan tambah kalimat sebelumnya):
+MOMENTUM: [1 kalimat]
+HARGA MASUK IDEAL: [angka spesifik]
+TARGET UNTUNG 1: [angka]
+TARGET UNTUNG 2: [angka]
+BATAS RUGI: [angka]
+SINYAL WHALE: [Normal / Aktif / Waspada]
+KESIMPULAN: [2-3 kalimat santai dan actionable]`
+      : `Kamu trader profesional saham AS. Analisis ${aset.ticker} (${aset.nama}) pakai Bahasa Indonesia santai tapi informatif. Data: Harga ${fmtUSD(aset.harga)}, Perubahan ${aset.ubah}%, RSI ${aset.rsi.toFixed(1)}, MA50 ${fmtUSD(aset.ma50)}, MA200 ${fmtUSD(aset.ma200)}, Volume ${aset.vol}, Kategori: ${aset.kat}. Potensi: ${aset.info}.
+Tulis persis format ini:
+TREN SEKARANG: [1 kalimat]
+HARGA MASUK IDEAL: [angka spesifik]
+TARGET UNTUNG 1: [angka]
+TARGET UNTUNG 2: [angka]
+BATAS RUGI: [angka stop loss]
+KESIMPULAN: [2-3 kalimat santai dan actionable]`;
+    tanyaAI(p).then(r=>{setHasil(r);setLoading(false);}).catch(()=>{setHasil("Gagal konek ke AI, coba lagi ya.");setLoading(false);});
+  }, []);
+
+  const baris = hasil.split("\n").filter(Boolean);
+
+  return (
+    <div style={{position:"fixed",inset:0,background:"rgba(2,6,14,0.9)",zIndex:2000,display:"flex",alignItems:"center",justifyContent:"center",padding:16}} onClick={tutup}>
+      <div style={{background:C.bg2,border:`1px solid ${C.cyan}44`,borderRadius:18,padding:24,maxWidth:460,width:"100%",boxShadow:`0 0 60px rgba(0,212,255,0.12)`}} onClick={e=>e.stopPropagation()}>
+        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:16}}>
+          <div>
+            <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:9,color:C.cyan,letterSpacing:"0.14em",textTransform:"uppercase"}}>⚡ Analisis AI</div>
+            <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:19,fontWeight:700,color:C.white,marginTop:2}}>
+              {aset.ticker} <span style={{fontSize:11,color:C.muted,fontWeight:400}}>{aset.nama}</span>
+            </div>
+          </div>
+          <button onClick={tutup} style={{background:"transparent",border:"none",color:C.muted,cursor:"pointer",fontSize:18}}>✕</button>
+        </div>
+        <div style={{marginBottom:14,display:"flex",gap:8,flexWrap:"wrap"}}>
+          <Pill color={warnaSinyal(aset.sinyal)} size={11}>{aset.sinyal==="BELI"&&<span style={{animation:"kedip 1.4s infinite"}}>●</span>} {aset.sinyal}</Pill>
+          <Pill color={C.muted} size={10}>{aset.kat}</Pill>
+        </div>
+        <div style={{padding:"9px 12px",background:C.bg1,borderRadius:8,border:`1px solid ${C.border}`,marginBottom:14}}>
+          <div style={{fontSize:9,color:C.muted,fontFamily:"'JetBrains Mono',monospace",marginBottom:3,textTransform:"uppercase"}}>Potensi</div>
+          <div style={{fontSize:12,color:C.body,fontFamily:"Inter,sans-serif",lineHeight:1.5}}>💡 {aset.info}</div>
+        </div>
+        {loading ? (
+          <div style={{textAlign:"center",padding:28}}>
+            <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:12,color:C.cyan,animation:"kedip 1.4s infinite"}}>◌ AI lagi analisis...</div>
+          </div>
+        ) : (
+          <div style={{display:"flex",flexDirection:"column",gap:7}}>
+            {baris.map((line,i)=>{
+              const idx = line.indexOf(":");
+              const k = idx>0?line.slice(0,idx).trim():"";
+              const v = idx>0?line.slice(idx+1).trim():line;
+              const isKes = k.toUpperCase().includes("KESIMPULAN");
+              return (
+                <div key={i} style={{padding:"9px 12px",borderRadius:8,background:isKes?"rgba(0,212,255,0.06)":C.bg1,border:`1px solid ${isKes?C.cyan+"33":C.border}`}}>
+                  {k&&<div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:8,color:C.muted,marginBottom:2,textTransform:"uppercase",letterSpacing:"0.1em"}}>{k}</div>}
+                  <div style={{fontFamily:"Inter,sans-serif",fontSize:12,color:C.bright,lineHeight:1.6}}>{v||line}</div>
                 </div>
-                <p class="text-[10px] md:text-xs text-gray-500 tracking-wider mt-1 uppercase">Sistem Portal Portofolio v3.06</p>
-            </div>
-            
-            <div class="pointer-events-auto text-right hud-font text-xs text-cyan-400/80 bg-black/40 backdrop-blur-md p-3 rounded-lg neon-border">
-                <div>KOORDINAT: <span id="hud-coords">X: 0.00 | Y: 0.00</span></div>
-                <div class="text-[10px] text-gray-400 mt-1">STATUS: <span class="text-emerald-400">ONLINE</span></div>
-            </div>
-        </header>
-
-        <!-- PANDUAN TENGAH (Hanya Muncul di Awal) -->
-        <div id="central-guide" class="self-center text-center transition-all duration-1000 transform translate-y-0 opacity-100">
-            <div class="hud-font text-xs text-cyan-400 tracking-[0.3em] uppercase mb-4 animate-pulse">Inisialisasi Lingkungan 3D</div>
-            <h2 class="text-3xl md:text-6xl font-extrabold tracking-tight mb-6">WEBSITE MASA DEPAN</h2>
-            <button id="btn-start" class="pointer-events-auto px-8 py-3 bg-cyan-500/10 hover:bg-cyan-500/30 text-cyan-400 border border-cyan-400/40 rounded-full text-xs tracking-widest font-bold transition-all duration-300 transform hover:scale-105 neon-glow">
-                MASUK DECK INTERAKTIF
-            </button>
-        </div>
-
-        <!-- FOOTER HUD & NAVIGASI KONTROL -->
-        <footer class="flex flex-col md:flex-row justify-between items-center gap-6 w-full">
-            
-            <!-- Metadata Samping -->
-            <div class="hidden md:flex flex-col hud-font text-[10px] text-gray-500 gap-1">
-                <div>MODEL PERSPEKTIF: PARTICLE_MORPH_ENGINE_v2</div>
-                <div>RENDER: WEBGL_2.0_LATENCY_LOW</div>
-                <div>AUDIO UTAMA: SYNTH_GENERATIVE_ON</div>
-            </div>
-
-            <!-- Navigasi Utama -->
-            <div id="nav-container" class="pointer-events-auto opacity-0 translate-y-10 transition-all duration-1000 flex bg-black/60 backdrop-blur-xl p-2 rounded-2xl neon-border gap-2">
-                <button onclick="switchScene(1)" id="nav-btn-1" class="px-5 py-3 rounded-xl text-xs font-bold tracking-wider transition-all duration-300 flex items-center gap-2 bg-cyan-500/20 text-cyan-400 border border-cyan-400/30">
-                    <span class="w-1.5 h-1.5 bg-cyan-400 rounded-full"></span> 01. IGLO CORE
-                </button>
-                <button onclick="switchScene(2)" id="nav-btn-2" class="px-5 py-3 rounded-xl text-xs font-bold tracking-wider transition-all duration-300 flex items-center gap-2 text-gray-400 hover:text-white">
-                    <span class="w-1.5 h-1.5 bg-gray-500 rounded-full"></span> 02. CRYSTAL
-                </button>
-                <button onclick="switchScene(3)" id="nav-btn-3" class="px-5 py-3 rounded-xl text-xs font-bold tracking-wider transition-all duration-300 flex items-center gap-2 text-gray-400 hover:text-white">
-                    <span class="w-1.5 h-1.5 bg-gray-500 rounded-full"></span> 03. HOLO PENGUIN
-                </button>
-            </footer>
-        </div>
+              );
+            })}
+          </div>
+        )}
+        <div style={{marginTop:12,fontSize:8,color:C.dim,fontFamily:"Inter,sans-serif"}}>⚠ Bukan saran investasi. Selalu pakai stop loss.</div>
+      </div>
     </div>
+  );
+}
 
-    <!-- Panel Informasi Dinamis (Berubah sesuai Scene) -->
-    <div id="info-panel" class="absolute bottom-28 left-6 md:left-10 z-10 w-[85%] md:w-[350px] bg-black/50 backdrop-blur-md p-6 rounded-xl border border-white/5 opacity-0 transform translate-y-10 transition-all duration-1000 pointer-events-none">
-        <div class="hud-font text-[10px] text-cyan-400 tracking-wider mb-1" id="panel-meta">PORTFOLIO_CD_01</div>
-        <h3 class="text-xl font-bold tracking-tight mb-2" id="panel-title">Situs Iglo Modular</h3>
-        <p class="text-xs text-gray-400 leading-relaxed" id="panel-desc">Situs yang dibangun dengan perpaduan balok geometri 3D interaktif. Coba gerakkan kursor Anda untuk melihat balok-balok yang bereaksi terhadap gravitasi virtual.</p>
-        <div class="mt-4 pt-4 border-t border-white/5 flex justify-between items-center text-[10px] hud-font text-gray-500">
-            <span>SISTEM: AKTIF</span>
-            <span id="panel-stat">STABILITAS: 98.4%</span>
+// ─────────────────────────────────────────────────────────────────────────────
+// KALKULATOR KEUANGAN AI ← FITUR BARU
+// ─────────────────────────────────────────────────────────────────────────────
+function KalkulatorKeuangan() {
+  const [modal,     setModal]     = useState("");
+  const [pendapatan,setPendapatan]= useState("");
+  const [pengeluaran,setPengeluaran]=useState("");
+  const [tujuan,    setTujuan]    = useState("");
+  const [waktu,     setWaktu]     = useState("");
+  const [profil,    setProfil]    = useState("");
+  const [hasil,     setHasil]     = useState(null);
+  const [loading,   setLoading]   = useState(false);
+
+  const profilList = [
+    {id:"konservatif", label:"🛡️ Konservatif", sub:"Aman, risiko minimal"},
+    {id:"moderat",     label:"⚖️ Moderat",     sub:"Seimbang, risiko sedang"},
+    {id:"agresif",     label:"🚀 Agresif",      sub:"Ingin cuan besar, siap risiko"},
+  ];
+
+  const hitungSaran = async () => {
+    if (!modal || !profil) return;
+    setLoading(true); setHasil(null);
+    const p = `Kamu adalah perencana keuangan profesional Indonesia. Berikan saran keuangan berdasarkan data berikut:
+
+Modal/tabungan sekarang: ${modal ? fmtRp(modal) : "tidak disebutkan"}
+Pendapatan per bulan: ${pendapatan ? fmtRp(pendapatan) : "tidak disebutkan"}
+Pengeluaran per bulan: ${pengeluaran ? fmtRp(pengeluaran) : "tidak disebutkan"}
+Tujuan keuangan: ${tujuan || "tidak disebutkan"}
+Target waktu: ${waktu || "tidak disebutkan"}
+Profil risiko: ${profil}
+
+Berikan saran dalam format PERSIS ini (jangan tambah kalimat sebelumnya, langsung ke formatnya):
+
+ANALISIS KONDISI: [2 kalimat simpel tentang kondisi keuangan sekarang]
+
+DANA DARURAT: [Rp berapa yang harus disimpan dulu sebagai dana darurat, dan di mana simpannya]
+
+ALOKASI BULANAN:
+• Tabungan: [%] → [Rp]
+• Investasi: [%] → [Rp]
+• Dana Bebas: [%] → [Rp]
+
+REKOMENDASI INVESTASI:
+• [Instrumen 1] — [alasan singkat, cocok untuk profil ${profil}]
+• [Instrumen 2] — [alasan singkat]
+• [Instrumen 3] — [alasan singkat]
+
+STRATEGI CAPAI TUJUAN: [2-3 kalimat konkret tentang cara capai tujuan "${tujuan||"kebebasan finansial"}" dalam ${waktu||"jangka panjang"}]
+
+PERINGATAN: [1-2 hal yang perlu dihindari sesuai profil ${profil}]
+
+Pakai Bahasa Indonesia yang sangat mudah dipahami, seperti ngobrol sama teman yang baru belajar investasi.`;
+
+    const r = await tanyaAI(p).catch(()=>"Gagal konek ke AI, coba lagi ya.");
+    setHasil(r);
+    setLoading(false);
+  };
+
+  const parsed = hasil?.split("\n").filter(Boolean) || [];
+
+  const sectionColor = (line) => {
+    if (line.startsWith("ANALISIS")) return C.cyan;
+    if (line.startsWith("DANA DARURAT")) return C.green;
+    if (line.startsWith("ALOKASI")) return C.amber;
+    if (line.startsWith("REKOMENDASI")) return C.purple;
+    if (line.startsWith("STRATEGI")) return C.cyan;
+    if (line.startsWith("PERINGATAN")) return C.red;
+    return null;
+  };
+
+  return (
+    <div style={{display:"flex",flexDirection:"column",gap:16}}>
+
+      {/* Hero banner */}
+      <div style={{
+        background:`linear-gradient(135deg, #0a1e38 0%, #071428 60%, #0a0f1e 100%)`,
+        border:`1px solid ${C.cyan}33`,borderRadius:16,padding:"20px 20px 16px",
+        position:"relative",overflow:"hidden",
+      }}>
+        <div style={{position:"absolute",top:-30,right:-30,width:160,height:160,borderRadius:"50%",background:C.cyanGlow,filter:"blur(40px)",pointerEvents:"none"}}/>
+        <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:9,color:C.cyan,letterSpacing:"0.14em",textTransform:"uppercase",marginBottom:6}}>
+          🧮 Kalkulator Keuangan AI
         </div>
+        <div style={{fontFamily:"Inter,sans-serif",fontSize:14,fontWeight:600,color:C.white,marginBottom:4}}>
+          Masukkan kondisi keuanganmu, AI akan kasih saran lengkap
+        </div>
+        <div style={{fontFamily:"Inter,sans-serif",fontSize:11,color:C.muted}}>
+          Mau nabung, investasi, atau keduanya? AI akan tentuin porsinya buat kamu.
+        </div>
+      </div>
+
+      {/* Form */}
+      <Card style={{padding:18}}>
+        <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(200px,1fr))",gap:14,marginBottom:14}}>
+          {/* Modal */}
+          <div>
+            <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:9,color:C.muted,marginBottom:6,textTransform:"uppercase",letterSpacing:"0.08em"}}>
+              💰 Uang yang kamu punya sekarang <span style={{color:C.red}}>*</span>
+            </div>
+            <Input
+              value={modal}
+              onChange={e=>setModal(e.target.value.replace(/\D/g,""))}
+              placeholder="Contoh: 500000"
+            />
+            {modal && <div style={{fontSize:10,color:C.green,marginTop:4,fontFamily:"'JetBrains Mono',monospace"}}>{fmtRp(modal)}</div>}
+          </div>
+          {/* Pendapatan */}
+          <div>
+            <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:9,color:C.muted,marginBottom:6,textTransform:"uppercase",letterSpacing:"0.08em"}}>
+              💼 Pendapatan per bulan
+            </div>
+            <Input
+              value={pendapatan}
+              onChange={e=>setPendapatan(e.target.value.replace(/\D/g,""))}
+              placeholder="Contoh: 3000000"
+            />
+            {pendapatan && <div style={{fontSize:10,color:C.green,marginTop:4,fontFamily:"'JetBrains Mono',monospace"}}>{fmtRp(pendapatan)}</div>}
+          </div>
+          {/* Pengeluaran */}
+          <div>
+            <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:9,color:C.muted,marginBottom:6,textTransform:"uppercase",letterSpacing:"0.08em"}}>
+              🛒 Pengeluaran per bulan
+            </div>
+            <Input
+              value={pengeluaran}
+              onChange={e=>setPengeluaran(e.target.value.replace(/\D/g,""))}
+              placeholder="Contoh: 2000000"
+            />
+            {pengeluaran && pendapatan && (
+              <div style={{fontSize:10,color:Number(pengeluaran)>Number(pendapatan)?C.red:C.green,marginTop:4,fontFamily:"'JetBrains Mono',monospace"}}>
+                Sisa: {fmtRp(Math.abs(Number(pendapatan)-Number(pengeluaran)))} {Number(pengeluaran)>Number(pendapatan)?"⚠ Defisit!":"✓"}
+              </div>
+            )}
+          </div>
+          {/* Tujuan */}
+          <div>
+            <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:9,color:C.muted,marginBottom:6,textTransform:"uppercase",letterSpacing:"0.08em"}}>
+              🎯 Tujuan keuanganmu
+            </div>
+            <Input
+              value={tujuan}
+              onChange={e=>setTujuan(e.target.value)}
+              placeholder="Contoh: Beli HP baru, modal usaha..."
+            />
+          </div>
+          {/* Waktu */}
+          <div>
+            <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:9,color:C.muted,marginBottom:6,textTransform:"uppercase",letterSpacing:"0.08em"}}>
+              📅 Target waktu capai tujuan
+            </div>
+            <Input
+              value={waktu}
+              onChange={e=>setWaktu(e.target.value)}
+              placeholder="Contoh: 3 bulan, 1 tahun..."
+            />
+          </div>
+        </div>
+
+        {/* Profil risiko */}
+        <div style={{marginBottom:16}}>
+          <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:9,color:C.muted,marginBottom:8,textTransform:"uppercase",letterSpacing:"0.08em"}}>
+            🎭 Profil risiko kamu <span style={{color:C.red}}>*</span>
+          </div>
+          <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:8}}>
+            {profilList.map(p=>(
+              <button key={p.id} onClick={()=>setProfil(p.id)} style={{
+                padding:"12px 10px",borderRadius:10,cursor:"pointer",textAlign:"center",
+                background:profil===p.id?`${C.cyan}15`:C.bg1,
+                border:`1px solid ${profil===p.id?C.cyan:C.border}`,
+                boxShadow:profil===p.id?`0 0 16px ${C.cyanGlow}`:"none",
+                transition:"all 0.2s",
+              }}>
+                <div style={{fontSize:15,marginBottom:4}}>{p.label.split(" ")[0]}</div>
+                <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:10,fontWeight:700,color:profil===p.id?C.cyan:C.muted}}>{p.label.split(" ").slice(1).join(" ")}</div>
+                <div style={{fontSize:9,color:C.dim,marginTop:2,fontFamily:"Inter,sans-serif"}}>{p.sub}</div>
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Tombol */}
+        <Btn
+          onClick={hitungSaran}
+          disabled={!modal || !profil || loading}
+          variant="solid"
+          style={{width:"100%",padding:"12px",fontSize:13,borderRadius:10,letterSpacing:"0.04em"}}
+        >
+          {loading ? "⏳ AI lagi mikir..." : "✨ Analisis Keuanganku"}
+        </Btn>
+      </Card>
+
+      {/* Hasil */}
+      {loading && (
+        <Card style={{padding:32,textAlign:"center"}}>
+          <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:12,color:C.cyan,animation:"kedip 1.4s infinite",marginBottom:8}}>◌ AI sedang menganalisis kondisi keuanganmu...</div>
+          <div style={{fontSize:11,color:C.muted,fontFamily:"Inter,sans-serif"}}>Biasanya butuh 5–10 detik</div>
+        </Card>
+      )}
+
+      {hasil && !loading && (
+        <div style={{display:"flex",flexDirection:"column",gap:8}}>
+          <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:9,color:C.muted,textTransform:"uppercase",letterSpacing:"0.12em",padding:"0 2px",marginBottom:2}}>
+            Hasil Analisis AI untuk <span style={{color:C.cyan}}>profil {profil}</span>
+          </div>
+
+          {/* Summary cards kalau ada data */}
+          {modal && pendapatan && (
+            <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(130px,1fr))",gap:8,marginBottom:4}}>
+              {[
+                {label:"Modal Sekarang", val:fmtRp(modal), color:C.cyan},
+                {label:"Pemasukan/Bulan", val:fmtRp(pendapatan), color:C.green},
+                {label:"Pengeluaran/Bulan", val:fmtRp(pengeluaran||0), color:C.red},
+                {label:"Sisa/Bulan", val:fmtRp(Math.max(0,Number(pendapatan)-Number(pengeluaran||0))), color:C.amber},
+              ].map(s=>(
+                <div key={s.label} style={{background:C.bg2,border:`1px solid ${C.border}`,borderRadius:10,padding:"10px 12px"}}>
+                  <div style={{fontSize:8,color:C.muted,fontFamily:"'JetBrains Mono',monospace",marginBottom:3,textTransform:"uppercase"}}>{s.label}</div>
+                  <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:12,fontWeight:700,color:s.color}}>{s.val}</div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* Saran AI */}
+          {parsed.map((line,i)=>{
+            const hColor = sectionColor(line);
+            const isHeader = !!hColor;
+            const isBullet = line.startsWith("•") || line.startsWith("-");
+            return (
+              <div key={i} style={{
+                padding: isHeader?"10px 14px":"8px 14px 8px 20px",
+                borderRadius: isHeader?10:8,
+                background: isHeader?`${hColor}0d`:C.bg1,
+                border:`1px solid ${isHeader?hColor+"33":C.border}`,
+                marginTop: isHeader?4:0,
+              }}>
+                {isHeader ? (
+                  <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:10,fontWeight:700,color:hColor,textTransform:"uppercase",letterSpacing:"0.1em"}}>{line}</div>
+                ) : (
+                  <div style={{fontFamily:"Inter,sans-serif",fontSize:12,color:isBullet?C.bright:C.body,lineHeight:1.65}}>{line}</div>
+                )}
+              </div>
+            );
+          })}
+
+          <div style={{padding:"10px 14px",borderRadius:8,background:"rgba(255,61,90,0.05)",border:`1px solid ${C.red}22`,marginTop:4}}>
+            <div style={{fontSize:9,color:C.dim,fontFamily:"Inter,sans-serif",lineHeight:1.6}}>
+              ⚠️ Ini adalah saran edukatif berbasis AI, bukan saran keuangan resmi. Konsultasikan keputusan besar ke financial planner berlisensi.
+            </div>
+          </div>
+        </div>
+      )}
     </div>
+  );
+}
 
-    <!-- Tombol Suara Mute/Unmute -->
-    <button id="btn-sound" class="absolute top-6 right-6 md:top-10 md:right-10 z-20 w-10 h-10 bg-black/40 backdrop-blur-md rounded-full border border-white/10 flex items-center justify-center text-gray-400 hover:text-white transition-all pointer-events-auto">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" id="sound-icon">
-            <path fill-rule="evenodd" d="M9.383 3.076A1 1 0 0110 4v12a1 1 0 01-1.707.707L4.586 13H2a1 1 0 01-1-1V8a1 1 0 011-1h2.586l3.693-3.693a1 1 0 011.104-.231zM13.586 10l2.293-2.293a1 1 0 10-1.414-1.414L12.172 8.586l-2.293-2.293a1 1 0 10-1.414 1.414L10.758 10l-2.293 2.293a1 1 0 101.414 1.414l2.293-2.293 2.293 2.293a1 1 0 001.414-1.414L13.586 10z" clip-rule="evenodd" />
-        </svg>
-    </button>
+// ─────────────────────────────────────────────────────────────────────────────
+// FEED BERITA
+// ─────────────────────────────────────────────────────────────────────────────
+function FeedBerita() {
+  const [filter, setFilter] = useState("Semua");
+  const [tanya, setTanya]   = useState("");
+  const [jawab, setJawab]   = useState("");
+  const [loading, setLoad]  = useState(false);
+  const kats = ["Semua","Saham US","Kripto","Makro"];
+  const tampil = filter==="Semua" ? BERITA : BERITA.filter(b=>b.kat===filter);
 
-    <!-- Memuat Library Three.js dan GSAP untuk Animasi Kelas Atas -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+  const kirim = async () => {
+    if (!tanya.trim()) return;
+    setLoad(true);
+    const r = await tanyaAI(`Kamu analis pasar keuangan. Jawab dalam Bahasa Indonesia yang mudah dipahami, maksimal 3 paragraf singkat: "${tanya}". Fokus ke dampak ke saham/kripto.`).catch(()=>"Gagal, coba lagi.");
+    setJawab(r); setLoad(false);
+  };
 
-    <script>
-        // --- 1. CONFIG & SYSTEM STATE ---
-        let currentScene = 1;
-        let isStarted = false;
-        let soundEnabled = false;
-        let mouseX = 0, mouseY = 0;
-        let targetMouseX = 0, targetMouseY = 0;
+  return (
+    <div style={{display:"flex",flexDirection:"column",gap:14}}>
+      <div style={{display:"flex",gap:8,flexWrap:"wrap"}}>
+        {kats.map(k=>(
+          <button key={k} onClick={()=>setFilter(k)} style={{
+            padding:"4px 14px",borderRadius:20,cursor:"pointer",
+            background:filter===k?`${C.cyan}18`:"transparent",
+            border:`1px solid ${filter===k?C.cyan:C.border}`,
+            fontFamily:"'JetBrains Mono',monospace",fontSize:9,
+            color:filter===k?C.cyan:C.muted,transition:"all 0.2s",
+          }}>{k}</button>
+        ))}
+      </div>
+      <div style={{display:"flex",flexDirection:"column",gap:8}}>
+        {tampil.map((b,i)=>(
+          <div key={i} style={{padding:"11px 14px",background:C.bg1,borderRadius:10,border:`1px solid ${b.dampak==="bullish"?C.green+"1a":C.red+"1a"}`,display:"flex",gap:10,alignItems:"flex-start"}}>
+            <div style={{flexShrink:0,width:7,height:7,borderRadius:"50%",marginTop:5,background:b.dampak==="bullish"?C.green:C.red,boxShadow:`0 0 6px ${b.dampak==="bullish"?C.green:C.red}`}}/>
+            <div style={{flex:1}}>
+              <div style={{fontSize:12,color:C.bright,lineHeight:1.5,fontFamily:"Inter,sans-serif"}}>{b.judul}</div>
+              <div style={{marginTop:5,display:"flex",gap:8,flexWrap:"wrap",alignItems:"center"}}>
+                <span style={{fontFamily:"'JetBrains Mono',monospace",fontSize:8,color:C.muted}}>{b.waktu}</span>
+                <Pill color={C.cyan} size={8}>{b.kat}</Pill>
+                <Pill color={b.dampak==="bullish"?C.green:C.red} size={8}>{b.dampak==="bullish"?"▲ Bullish":"▼ Bearish"} · {b.aset}</Pill>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+      <Card style={{padding:16}}>
+        <SectionLabel icon="🤖">Tanya AI soal berita apa saja</SectionLabel>
+        <div style={{display:"flex",gap:8}}>
+          <Input value={tanya} onChange={e=>setTanya(e.target.value)} onKeyDown={e=>e.key==="Enter"&&kirim()} placeholder="Misal: Dampak suku bunga Fed ke NVDA?" style={{flex:1}}/>
+          <Btn onClick={kirim} disabled={loading} variant="outline">{loading?"...":"Tanya"}</Btn>
+        </div>
+        {jawab && (
+          <div style={{marginTop:12,padding:12,background:C.bg1,borderRadius:8,border:`1px solid ${C.border}`}}>
+            <div style={{fontFamily:"Inter,sans-serif",fontSize:12,color:C.bright,lineHeight:1.7,whiteSpace:"pre-wrap"}}>{jawab}</div>
+          </div>
+        )}
+      </Card>
+    </div>
+  );
+}
 
-        // Web Audio Context (Procedural Sound Engine)
-        let audioCtx = null;
+// ─────────────────────────────────────────────────────────────────────────────
+// BELAJAR TRADING
+// ─────────────────────────────────────────────────────────────────────────────
+function BelajarTrading() {
+  const [buka, setBuka]   = useState(null);
+  const [tanya, setTanya] = useState("");
+  const [jawab, setJawab] = useState("");
+  const [loading, setLoad]= useState(false);
 
-        // --- 2. THREE.JS INITIALIZATION ---
-        const canvas = document.getElementById('webgl-canvas');
-        const scene = new THREE.Scene();
-        
-        // Menambahkan Kabut (Fog) untuk Kedalaman Sinematik
-        scene.background = new THREE.Color(0x0a0c10);
-        scene.fog = new THREE.FogExp2(0x0a0c10, 0.05);
+  const kirim = async () => {
+    if (!tanya.trim()) return;
+    setLoad(true);
+    const r = await tanyaAI(`Kamu guru trading yang asik. Jawab dalam Bahasa Indonesia yang sangat mudah, seperti ngobrol sama teman baru belajar. Pakai contoh nyata dan angka konkret. Maks 4 paragraf. Pertanyaan: "${tanya}"`).catch(()=>"Gagal, coba lagi.");
+    setJawab(r); setLoad(false);
+  };
 
-        // Pengaturan Kamera
-        const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 100);
-        camera.position.set(0, 2, 8);
+  return (
+    <div style={{display:"flex",flexDirection:"column",gap:10}}>
+      <div style={{fontSize:12,color:C.muted,fontFamily:"Inter,sans-serif",lineHeight:1.6,marginBottom:4}}>
+        Semua penjelasan pakai bahasa sehari-hari. Tidak ada istilah ribet yang tidak dijelasin.
+      </div>
+      {MATERI.map(m=>(
+        <Card key={m.id} style={{border:`1px solid ${buka===m.id?C.cyan+"44":C.border}`}}>
+          <button onClick={()=>setBuka(buka===m.id?null:m.id)} style={{width:"100%",padding:"14px 16px",background:"transparent",border:"none",display:"flex",justifyContent:"space-between",alignItems:"center",cursor:"pointer"}}>
+            <div style={{display:"flex",alignItems:"center",gap:10,textAlign:"left"}}>
+              <span style={{fontFamily:"Inter,sans-serif",fontSize:13,fontWeight:600,color:buka===m.id?C.white:C.bright}}>{m.judul}</span>
+              <Pill color={levelWarna[m.level]} size={8}>{m.level}</Pill>
+            </div>
+            <span style={{color:C.muted,fontSize:12,flexShrink:0}}>{buka===m.id?"▲":"▼"}</span>
+          </button>
+          {buka===m.id&&(
+            <div style={{padding:"0 16px 16px"}}>
+              <div style={{height:1,background:C.border,marginBottom:12}}/>
+              <div style={{fontFamily:"Inter,sans-serif",fontSize:13,color:C.body,lineHeight:1.85,whiteSpace:"pre-wrap"}}>{m.isi}</div>
+            </div>
+          )}
+        </Card>
+      ))}
+      <Card style={{padding:16,marginTop:4}}>
+        <SectionLabel icon="🎓">Ada pertanyaan lain? Tanya AI langsung</SectionLabel>
+        <div style={{display:"flex",gap:8}}>
+          <Input value={tanya} onChange={e=>setTanya(e.target.value)} onKeyDown={e=>e.key==="Enter"&&kirim()} placeholder="Misal: Apa bedanya saham dan kripto?" style={{flex:1}}/>
+          <Btn onClick={kirim} disabled={loading} variant="green">{loading?"...":"Tanya"}</Btn>
+        </div>
+        {jawab&&(
+          <div style={{marginTop:12,padding:12,background:C.bg1,borderRadius:8,border:`1px solid ${C.green}22`}}>
+            <div style={{fontFamily:"Inter,sans-serif",fontSize:12,color:C.bright,lineHeight:1.7,whiteSpace:"pre-wrap"}}>{jawab}</div>
+          </div>
+        )}
+      </Card>
+    </div>
+  );
+}
 
-        const renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true, alpha: false });
-        renderer.setSize(window.innerWidth, window.innerHeight);
-        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-        renderer.shadowMap.enabled = true;
+// ─────────────────────────────────────────────────────────────────────────────
+// MATRIKS KORELASI
+// ─────────────────────────────────────────────────────────────────────────────
+function MatriksKorelasi() {
+  const kr=["BTC","ETH","SOL"], sh=["NVDA","TSLA","AAPL"];
+  const d={"BTC-NVDA":0.72,"BTC-TSLA":0.65,"BTC-AAPL":0.58,"ETH-NVDA":0.69,"ETH-TSLA":0.61,"ETH-AAPL":0.54,"SOL-NVDA":0.48,"SOL-TSLA":0.52,"SOL-AAPL":0.39};
+  const wc=(v)=>v>=0.7?C.green:v>=0.5?C.amber:C.red;
+  return (
+    <Card style={{padding:16}}>
+      <SectionLabel icon="🔗">Korelasi Kripto × Saham AS</SectionLabel>
+      <div style={{fontSize:10,color:C.muted,fontFamily:"Inter,sans-serif",marginBottom:12}}>Semakin dekat ke 1.00 = gerakan makin kompak. Penting biar tidak buka posisi yang saling berlawanan.</div>
+      <div style={{overflowX:"auto"}}>
+        <table style={{borderCollapse:"collapse",width:"100%"}}>
+          <thead><tr>
+            <th style={{padding:"5px 10px",textAlign:"left",fontFamily:"'JetBrains Mono',monospace",fontSize:9,color:C.muted}}></th>
+            {sh.map(s=><th key={s} style={{padding:"5px 14px",fontFamily:"'JetBrains Mono',monospace",fontSize:11,color:C.white,fontWeight:700}}>{s}</th>)}
+          </tr></thead>
+          <tbody>{kr.map(k=>(
+            <tr key={k}>
+              <td style={{padding:"7px 10px",fontFamily:"'JetBrains Mono',monospace",fontWeight:700,fontSize:12,color:C.white}}>{k}</td>
+              {sh.map(s=>{const v=d[`${k}-${s}`]||0;return(
+                <td key={s} style={{padding:"7px 14px",textAlign:"center"}}>
+                  <div style={{display:"inline-block",padding:"3px 11px",borderRadius:8,background:`${wc(v)}12`,border:`1px solid ${wc(v)}35`,fontFamily:"'JetBrains Mono',monospace",fontSize:13,fontWeight:700,color:wc(v)}}>{v.toFixed(2)}</div>
+                </td>
+              );})}
+            </tr>
+          ))}</tbody>
+        </table>
+        <div style={{marginTop:10,display:"flex",gap:14,flexWrap:"wrap"}}>
+          {[[C.green,"≥ 0.70 Kuat"],[C.amber,"0.50–0.69 Sedang"],[C.red,"< 0.50 Lemah"]].map(([c,l])=>(
+            <span key={l} style={{fontFamily:"'JetBrains Mono',monospace",fontSize:9,color:c}}>{l}</span>
+          ))}
+        </div>
+      </div>
+    </Card>
+  );
+}
 
-        // Pencahayaan (Lighting)
-        const ambientLight = new THREE.AmbientLight(0x1a2436, 1.2);
-        scene.add(ambientLight);
+// ─────────────────────────────────────────────────────────────────────────────
+// APP UTAMA
+// ─────────────────────────────────────────────────────────────────────────────
+export default function App() {
+  const [tab,     setTab]     = useState("saham");
+  const [saham,   setSaham]   = useState(SAHAM_DATA);
+  const [kripto,  setKripto]  = useState(KRIPTO_DATA);
+  const [modal,   setModal]   = useState(null);
+  const [jam,     setJam]     = useState(new Date());
 
-        const directionalLight = new THREE.DirectionalLight(0x00ffff, 2.5);
-        directionalLight.position.set(5, 10, 7);
-        scene.add(directionalLight);
+  // Jam live
+  useEffect(()=>{ const id=setInterval(()=>setJam(new Date()),1000); return()=>clearInterval(id); },[]);
 
-        const pointLight = new THREE.PointLight(0xff00ff, 3, 15);
-        pointLight.position.set(0, 1, 0);
-        scene.add(pointLight);
+  // Simulasi harga nonstop 24/7
+  useEffect(()=>{
+    const id=setInterval(()=>{
+      setSaham(p=>p.map(s=>({...s,
+        harga:+(s.harga*(1+(Math.random()-0.5)*0.0016)).toFixed(2),
+        ubah:+((s.ubah+(Math.random()-0.5)*0.04)).toFixed(2),
+        rsi: Math.min(85,Math.max(18,s.rsi+(Math.random()-0.5)*0.4)),
+      })));
+      setKripto(p=>p.map(c=>({...c,
+        harga:+(c.harga*(1+(Math.random()-0.5)*0.0022)),
+        ubah:+((c.ubah+(Math.random()-0.5)*0.07)).toFixed(2),
+        rsi: Math.min(85,Math.max(18,c.rsi+(Math.random()-0.5)*0.5)),
+      })));
+    },3000);
+    return()=>clearInterval(id);
+  },[]);
 
-        // --- 3. PROCEDURAL SOUND GENERATOR (Web Audio API) ---
-        function initAudio() {
-            if (!audioCtx) {
-                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-            }
-        }
+  const jamUTC = jam.getUTCHours()*60+jam.getUTCMinutes();
+  const bursaBuka = jamUTC>=810&&jamUTC<1200;
 
-        function playSynthSound(freq, type, duration, vol) {
-            if (!soundEnabled || !audioCtx) return;
-            try {
-                let osc = audioCtx.createOscillator();
-                let gainNode = audioCtx.createGain();
+  const TABS = [
+    {id:"saham",    icon:"📈", label:"Saham AS",          sub:"NYSE & NASDAQ"},
+    {id:"kripto",   icon:"₿",  label:"Kripto",             sub:"24 Jam Nonstop"},
+    {id:"kalkulator",icon:"🧮",label:"Kalkulator AI",      sub:"Rencana Keuangan"},
+    {id:"berita",   icon:"📰", label:"Berita",             sub:"Live 24 Jam"},
+    {id:"belajar",  icon:"🎓", label:"Belajar",            sub:"Dari Nol"},
+  ];
+
+  const sinyal_beli = (tab==="saham"?saham:kripto).filter(a=>a.sinyal==="BELI").length;
+
+  return (
+    <div style={{minHeight:"100vh",background:C.bg0,color:C.body,fontFamily:"Inter,sans-serif"}}>
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600;700&display=swap');
+        @keyframes geser{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+        @keyframes kedip{0%,100%{opacity:1}50%{opacity:0.15}}
+        @keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+        *{box-sizing:border-box;margin:0;padding:0;}
+        input::placeholder{color:#1e3a5f;}
+        ::-webkit-scrollbar{width:4px;}::-webkit-scrollbar-track{background:${C.bg0};}::-webkit-scrollbar-thumb{background:${C.border};border-radius:4px;}
+      `}</style>
+
+      {/* TOP BAR */}
+      <div style={{background:"linear-gradient(to right,#020810,#04111f,#020810)",borderBottom:`1px solid ${C.border}`,padding:"10px 18px",display:"flex",justifyContent:"space-between",alignItems:"center",flexWrap:"wrap",gap:8}}>
+        <div style={{display:"flex",alignItems:"center",gap:12}}>
+          <div style={{width:32,height:32,borderRadius:8,background:`linear-gradient(135deg,${C.cyan},#0070a0)`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:16,flexShrink:0}}>⬡</div>
+          <div>
+            <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:14,fontWeight:700,color:C.white,letterSpacing:"-0.01em"}}>ALPHA COMMAND</div>
+            <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:8,color:C.muted,letterSpacing:"0.14em",textTransform:"uppercase"}}>Dashboard AI Saham & Kripto</div>
+          </div>
+        </div>
+        <div style={{display:"flex",gap:8,alignItems:"center",flexWrap:"wrap"}}>
+          <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:10,color:C.muted}}>🕐 {jam.toLocaleTimeString("id-ID")}</div>
+          <Pill color={bursaBuka?C.green:C.red}>{bursaBuka?"● BURSA BUKA":"● BURSA TUTUP"}</Pill>
+          <Pill color={C.green}>● KRIPTO 24/7</Pill>
+        </div>
+      </div>
+
+      {/* TICKER TAPE */}
+      <TickerTape saham={saham} kripto={kripto}/>
+
+      <div style={{maxWidth:1100,margin:"0 auto",padding:"16px 14px"}}>
+
+        {/* TAB MENU */}
+        <div style={{display:"grid",gridTemplateColumns:"repeat(5,1fr)",gap:6,marginBottom:16}}>
+          {TABS.map(t=>{
+            const active=tab===t.id;
+            return (
+              <button key={t.id} onClick={()=>setTab(t.id)} style={{
+                padding:"11px 8px",borderRadius:12,cursor:"pointer",textAlign:"center",
+                background:active?`linear-gradient(145deg,${C.cyan}18,${C.cyan}08)`:`${C.bg2}`,
+                border:`1px solid ${active?C.cyan+"66":C.border}`,
+                boxShadow:active?`0 0 20px ${C.cyanGlow},inset 0 1px 0 ${C.cyan}22`:"none",
+                transition:"all 0.22s",
+              }}>
+                <div style={{fontSize:16,marginBottom:3}}>{t.icon}</div>
+                <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:10,fontWeight:700,color:active?C.cyan:C.muted}}>{t.label}</div>
+                <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:8,color:C.dim,marginTop:1}}>{t.sub}</div>
+              </button>
+            );
+          })}
+        </div>
+
+        {/* SINYAL BELI BANNER */}
+        {(tab==="saham"||tab==="kripto")&&sinyal_beli>0&&(
+          <div style={{marginBottom:12,padding:"8px 14px",borderRadius:8,background:C.greenGlow,border:`1px solid ${C.green}28`,display:"flex",alignItems:"center",gap:8}}>
+            <div style={{width:6,height:6,borderRadius:"50%",background:C.green,animation:"kedip 1.4s infinite",flexShrink:0}}/>
+            <span style={{fontFamily:"'JetBrains Mono',monospace",fontSize:10,color:C.green,fontWeight:700}}>{sinyal_beli} sinyal BELI aktif</span>
+            <span style={{fontSize:10,color:C.muted,fontFamily:"Inter,sans-serif"}}>— tetap pakai stop loss ya bro</span>
+          </div>
+        )}
+
+        {/* KONTEN TAB SAHAM */}
+        {tab==="saham"&&(
+          <div style={{display:"flex",flexDirection:"column",gap:14,animation:"fadeIn 0.3s ease"}}>
+            <PanelMakro/>
+            <Card>
+              <div style={{padding:"12px 16px",borderBottom:`1px solid ${C.border}`,display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+                <span style={{fontFamily:"'JetBrains Mono',monospace",fontSize:9,color:C.muted,textTransform:"uppercase",letterSpacing:"0.1em"}}>Saham AS — Potensi Naik Drastis Included</span>
+                <span style={{fontFamily:"'JetBrains Mono',monospace",fontSize:8,color:C.dim}}>Update tiap 3 detik</span>
+              </div>
+              {/* Header kolom */}
+              <div style={{display:"grid",gridTemplateColumns:"76px 1fr 104px 76px 64px 94px 64px",gap:8,padding:"7px 16px",borderBottom:`1px solid ${C.border}`}}>
+                {["Kode","RSI / Kategori","Harga","Ubah","Volume","Sinyal","Analisis"].map((h,i)=>(
+                  <div key={h} style={{fontFamily:"'JetBrains Mono',monospace",fontSize:8,color:C.dim,textTransform:"uppercase",letterSpacing:"0.08em",textAlign:["Harga","Ubah","Volume"].includes(h)?"right":h==="Analisis"?"right":"left"}}>{h}</div>
+                ))}
+              </div>
+              {saham.map(a=><BarisAset key={a.ticker} a={a} onAnalisis={a=>setModal(a)}/>)}
+            </Card>
+            <MatriksKorelasi/>
+          </div>
+        )}
+
+        {/* KONTEN TAB KRIPTO */}
+        {tab==="kripto"&&(
+          <div style={{display:"flex",flexDirection:"column",gap:14,animation:"fadeIn 0.3s ease"}}>
+            {/* Metrik futures */}
+            <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(130px,1fr))",gap:8}}>
+              {kripto.filter(c=>["BTC","ETH","SOL","TAO"].includes(c.ticker)).map(c=>(
+                <Card key={c.ticker} style={{padding:"12px 14px"}}>
+                  <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:11,fontWeight:700,color:C.white,marginBottom:8}}>{c.ticker}</div>
+                  <div style={{fontSize:8,color:C.muted,fontFamily:"'JetBrains Mono',monospace",marginBottom:2,textTransform:"uppercase"}}>Funding Rate</div>
+                  <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:13,fontWeight:700,color:c.funding>=0?C.amber:C.red,marginBottom:6}}>{c.funding>=0?"+":""}{(c.funding*100).toFixed(3)}%</div>
+                  <div style={{fontSize:8,color:C.muted,fontFamily:"'JetBrains Mono',monospace",marginBottom:2,textTransform:"uppercase"}}>L/S Ratio</div>
+                  <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:13,fontWeight:700,color:c.ls>1?C.green:C.red}}>{c.ls.toFixed(2)}x</div>
+                </Card>
+              ))}
+            </div>
+            <Card>
+              <div style={{padding:"12px 16px",borderBottom:`1px solid ${C.border}`,display:"flex",justifyContent:"space-between"}}>
+                <span style={{fontFamily:"'JetBrains Mono',monospace",fontSize:9,color:C.muted,textTransform:"uppercase",letterSpacing:"0.1em"}}>Kripto — Altcoin Potensi Meledak Included</span>
+                <span style={{fontFamily:"'JetBrains Mono',monospace",fontSize:8,color:C.dim}}>24 Jam Nonstop</span>
+              </div>
+              <div style={{display:"grid",gridTemplateColumns:"76px 1fr 104px 76px 64px 94px 64px",gap:8,padding:"7px 16px",borderBottom:`1px solid ${C.border}`}}>
+                {["Kode","RSI / Kategori","Harga","Ubah","Volume","Sinyal","Analisis"].map((h)=>(
+                  <div key={h} style={{fontFamily:"'JetBrains Mono',monospace",fontSize:8,color:C.dim,textTransform:"uppercase",letterSpacing:"0.08em",textAlign:["Harga","Ubah","Volume"].includes(h)?"right":h==="Analisis"?"right":"left"}}>{h}</div>
+                ))}
+              </div>
+              {kripto.map(a=><BarisAset key={a.ticker} a={a} onAnalisis={a=>setModal(a)}/>)}
+            </Card>
+            <MatriksKorelasi/>
+          </div>
+        )}
+
+        {/* KONTEN TAB KALKULATOR */}
+        {tab==="kalkulator"&&(
+          <div style={{animation:"fadeIn 0.3s ease"}}>
+            <KalkulatorKeuangan/>
+          </div>
+        )}
+
+        {/* KONTEN TAB BERITA */}
+        {tab==="berita"&&(
+          <Card style={{padding:16,animation:"fadeIn 0.3s ease"}}>
+            <SectionLabel icon="📰">Berita Pasar Live 24 Jam</SectionLabel>
+            <FeedBerita/>
+          </Card>
+        )}
+
+        {/* KONTEN TAB BELAJAR */}
+        {tab==="belajar"&&(
+          <Card style={{padding:16,animation:"fadeIn 0.3s ease"}}>
+            <SectionLabel icon="🎓">Belajar Trading — Dari Nol Sampai Ngerti</SectionLabel>
+            <BelajarTrading/>
+          </Card>
+        )}
+
+        {/* FOOTER */}
+        <div style={{marginTop:16,padding:"10px 14px",borderRadius:8,background:C.bg1,border:`1px solid ${C.border}`}}>
+          <div style={{fontSize:8,color:C.dim,fontFamily:"'JetBrains Mono',monospace",lineHeight:1.8}}>
+            ⚠️ Alpha Command adalah alat bantu analisis & edukasi. Harga disimulasikan untuk demo — integrasikan Binance API / Alpaca Markets / CoinGecko untuk data live nyata. Konten ini bukan saran investasi maupun keuangan resmi.
+          </div>
+        </div>
+      </div>
+
+      {/* MODAL ANALISIS AI */}
+      {modal&&<ModalAI aset={modal} tutup={()=>setModal(null)}/>}
+    </div>
+  );
+}
+
+   
                 
-                osc.type = type;
-                osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
-                
-                gainNode.gain.setValueAtTime(vol, audioCtx.currentTime);
-                gainNode.gain.exponentialRampToValueAtTime(0.00001, audioCtx.currentTime + duration);
-                
-                osc.connect(gainNode);
-                gainNode.connect(audioCtx.destination);
-                
-                osc.start();
-                osc.stop(audioCtx.currentTime + duration);
-            } catch(e) {
-                console.log("Gagal memutar audio:", e);
-            }
-        }
-
-        // Suara Transisi Ruang Angkasa
-        function playTransitionSound() {
-            playSynthSound(100, 'sawtooth', 1.2, 0.15);
-            playSynthSound(220, 'sine', 1.5, 0.25);
-            setTimeout(() => {
-                playSynthSound(440, 'triangle', 0.8, 0.1);
-            }, 300);
-        }
-
-        // Suara Klik Ringan
-        function playClickSound() {
-            playSynthSound(880, 'sine', 0.1, 0.1);
-        }
-
-        // --- 4. SCENE OBJECT CREATIONS ---
-
-        // ==========================================
-        // SCENE 1: IGLO STRUCTURE CORE
-        // ==========================================
-        const iglooGroup = new THREE.Group();
-        scene.add(iglooGroup);
-
-        const blocksArray = [];
-        const blockMaterial = new THREE.MeshStandardMaterial({
-            color: 0xcccccc,
-            roughness: 0.1,
-            metalness: 0.8,
-            flatShading: true
-        });
-
-        // Membuat Struktur Kubah Iglo Secara Matematika
-        const radius = 3;
-        const rows = 6;
-        for (let i = 0; i < rows; i++) {
-            const phi = (Math.PI / 2) * (i / (rows - 1)); // Sudut elevasi
-            const currentRadius = radius * Math.cos(phi);
-            const circumference = 2 * Math.PI * currentRadius;
-            const blockCount = Math.max(4, Math.floor(circumference / 0.8));
-
-            for (let j = 0; j < blockCount; j++) {
-                const theta = (2 * Math.PI) * (j / blockCount);
-
-                // Tambah variasi ukuran balok
-                const w = 0.5 + Math.random() * 0.1;
-                const h = 0.35;
-                const d = 0.4;
-                const geom = new THREE.BoxGeometry(w, h, d);
-                const block = new THREE.Mesh(geom, blockMaterial);
-
-                // Hitung posisi berbentuk kubah setengah bola
-                const posX = currentRadius * Math.sin(theta);
-                const posY = radius * Math.sin(phi);
-                const posZ = currentRadius * Math.cos(theta);
-
-                block.position.set(posX, posY, posZ);
-                
-                // Atur rotasi balok agar menghadap ke pusat kubah
-                block.lookAt(0, posY, 0);
-
-                // Simpan koordinat awal untuk efek animasi meledak (Scatter)
-                block.userData = {
-                    originalPos: block.position.clone(),
-                    originalRot: block.rotation.clone(),
-                    randomDir: new THREE.Vector3(
-                        (Math.random() - 0.5) * 6,
-                        (Math.random() - 0.5) * 6 + 2,
-                        (Math.random() - 0.5) * 6
-                    )
-                };
-
-                iglooGroup.add(block);
-                blocksArray.push(block);
-            }
-        }
-        
-        // Menempatkan iglo sedikit di bawah pusat visual
-        iglooGroup.position.y = -0.5;
-
-        // ==========================================
-        // SCENE 2: CRYSTAL CHAMBER (CORE KOSMIK)
-        // ==========================================
-        const crystalGroup = new THREE.Group();
-        crystalGroup.position.set(0, 10, -20); // Ditempatkan jauh di belakang / atas pada awalnya
-        scene.add(crystalGroup);
-
-        // Bentuk Geometri Kristal Utama
-        const crystalGeom = new THREE.OctahedronGeometry(2.2, 0);
-        const crystalMat = new THREE.MeshStandardMaterial({
-            color: 0x00ffff,
-            roughness: 0.05,
-            metalness: 0.9,
-            flatShading: true,
-            transparent: true,
-            opacity: 0.95
-        });
-        const crystalMesh = new THREE.Mesh(crystalGeom, crystalMat);
-        crystalGroup.add(crystalMesh);
-
-        // Kristal Pelindung Luar (Wireframe)
-        const crystalOuterGeom = new THREE.OctahedronGeometry(2.6, 1);
-        const crystalOuterMat = new THREE.MeshBasicMaterial({
-            color: 0xff00ff,
-            wireframe: true,
-            transparent: true,
-            opacity: 0.3
-        });
-        const crystalOuterMesh = new THREE.Mesh(crystalOuterGeom, crystalOuterMat);
-        crystalGroup.add(crystalOuterMesh);
-
-        // Cincin Partikel Di Sekeliling Kristal
-        const ringGeom = new THREE.BufferGeometry();
-        const ringCount = 600;
-        const ringPositions = new Float32Array(ringCount * 3);
-        const ringColors = new Float32Array(ringCount * 3);
-
-        for(let i = 0; i < ringCount; i++) {
-            const angle = (i / ringCount) * Math.PI * 2 + Math.random() * 0.2;
-            const r = 4.5 + (Math.random() - 0.5) * 0.8;
-            ringPositions[i*3] = Math.cos(angle) * r;
-            ringPositions[i*3+1] = (Math.random() - 0.5) * 0.5;
-            ringPositions[i*3+2] = Math.sin(angle) * r;
-
-            ringColors[i*3] = 0;     // R
-            ringColors[i*3+1] = 1;   // G
-            ringColors[i*3+2] = 1;   // B
-        }
-
-        ringGeom.setAttribute('position', new THREE.BufferAttribute(ringPositions, 3));
-        ringGeom.setAttribute('color', new THREE.BufferAttribute(ringColors, 3));
-
-        const particleMaterial = new THREE.PointsMaterial({
-            size: 0.08,
-            vertexColors: true,
-            transparent: true,
-            opacity: 0.8
-        });
-
-        const ringParticles = new THREE.Points(ringGeom, particleMaterial);
-        crystalGroup.add(ringParticles);
-
-        // ==========================================
-        // SCENE 3: HOLO PENGUIN & TRANSISI LOGO "X" (MORPHING SYSTEM)
-        // ==========================================
-        const particleGroup = new THREE.Group();
-        particleGroup.position.set(0, -15, -40); // Ditaruh jauh di bawah & belakang
-        scene.add(particleGroup);
-
-        const particleCount = 7000;
-        const mainParticleGeom = new THREE.BufferGeometry();
-        
-        // Array posisi saat ini, target 1 (Penguin), dan target 2 (Logo X)
-        const positions = new Float32Array(particleCount * 3);
-        const p1Targets = new Float32Array(particleCount * 3); // Posisi Bentuk Penguin
-        const p2Targets = new Float32Array(particleCount * 3); // Posisi Bentuk Logo X
-        const pColors = new Float32Array(particleCount * 3);
-
-        // Menghitung Koordinat Bentuk Penguin & Logo X secara Matematis
-        for (let i = 0; i < particleCount; i++) {
-            // Posisi Awal (Acak Berhamburan)
-            positions[i*3] = (Math.random() - 0.5) * 30;
-            positions[i*3+1] = (Math.random() - 0.5) * 30;
-            positions[i*3+2] = (Math.random() - 0.5) * 30;
-
-            // --- BENTUK 1: PENGUIN DENGAN HEADPHONE ---
-            let tx, ty, tz;
-            const rVal = Math.random();
-
-            if (rVal < 0.5) {
-                // Badan Penguin (Elipsoid Tegak)
-                const theta = Math.random() * Math.PI * 2;
-                const phi = Math.acos((Math.random() * 2) - 1);
-                tx = 1.3 * Math.sin(phi) * Math.cos(theta);
-                ty = 2.1 * Math.cos(phi) + 1.2;
-                tz = 1.3 * Math.sin(phi) * Math.sin(theta);
-            } else if (rVal < 0.75) {
-                // Kepala Penguin (Bola Atas)
-                const theta = Math.random() * Math.PI * 2;
-                const phi = Math.acos((Math.random() * 2) - 1);
-                tx = 0.9 * Math.sin(phi) * Math.cos(theta);
-                ty = 0.9 * Math.cos(phi) + 3.1;
-                tz = 0.9 * Math.sin(phi) * Math.sin(theta);
-            } else if (rVal < 0.88) {
-                // Sayap/Flippers Kiri Kanan
-                const side = Math.random() > 0.5 ? 1 : -1;
-                tx = side * (1.3 + Math.random() * 0.4);
-                ty = 1.5 + (Math.random() - 0.5) * 1.2 - (Math.abs(tx) * 0.3);
-                tz = (Math.random() - 0.5) * 0.3;
-            } else {
-                // Headphone (Busur di atas kepala & bantalan telinga)
-                const arcAngle = (Math.random() * Math.PI) - Math.PI; // Setengah lingkaran atas
-                const isPad = Math.random() > 0.8;
-                if (isPad) {
-                    // Bantalan telinga headphone kiri/kanan
-                    const side = Math.random() > 0.5 ? 1 : -1;
-                    tx = side * 1.0;
-                    ty = 3.1 + (Math.random() - 0.5) * 0.4;
-                    tz = (Math.random() - 0.5) * 0.4;
-                } else {
-                    // Ikat Kepala Headphone
-                    tx = Math.cos(arcAngle) * 1.05;
-                    ty = Math.sin(arcAngle) * 1.05 + 3.2;
-                    tz = (Math.random() - 0.5) * 0.2;
-                }
-            }
-
-            p1Targets[i*3] = tx;
-            p1Targets[i*3+1] = ty - 1.2; // Offset posisi y agar seimbang di porosnya
-            p1Targets[i*3+2] = tz;
-
-            // --- BENTUK 2: LOGO HURUF "X" ---
-            let px, py, pz;
-            const xVal = Math.random();
-            if (xVal < 0.45) {
-                // Batang Utama Kiri ke Kanan Atas
-                const progress = (Math.random() - 0.5) * 4.5;
-                px = progress;
-                py = progress * 1.1;
-                pz = (Math.random() - 0.5) * 0.6;
-            } else if (xVal < 0.90) {
-                // Batang Utama Kanan ke Kiri Atas
-                const progress = (Math.random() - 0.5) * 4.5;
-                px = progress;
-                py = -progress * 1.1;
-                pz = (Math.random() - 0.5) * 0.6;
-            } else {
-                // Partikel Aura Acak di Tengah Logo X
-                const theta = Math.random() * Math.PI * 2;
-                const rRadius = Math.random() * 2;
-                px = Math.cos(theta) * rRadius;
-                py = Math.sin(theta) * rRadius;
-                pz = (Math.random() - 0.5) * 1.2;
-            }
-
-            p2Targets[i*3] = px;
-            p2Targets[i*3+1] = py;
-            p2Targets[i*3+2] = pz;
-
-            // Pewarnaan Partikel (Gradasi Sian ke Ungu Holografik)
-            const mixRatio = Math.random();
-            pColors[i*3] = mixRatio * 0.2;               // Red (Sangat sedikit merah)
-            pColors[i*3+1] = (1 - mixRatio) * 0.9 + 0.1; // Green
-            pColors[i*3+2] = 1.0;                        // Blue (Dominan Sian ke Biru)
-        }
-
-        mainParticleGeom.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-        mainParticleGeom.setAttribute('color', new THREE.BufferAttribute(pColors, 3));
-
-        // Menggunakan shader bawaan PointsMaterial yang responsif terhadap pencahayaan
-        const hologramMaterial = new THREE.PointsMaterial({
-            size: 0.05,
-            vertexColors: true,
-            transparent: true,
-            opacity: 0.85,
-            blending: THREE.AdditiveBlending
-        });
-
-        const mainHoloPoints = new THREE.Points(mainParticleGeom, hologramMaterial);
-        particleGroup.add(mainHoloPoints);
-
-        // --- Variabel Morphing Engine ---
-        let morphState = { progress: 0 }; // 0 = Bebas, 1 = Penguin, 2 = Logo X
-        let currentMorphTarget = p1Targets;
-
-        // Fungsi memperbarui transisi partikel di setiap frame
-        function updateMorphingParticles() {
-            const posAttr = mainParticleGeom.attributes.position;
-            const currentArr = posAttr.array;
-
-            for (let i = 0; i < particleCount; i++) {
-                const idx = i * 3;
-                let targetX, targetY, targetZ;
-
-                if (morphState.progress <= 1) {
-                    // Transisi dari hamburan awal ke Penguin
-                    const t = morphState.progress;
-                    targetX = THREE.MathUtils.lerp(positions[idx], p1Targets[idx], t);
-                    targetY = THREE.MathUtils.lerp(positions[idx+1], p1Targets[idx+1], t);
-                    targetZ = THREE.MathUtils.lerp(positions[idx+2], p1Targets[idx+2], t);
-                } else {
-                    // Transisi dari Penguin ke Logo "X" (progress bernilai 1 sampai 2)
-                    const t = morphState.progress - 1;
-                    // Formula transisi halus Ease-InOut
-                    const easeT = t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
-                    targetX = THREE.MathUtils.lerp(p1Targets[idx], p2Targets[idx], easeT);
-                    targetY = THREE.MathUtils.lerp(p1Targets[idx+1], p2Targets[idx+1], easeT);
-                    targetZ = THREE.MathUtils.lerp(p1Targets[idx+2], p2Targets[idx+2], easeT);
-                }
-
-                currentArr[idx] = targetX;
-                currentArr[idx+1] = targetY;
-                currentArr[idx+2] = targetZ;
-            }
-            posAttr.needsUpdate = true;
-        }
-
-
-        // --- 5. INTERACTION & INTERFACE EVENTS ---
-
-        // Integrasi Audio dan Mulai Navigasi Utama
-        document.getElementById('btn-start').addEventListener('click', () => {
-            initAudio();
-            isStarted = true;
-            playClickSound();
-            playTransitionSound();
-
-            // Sembunyikan panduan pusat dengan efek GSAP yang super mulus
-            gsap.to('#central-guide', {
-                opacity: 0,
-                y: -50,
-                duration: 1,
-                onComplete: () => {
-                    document.getElementById('central-guide').classList.add('hidden');
-                }
-            });
-
-            // Munculkan menu navigasi utama dan panel info
-            gsap.to('#nav-container', { opacity: 1, y: 0, duration: 1.2, delay: 0.5 });
-            gsap.to('#info-panel', { opacity: 1, y: 0, duration: 1.2, delay: 0.7 });
-        });
-
-        // Kontrol Suara (Mute/Unmute Toggle)
-        const btnSound = document.getElementById('btn-sound');
-        btnSound.addEventListener('click', () => {
-            initAudio();
-            soundEnabled = !soundEnabled;
-            if (soundEnabled) {
-                btnSound.classList.add('text-cyan-400');
-                btnSound.innerHTML = `
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                        <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
-                    </svg>
-                `;
-                playClickSound();
-            } else {
-                btnSound.classList.remove('text-cyan-400');
-                btnSound.innerHTML = `
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                        <path fill-rule="evenodd" d="M9.383 3.076A1 1 0 0110 4v12a1 1 0 01-1.707.707L4.586 13H2a1 1 0 01-1-1V8a1 1 0 011-1h2.586l3.693-3.693a1 1 0 011.104-.231zM13.586 10l2.293-2.293a1 1 0 10-1.414-1.414L12.172 8.586l-2.293-2.293a1 1 0 10-1.414 1.414L10.758 10l-2.293 2.293a1 1 0 101.414 1.414l2.293-2.293 2.293 2.293a1 1 0 001.414-1.414L13.586 10z" clip-rule="evenodd" />
-                    </svg>
-                `;
-            }
-        });
-
-        // Deteksi Posisi Mouse untuk Efek Parallax Kamera Sinematik
-        window.addEventListener('mousemove', (e) => {
-            targetMouseX = (e.clientX / window.innerWidth - 0.5) * 2;
-            targetMouseY = (e.clientY / window.innerHeight - 0.5) * 2;
-
-            // Tampilkan koordinat di HUD
-            document.getElementById('hud-coords').innerText = `X: ${targetMouseX.toFixed(2)} | Y: ${targetMouseY.toFixed(2)}`;
-        });
-
-        // Dukungan Pergerakan Sentuhan Layar (Mobile Responsive Touch Support)
-        window.addEventListener('touchmove', (e) => {
-            if (e.touches.length > 0) {
-                targetMouseX = (e.touches[0].clientX / window.innerWidth - 0.5) * 2;
-                targetMouseY = (e.touches[0].clientY / window.innerHeight - 0.5) * 2;
-                document.getElementById('hud-coords').innerText = `X: ${targetMouseX.toFixed(2)} | Y: ${targetMouseY.toFixed(2)}`;
-            }
-        }, { passive: true });
-
-
-        // --- 6. TRANSISI ANTAR SCENE SECARA SINEMATIK ---
-
-        const sceneData = {
-            1: {
-                title: "Situs Iglo Modular",
-                meta: "PORTFOLIO_CD_01",
-                desc: "Situs yang dibangun dengan perpaduan balok geometri 3D interaktif. Coba gerakkan kursor Anda untuk melihat balok-balok yang bereaksi terhadap gravitasi virtual.",
-                stat: "STABILITAS: 98.4%"
-            },
-            2: {
-                title: "Ruang Inti Kristal",
-                meta: "PORTFOLIO_CD_02",
-                desc: "Energi inti murni bersinar di dalam formasi kristal octahedron. Sistem partikel berkecepatan tinggi berputar di sekitar struktur kristal, merespons setiap ketukan navigasi.",
-                stat: "KESTABILAN DAYA: 100%"
-            },
-            3: {
-                title: "Holo Penguin ke Logo X",
-                meta: "PORTFOLIO_CD_03",
-                desc: "Saksikan jutaan partikel holografik berkumpul membentuk karakter Penguin dengan Headphone ikonik, kemudian meleleh dan menyatu kembali membentuk logo ikonik platform X secara dinamis.",
-                stat: "DENSITAS PARTIKEL: 7K"
-            }
-        };
-
-        function updateHUDtext(sceneNum) {
-            const data = sceneData[sceneNum];
-            
-            // Animasi transisi keluar masuk teks HUD
-            gsap.to('#info-panel', {
-                opacity: 0,
-                y: 15,
-                duration: 0.4,
-                onComplete: () => {
-                    document.getElementById('panel-meta').innerText = data.meta;
-                    document.getElementById('panel-title').innerText = data.title;
-                    document.getElementById('panel-desc').innerText = data.desc;
-                    document.getElementById('panel-stat').innerText = data.stat;
-                    
-                    gsap.to('#info-panel', { opacity: 1, y: 0, duration: 0.6 });
-                }
-            });
-        }
-
-        function switchScene(sceneNum) {
-            if (currentScene === sceneNum) return;
-            playClickSound();
-            playTransitionSound();
-
-            const oldScene = currentScene;
-            currentScene = sceneNum;
-
-            // Perbarui warna tombol navigasi aktif
-            for (let i = 1; i <= 3; i++) {
-                const btn = document.getElementById(`nav-btn-${i}`);
-                if (i === sceneNum) {
-                    btn.className = "px-5 py-3 rounded-xl text-xs font-bold tracking-wider transition-all duration-300 flex items-center gap-2 bg-cyan-500/20 text-cyan-400 border border-cyan-400/30";
-                    btn.querySelector('span').className = "w-1.5 h-1.5 bg-cyan-400 rounded-full";
-                } else {
-                    btn.className = "px-5 py-3 rounded-xl text-xs font-bold tracking-wider transition-all duration-300 flex items-center gap-2 text-gray-400 hover:text-white";
-                    btn.querySelector('span').className = "w-1.5 h-1.5 bg-gray-500 rounded-full";
-                }
-            }
-
-            updateHUDtext(sceneNum);
-
-            // --- ANIMASI TIMELINE TRANSISI METODE UTAMA ---
-            const transitionTimeline = gsap.timeline();
-
-            if (oldScene === 1) {
-                // LEDAKKAN IGLO: Balok-balok meluncur berhamburan ke luar
-                blocksArray.forEach(block => {
-                    transitionTimeline.to(block.position, {
-                        x: block.userData.originalPos.x + block.userData.randomDir.x,
-                        y: block.userData.originalPos.y + block.userData.randomDir.y,
-                        z: block.userData.originalPos.z + block.userData.randomDir.z,
-                        duration: 1.5,
-                        ease: "power2.out"
-                    }, 0);
-                    transitionTimeline.to(block.rotation, {
-                        x: block.rotation.x + Math.random() * 4,
-                        y: block.rotation.y + Math.random() * 4,
-                        duration: 1.5
-                    }, 0);
-                });
-                
-                // Redupkan grup iglo secara keseluruhan
-                transitionTimeline.to(iglooGroup.position, { y: -10, duration: 1.2 }, 0);
-            }
-
-            if (sceneNum === 1) {
-                // Kembalikan susunan balok iglo ke bentuk aslinya
-                transitionTimeline.to(iglooGroup.position, { y: -0.5, duration: 1.5, ease: "power2.out" }, 0);
-                blocksArray.forEach(block => {
-                    transitionTimeline.to(block.position, {
-                        x: block.userData.originalPos.x,
-                        y: block.userData.originalPos.y,
-                        z: block.userData.originalPos.z,
-                        duration: 2,
-                        ease: "elastic.out(1, 0.75)"
-                    }, 0.2);
-                    transitionTimeline.to(block.rotation, {
-                        x: block.userData.originalRot.x,
-                        y: block.userData.originalRot.y,
-                        z: block.userData.originalRot.z,
-                        duration: 1.5
-                    }, 0.2);
-                });
-
-                // Zoom Posisi Kamera Kembali ke Iglo
-                transitionTimeline.to(camera.position, { x: 0, y: 2, z: 8, duration: 2.2, ease: "power3.inOut" }, 0);
-            }
-
-            else if (sceneNum === 2) {
-                // Munculkan Kristal dari atas dan dekatkan kamera ke Inti
-                crystalGroup.position.set(0, 15, -25);
-                transitionTimeline.to(crystalGroup.position, { x: 0, y: 1.5, z: 0, duration: 2.2, ease: "power3.out" }, 0);
-                transitionTimeline.to(camera.position, { x: 0, y: 1.8, z: 7.5, duration: 2.2, ease: "power3.inOut" }, 0);
-
-                // Tambahkan efek kilau pada kristal luar
-                transitionTimeline.to(crystalOuterMesh.scale, { x: 1.3, y: 1.3, z: 1.3, duration: 0.5, yoyo: true, repeat: 1 }, 0.5);
-            }
-
-            else if (sceneNum === 3) {
-                // Mulai Proses Animasi Partikel Morphing
-                // Pertama: Partikel menyusut merapat membentuk PENGUIN
-                particleGroup.position.set(0, 0, 0);
-                
-                // Reset morphProgress ke 0 sebelum memulai
-                morphState.progress = 0;
-
-                // Tahap 1: Morphing ke Penguin (durasi 2.5 detik)
-                transitionTimeline.to(morphState, {
-                    progress: 1.0,
-                    duration: 2.5,
-                    ease: "power2.inOut",
-                    onUpdate: updateMorphingParticles
-                }, 0);
-
-                // Gerakkan Kamera Menghadap Penguin dari Samping Secara Sinematik
-                transitionTimeline.to(camera.position, { x: 1.8, y: 2, z: 5.5, duration: 3.5, ease: "power3.inOut" }, 0);
-
-                // Tahap 2: Jeda singkat, lalu lelehkan menjadi Logo "X" (setelah 4 detik berlalu)
-                transitionTimeline.to(morphState, {
-                    progress: 2.0,
-                    duration: 3.0,
-                    ease: "sine.inOut",
-                    onUpdate: updateMorphingParticles,
-                    onStart: () => {
-                        if (currentScene === 3) {
-                            playTransitionSound(); // Mainkan suara efek morphing logo
-                        }
-                    }
-                }, 4.0);
-
-                // Putar balik kamera saat transisi ke Logo X
-                transitionTimeline.to(camera.position, { x: -1.5, y: 1.2, z: 6.2, duration: 3.5, ease: "power2.inOut" }, 4.0);
-            }
-
-            // Sembunyikan objek-objek dari scene yang tidak aktif
-            if (sceneNum !== 2 && oldScene === 2) {
-                transitionTimeline.to(crystalGroup.position, { y: -15, z: -20, duration: 1.5, ease: "power2.in" }, 0);
-            }
-            if (sceneNum !== 3 && oldScene === 3) {
-                // Hamburkan kembali partikel hologram
-                transitionTimeline.to(morphState, {
-                    progress: 0,
-                    duration: 1.5,
-                    onUpdate: updateMorphingParticles
-                }, 0);
-                transitionTimeline.to(particleGroup.position, { y: -20, z: -40, duration: 1.5 }, 0);
-            }
-        }
-
-
-        // --- 7. GAME LOOP / ANIMATION LOOP ---
-        const clock = new THREE.Clock();
-
-        function animate() {
-            requestAnimationFrame(animate);
-
-            const elapsedTime = clock.getElapsedTime();
-
-            // 1. Efek Mouse Parallax (Kamera Mengikuti Gerakan Kursor dengan Lembut)
-            mouseX += (targetMouseX - mouseX) * 0.05;
-            mouseY += (targetMouseY - mouseY) * 0.05;
-
-            camera.position.x += (mouseX * 1.5 - camera.position.x * 0.1) * 0.05;
-            camera.position.y += ((-mouseY * 1.2 + 2) - camera.position.y * 0.1) * 0.05;
-            camera.lookAt(0, 1.2, 0);
-
-            // 2. Animasi Obyek Scene 1: Rotasi Lambat Kubah Iglo
-            if (currentScene === 1) {
-                iglooGroup.rotation.y = elapsedTime * 0.08;
-                // Balok bergerak membal halus (idle floating animation)
-                blocksArray.forEach((block, index) => {
-                    block.position.y = block.userData.originalPos.y + Math.sin(elapsedTime * 1.5 + index) * 0.03;
-                });
-            }
-
-            // 3. Animasi Obyek Scene 2: Putaran Kristal & Cincin Partikel
-            if (currentScene === 2 || crystalGroup.position.y > -10) {
-                crystalMesh.rotation.y = elapsedTime * 0.3;
-                crystalMesh.rotation.x = Math.sin(elapsedTime * 0.5) * 0.2;
-                crystalOuterMesh.rotation.y = -elapsedTime * 0.15;
-                ringParticles.rotation.y = elapsedTime * 0.1;
-                
-                // Efek denyut nafas kristal virtual
-                const pulse = 1 + Math.sin(elapsedTime * 2) * 0.05;
-                crystalMesh.scale.set(pulse, pulse, pulse);
-            }
-
-            // 4. Animasi Obyek Scene 3: Rotasi Lambat Hologram
-            if (currentScene === 3) {
-                particleGroup.rotation.y = elapsedTime * 0.12;
-                // Gerakan naik turun yang halus untuk efek terbang (Hologram Floating Effect)
-                particleGroup.position.y = Math.sin(elapsedTime * 1.2) * 0.15;
-            }
-
-            renderer.render(scene, camera);
-        }
-
-        // Jalankan Loop Animasi Setelah Jendela Siap Dimuat
-        window.onload = function() {
-            animate();
-        };
-
-        // --- 8. RESPONSIVE WINDOW RESIZE HANDLER ---
-        window.addEventListener('resize', () => {
-            camera.aspect = window.innerWidth / window.innerHeight;
-            camera.updateProjectionMatrix();
-            renderer.setSize(window.innerWidth, window.innerHeight);
-            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-        });
-
-    </script>
-</body>
-</html>
-
-```
